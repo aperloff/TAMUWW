@@ -7,7 +7,7 @@ class Error(EnvironmentError):
 
 siteDBDict = {
 #   alias: ('host', local_file_system, 'server', 'path_to_user_area','local_home','xrootd_path')    
-    'T1_US_FNAL_EOS'   : (False, 'cmseos.fnal.gov'    , '/srm/v2/server?SFN=' ,  '/eos/uscms/store/user/',                 '', 'root://cmsxrootd.fnal.gov//store/user/'),
+    'T1_US_FNAL_EOS'   : (False, 'cmseos.fnal.gov'    , '/srm/v2/server?SFN=' ,  '/eos/uscms/store/user/',                 '', 'root://cmseos.fnal.gov//store/user/'),
 	'T1_US_FNAL_LPC'   : (True, ''                   , ''                    ,                        '', os.environ['HOME'], ''),
     'T3_US_TAMU'       : (False, 'srm.brazos.tamu.edu', '/srm/v2/server?SFN=' , '/fdata/hepx/store/user/',                 '', '')
 }
@@ -116,18 +116,20 @@ def init_commands():
             scommand = "srmcp -2 -pushmode=true -debug=true"
         else:
             scommand = "srmcp -2 -pushmode=true"
-        
-    if(siteDBDict[START][0]):
+
+    if XRDCP and siteDBDict[START][0]:
+        scommand += " \""+STARTpath+"/"
+    elif siteDBDict[START][0]:
         scommand += " \"file:////"+siteDBDict[START][2]+siteDBDict[START][3]+"/"+STARTpath+"/"
     elif(XRDCP):
-        scommand += " "+siteDBDict[START][5]+"/"+START_USER+"/"+STARTpath+"/"
+        scommand += " \""+siteDBDict[START][5]+"/"+START_USER+"/"+STARTpath+"/"
     else:
         scommand += " \"srm://"+siteDBDict[START][1]+":8443"+siteDBDict[START][2]+siteDBDict[START][3]+"/"+START_USER+"/"+STARTpath+"/"
 
     if(siteDBDict[END][0]):
         ecommand = "\"file:////"+siteDBDict[END][1]+siteDBDict[END][2]+siteDBDict[END][3]+"/"+ENDpath+"/"
     elif(XRDCP):
-        ecommand = siteDBDict[END][5]+"/"END_USER+"/"+ENDpath+"/"
+        ecommand = "\""+siteDBDict[END][5]+"/"+END_USER+"/"+ENDpath+"/"
     else:
         ecommand = "\"srm://"+siteDBDict[END][1]+":8443"+siteDBDict[END][2]+siteDBDict[END][3]+"/"+END_USER+"/"+ENDpath+"/"
 
