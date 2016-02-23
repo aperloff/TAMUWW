@@ -1,0 +1,22 @@
+CB = /uscms_data/d2/aperloff/YOURWORKINGAREA/MatrixElement/gitty/CMSSW_5_3_2_patch4/
+SD = $(CB)/src/
+TCD = $(SD)/TAMUWW/ConfigFiles
+TMD = $(SD)/TAMUWW/MVA
+LD = $(CB)/lib/slc5_amd64_gcc462/
+BD = $(CB)/bin/slc5_amd64_gcc462/
+WD = $(TMD)/bin/2014_11_02_TMVA_output_2JetsBin_0Tag_both_HToWW_WJets_allEvtProbs_0KinVar/
+
+universe = vanilla
+Executable = $(WD)/MVABatchJob.sh
+transfer_input_files = $(TMD)/macros, $(TCD), $(BD)/TMVAClassification_x, $(LD)/libTAMUWWMVA.so, $(LD)/libTAMUWWSpecialTools.so, $(LD)/libTAMUWWMEPATNtuple.so, $(LD)/libElectroWeakAnalysisVPlusJets.so, $(LD)/libEGammaEGammaAnalysisTools.so, $(LD)/libCondFormatsEgammaObjects.so, $(LD)/libDataFormatsPatCandidates.so, $(LD)/libJetMETAnalysisJetUtilities.so, $(LD)/libTAMUWWAuxFunctions.so
+#, $(WD)/TMVA1.root
+
+Requirements = Memory >= 199 && OpSys == "LINUX" && (Arch != "DUMMY")
++BigMemoryJob = TRUE
+Should_Transfer_Files = ALWAYS
+WhenToTransferOutput = ON_EXIT_OR_EVICT
+Output = $(WD)/out_TMVA_$(process).stdout
+Error  = $(WD)/out_TMVA_$(process).stderr
+Log    = $(WD)/out_TMVA_$(process).condor
+notify_user = aperloff@physics.tamu.edu
+Queue 1

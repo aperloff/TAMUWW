@@ -1,0 +1,6 @@
+TMVAClassification_x -jetBin jets2 -tagcat eq1tag -signals ggH125 qqH125 WH_ZH_TTH_HToWW_M125 -backgrounds WJets TTbar -kinVar ht leptonPt jet2dRLep jet1dRLep CosTheta_l dEtaJetJet lepMT dPhiMETJet dPhiJetJet
+TMVAClassification_x -jetBin jets3 -tagcat eq1tag -signals ggH125 qqH125 WH_ZH_TTH_HToWW_M125 -backgrounds WJets TTbar -kinVar dPhiMETJet CosTheta_j lepMT CosTheta_l jet2Pt ht jet3dRLep leptonPt dRlepjj CosTheta_WH JacobePeak
+TMVAClassification_x -jetBin jets4 -tagcat eq1tag -signals ggH125 qqH125 WH_ZH_TTH_HToWW_M125 -backgrounds WJets TTbar -kinVar dPhiMETJet dRlepjj jet2dRLep lepMT sumJetEt leptonPt ht jet3dRLep JacobePeak jet4dRLep CosTheta_l nJets CosTheta_j
+TMVAClassification_x -jetBin jets2 -tagcat eq0tag -signals ggH125 qqH125 WH_ZH_TTH_HToWW_M125 -backgrounds WJets TTbar -kinVar ht dPhiMETJet CosTheta_l leptonPt jet1dRLep jet2dRLep dRlepjj lepMT dPhiJetJet Ptlnujj CosTheta_WH
+TMVAClassification_x -jetBin jets3 -tagcat eq0tag -signals ggH125 qqH125 WH_ZH_TTH_HToWW_M125 -backgrounds WJets TTbar -kinVar ht leptonPt CosTheta_WH minDPhiLepJet Mlnujj leptonEtaCharge dEtaJetJet CosTheta_l CosTheta_j dPhiMETJet jet3dRLep jet2dRLep dRlepjj
+TMVAClassification_x -jetBin jets4 -tagcat eq0tag -signals ggH125 qqH125 WH_ZH_TTH_HToWW_M125 -backgrounds WJets TTbar -kinVar ht dPhiMETJet dPhiMETLep jet2dRLep Mlnujj jet3dRLep leptonEtaCharge
