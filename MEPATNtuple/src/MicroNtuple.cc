@@ -197,7 +197,10 @@ void MicroNtuple::clear()
   size = 0;
   run = 0;
   event = 0;
-  
+
+  KinBDT = -9999;
+  MEBDT = -9999;
+  KinMEBDT = -9999;
 }
 
 void MicroNtuple::printIndexMap(indexMap2 & im) {

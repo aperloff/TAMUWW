@@ -173,6 +173,7 @@ public:
    Float_t sumJetEt;
    Float_t KinBDT;
    Float_t MEBDT;
+   Float_t KinMEBDT;
    TMVA::Reader *reader; //!
 
    // This method sets up the MVA reader.
@@ -199,7 +200,7 @@ public:
                    std::vector<TString> &inputTitles, std::vector<Double_t> &cutsMin, 
                    std::vector<Double_t> &cutsMax, Double_t effS = 0.7);
 
-  ClassDef(MicroNtuple, 18)
+  ClassDef(MicroNtuple, 19)
 
 };
 
