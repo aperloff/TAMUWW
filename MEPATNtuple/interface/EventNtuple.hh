@@ -50,6 +50,7 @@ using std::vector;
 using std::map;
 using std::string;
 using std::pair;
+using std::make_pair;
 using std::cout;
 using std::setw;
 using std::left;
@@ -125,6 +126,24 @@ public:
    // Print Event Information
    void printDecayInformation(int decayParticle, Int_t instance, Int_t depth, TString option = "");
    void printHiggsDecayInformation();
+   // Check if a specific final state particle was contained in the event
+   bool containsParticle(int pdgId, bool doAbs = true, double ptmin = 0.0);
+   string particleNameFromInt(int p);
+   // returns a number based on if the particle is a lepton or quark based on its pdgId
+   enum particleType{LEPTON,NEUTRINO,QUARK,BOSON,UNKNOWN};
+   int leptonNeutrinoOrQuark(int x);
+   // returns the charge of a particle based on its pdgId
+   double charge(int x);
+   // returns a number rounded away from zero
+   double round(double r);
+   int round_int(double r);
+   // returns the mass of the hadronic W and the leptonic W
+   pair<double,double> onVsOffShell();
+   pair<double,double> onVsOffShellInclusive(bool verbose = false);
+   // form a string which contains the Lorentz vector information in the form (Pt, Eta, Phi, E)
+   string getLVString(const TLorentzVector &lv);
+   // return the TLorentzVector associated with the lepton from a W decay
+   TLorentzVector getGenVorDaughter(particleType type, int expectedVPDGID=24, int *pdgid = 0, bool verbose = false);
 
    //
    // Trigger Information
