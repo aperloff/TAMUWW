@@ -301,6 +301,7 @@ private:
    int elcnt_Loose;
    int mucnt_Prim;
    int mucnt_Loose;
+   int leptonCnt;
    int jcnt_tot;
    int jNEntries;
    int EvtTotCount;

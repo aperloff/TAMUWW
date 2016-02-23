@@ -38,7 +38,7 @@ void SaveGenParticles::beginJob() {
                                  "TFileService missing from configuration!");
 
    // create the tree
-   EvtTree_2Jets = fs->make<TTree>(getJetBinString(DEFS::jets2).c_str(), "Output tree for matrix element");
+   EvtTree_2Jets = fs->make<TTree>((getJetBinString(DEFS::jets2)+"p").c_str(), "Output tree for matrix element");
    EvtNtuple = new EventNtuple();
    EvtTree_2Jets->Branch("EvtNtuple", "EventNtuple", &EvtNtuple);
 }

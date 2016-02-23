@@ -85,6 +85,7 @@ PerformSelection::PerformSelection(const edm::ParameterSet& iConfig)
    elcnt_Loose                =         iConfig.getParameter<int>             ("elcnt_Loose");
    mucnt_Prim                 =         iConfig.getParameter<int>             ("mucnt_Prim");
    mucnt_Loose                =         iConfig.getParameter<int>             ("mucnt_Loose");
+   leptonCnt                  =         iConfig.getParameter<int>             ("leptonCnt");
    jcnt_tot                   =         iConfig.getParameter<int>             ("jcnt_tot");
    EvtTotCount                =         iConfig.getParameter<int>             ("EvtTotCount");
    mu_passAll                 =         iConfig.getParameter<bool>            ("mu_passAll");
@@ -435,13 +436,13 @@ void PerformSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& 
                //
                // Record the electron info
                //
-               if (elcnt_Prim>=1) {
+               if (elcnt_Prim>=leptonCnt) {
                   incrementCounter(4,Nj,tableEl,tableLp);
                   if (!muONLY) printEventInformation(printEventInfo, 3, false);
                   if (mucnt_Loose==0) {
                      incrementCounter(5,Nj,tableEl,tableLp);
                      if (!muONLY) printEventInformation(printEventInfo, 4, false);
-                     if (elcnt_Loose==1) {
+                     if (elcnt_Loose==leptonCnt) {
                         incrementCounter(6,Nj,tableEl,tableLp);
                         if (!muONLY) printEventInformation(printEventInfo, 5, false);
                         el_passStandard=true;
@@ -593,10 +594,10 @@ void PerformSelection::analyze(const edm::Event& iEvent, const edm::EventSetup& 
                //
                // Record the muon info
                //
-               if (mucnt_Prim>=1) {
+               if (mucnt_Prim>=leptonCnt) {
                   incrementCounter(4,Nj,tableMu,tableLp);
                   if (!elONLY) printEventInformation(printEventInfo, 3, true);
-                  if (mucnt_Loose==1) {
+                  if (mucnt_Loose==leptonCnt) {
                      incrementCounter(5,Nj,tableMu,tableLp);
                      if (!elONLY)printEventInformation(printEventInfo, 4, true);
                      if (elcnt_Loose==0) {
