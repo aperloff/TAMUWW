@@ -1,0 +1,47 @@
+void WJetsSystematics() {
+   //TString basepath = "~/nobackup/Summer12ME8TeV/MEInput/";
+   TString basepath = "/home/aperloff/fdata/PS_outfiles_20121102_NTUPLES/";
+   TFile* down   = new TFile(basepath+"WJets_scaledown.root","READ");
+   TFile* middle = new TFile(basepath+"WJets.root","READ");
+   TFile* up     = new TFile(basepath+"WJets_scaleup.root","READ");
+   TLegend* leg = new TLegend(0.6,0.65,0.9,0.92);
+   TCut met("METLV[0].Pt()>25");
+   TCut lepton("(lLV[0].leptonCat == 2 && lLV[0].Pt() >= 30) || (lLV[0].leptonCat == 1 && lLV[0].Pt() >= 25) "); //muon==1 electron==2
+   TCut jets("jLV[0].Pt() > 30 && jLV[1].Pt() > 25");
+   TCut cuts(met && lepton && jets);
+   TString drawOptions = "goff";
+   TString var = "lLV[0].Pt()";
+   TString xaxis = "p_{T}^{Lepton} [GeV]";
+   TString yaxis = "Events";
+   down->cd("PS");
+   TH1D* hdown   = new TH1D("hdown","hdown",34,30,200);
+   hdown->Sumw2();
+   jets2p->Draw(var+">>hdown",cuts,drawOptions);
+   hdown->SetLineColor(kBlue);
+   hdown->Scale(1.0/hdown->Integral());
+   middle->cd("PS");
+   TH1D* hmiddle = new TH1D("hmiddle","hmiddle",34,30,200);
+   hmiddle->Sumw2();
+   jets2p->Draw(var+">>hmiddle",cuts,drawOptions);
+   hmiddle->SetLineColor(kBlack);
+   hmiddle->Scale(1.0/hmiddle->Integral());
+   up->cd("PS");
+   TH1D* hup     = new TH1D("hup","hup",34,30,200);
+   hup->Sumw2();
+   jets2p->Draw(var+">>hup",cuts,drawOptions);
+   hup->SetLineColor(kRed);
+   hup->Scale(1.0/hup->Integral());
+   leg->AddEntry(hup,"WJets_scaleup","l");
+   leg->AddEntry(hmiddle,"WJets","l");
+   leg->AddEntry(hdown,"WJets_scaledown","l");
+   hmiddle->Draw("e1");
+   hmiddle->GetXaxis()->SetTitle(xaxis);
+   hmiddle->GetYaxis()->SetTitle(yaxis);
+   hup->Draw("e1 sames");
+   hdown->Draw("e1 sames");
+   leg->Draw("same");
+   gPad->GetCanvas()->SaveAs("/home/aperloff/WJetsWithScales.png");
+   hmiddle->GetXaxis()->SetRangeUser(30,80);
+   gPad->GetCanvas()->SaveAs("/home/aperloff/WJetsWithScales_Zoom.png");
+   //gPad->GetCanvas()->SetLogy();
+}
