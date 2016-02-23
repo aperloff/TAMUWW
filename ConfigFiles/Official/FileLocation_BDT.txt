@@ -3,8 +3,10 @@
 # the base paths are relative to the CMSSW_BASE variable
 CellClass=TableCellText
 
-Category     | FilePath_UVa              				         	      |   FilePath_TAMU
-BasePath     | 2015_02_06_UVaWeights/                                     |   2014_11_02_TAMUWWMEOnlyWeights/
-jets2_eq0tag | TMVA_HWWtoWjets_2Jets_2j0B_11_Max4_noSpect_BDT.weights.xml |   TMVA_jets2_eq0tag_both_HToWW_WJets_allEvtProbs_0KinVar_BDT.weights.xml
-jets3_eq0tag | TMVA_HWWtoWjets_3Jets_3j0B_13_noSpect_BDT.weights.xml      |   TMVA_jets3_eq0tag_both_HToWW_WJets_allEvtProbs_0KinVar_BDT.weights.xml
-jets4_eq0tag | TMVA_HWWtoWjets_4Jets_4j0B_7Max3_noSpect_BDT.weights.xml	  |   TMVA_jets4_eq0tag_both_HToWW_WJets_allEvtProbs_0KinVar_BDT.weights.xml  
+Category     | FilePath_UVa              				         	      |   FilePath_TAMU																|   FilePath_Combined
+#BasePath     | 2015_02_06_UVaWeights/                                     |   2014_11_02_TAMUWWMEOnlyWeights/											|   
+#BasePath     | 2015_02_06_UVaWeights/                                     |   2015_07_14_TAMUWWMEOnlyWeights/											|   
+BasePath     | 2015_02_06_UVaWeights/                                     |   2015_07_17_TAMUWWMEOnlyWeights/											|   2015_07_17_TAMUWWCombinedWeights/
+jets2_eq0tag | TMVA_HWWtoWjets_2Jets_2j0B_11_Max4_noSpect_BDT.weights.xml |   TMVA_jets2_eq0tag_both_HToWW_WJets_allEvtProbs_0KinVar_BDT.weights.xml	|   TMVA_jets2_eq0tag_both_HToWW_WJets_allEvtProbs_11KinVar_BDT.weights.xml
+jets3_eq0tag | TMVA_HWWtoWjets_3Jets_3j0B_13_noSpect_BDT.weights.xml      |   TMVA_jets3_eq0tag_both_HToWW_WJets_allEvtProbs_0KinVar_BDT.weights.xml	|   TMVA_jets3_eq0tag_both_HToWW_WJets_allEvtProbs_13KinVar_BDT.weights.xml
+jets4_eq0tag | TMVA_HWWtoWjets_4Jets_4j0B_7Max3_noSpect_BDT.weights.xml	  |   TMVA_jets4_eq0tag_both_HToWW_WJets_allEvtProbs_0KinVar_BDT.weights.xml  	|   TMVA_jets4_eq0tag_both_HToWW_WJets_allEvtProbs_7KinVar_BDT.weights.xml

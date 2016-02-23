@@ -1,173 +1,236 @@
 # On the left is the process name.
 CellClass=TableCellMixed
 
-Process 					 |	LeptonCat	|	ScaleFactor					|	Comment
-Data        				 |  both		|	1.000    +/- 1.000 			| 
-SingleEl_Data				 |  both		|	1.000    +/- 1.000 			| 
-SingleMu_Data				 |  both		|	1.000    +/- 1.000 			| 
-STopS_T    					 |  both		|	1.000    +/- 1.000 			|
-STopS_Tbar 					 |  both		|	1.000    +/- 1.000 			|
-STopT_T    					 |  both		|	1.000    +/- 1.000 			|
-STopT_Tbar 					 |  both		|	1.000    +/- 1.000 			|
-STopTW_T   					 |  both		|	1.000    +/- 1.000 			|
-STopTW_Tbar					 |  both		|	1.000    +/- 1.000 			|
-TTbar     					 |  both		|	1.000    +/- 1.000 			|
-TTbar_JESUp					 |  both		|	1.000    +/- 1.000 			|
-TTbar_JESDown				 |  both		|	1.000    +/- 1.000 			|
-TTbarLJ   					 |  both		|	1.000    +/- 1.000 			| 
-TTbarDil  					 |  both		|	1.000    +/- 1.000 			|  
-Wbb       					 |  both		|	1.000    +/- 1.000 			| 
-Wcc       					 |  both		|	1.000    +/- 1.000 			| 
-WLight    					 |  both		|	1.000    +/- 1.000 			| 
-WpJ     					 |  both		| 	1.000    +/- 1.000 			|
-#WJets     					 |  both 		|	1.000    +/- 1.000 			| 	Standard WJets scale factor
+Process                      |  LeptonCat   |   ScaleFactor                 |   Comment
+Data                         |  both        |   1.000    +/- 1.000          | 
+SingleEl_Data                |  both        |   1.000    +/- 1.000          | 
+SingleMu_Data                |  both        |   1.000    +/- 1.000          | 
+STopS_T                      |  both        |   1.000    +/- 1.000          |
+STopS_Tbar                   |  both        |   1.000    +/- 1.000          |
+STopT_T                      |  both        |   1.000    +/- 1.000          |
+STopT_Tbar                   |  both        |   1.000    +/- 1.000          |
+STopTW_T                     |  both        |   1.000    +/- 1.000          |
+STopTW_Tbar                  |  both        |   1.000    +/- 1.000          |
+STopS_T_JESUp                |  both        |   1.000    +/- 1.000          |
+STopS_Tbar_JESUp             |  both        |   1.000    +/- 1.000          |
+STopT_T_JESUp                |  both        |   1.000    +/- 1.000          |
+STopT_Tbar_JESUp             |  both        |   1.000    +/- 1.000          |
+STopTW_T_JESUp               |  both        |   1.000    +/- 1.000          |
+STopTW_Tbar_JESUp            |  both        |   1.000    +/- 1.000          |
+STopS_T_JESDown              |  both        |   1.000    +/- 1.000          |
+STopS_Tbar_JESDown           |  both        |   1.000    +/- 1.000          |
+STopT_T_JESDown              |  both        |   1.000    +/- 1.000          |
+STopT_Tbar_JESDown           |  both        |   1.000    +/- 1.000          |
+STopTW_T_JESDown             |  both        |   1.000    +/- 1.000          |
+STopTW_Tbar_JESDown          |  both        |   1.000    +/- 1.000          |
+TTbar                        |  both        |   1.000    +/- 1.000          |
+TTbar_JESUp                  |  both        |   1.000    +/- 1.000          |
+TTbar_JESDown                |  both        |   1.000    +/- 1.000          |
+TTbarLJ                      |  both        |   1.000    +/- 1.000          | 
+TTbarDil                     |  both        |   1.000    +/- 1.000          |  
+Wbb                          |  both        |   1.000    +/- 1.000          | 
+Wcc                          |  both        |   1.000    +/- 1.000          | 
+WLight                       |  both        |   1.000    +/- 1.000          | 
+WpJ                          |  both        |   1.000    +/- 1.000          |
+#WJets                       |  both        |   1.000    +/- 1.000          |   Standard WJets scale factor
 #WJets                       |  both        |   0.970125 +/- 0.00259655     |   Combined WJets scale factor based on weighted mean (no QCD PU reweighting)
-WJets                        |  both        |   0.933630 +/- 0.00398281     |   Combined WJets scale factor based on weighted mean (no QCD PU reweighting)
-#WJets               		 |  electron 	|	0.942684 +/- 0.00440136		|	Scale factor for QCD with QCDWeight_electron_control6_rebinMET20_rebinEta2.root and QCD_ElFULL
-#WJets                       |	electron 	|	0.951146 +/- 0.00366689		|	Scale factor for QCD with QCDWeight_electron_control6_rebinMET20_rebinEta2.root and QCD_ElFULL before QCD PFIso upper cut
-#WJets                       |	electron 	|	0.962543 +/- 0.0037695		|	Scale factor for QCD with QCDWeight_electron_control6_rebinMET20_rebinEta2.root and QCD_ElFULL (no PU reweighting for QCD)
-WJets                        |	electron 	|	0.932891 +/- 0.00409988		|	Scale factor for QCD with QCDWeight_electron_control6_rebinMET20_rebinEta2.root and QCD_ElFULL
-#WJets     					 |  electron 	| 	1.0286   +/- 0.0024 		| 	Scale factor for WJets with Ricardo's QCDWeight_electron.root file
-#WJets                       | 	muon 		|	0.975701 +/- 0.00355249  	| 	Scale factor for QCD with QCD_MuFULL (no QCD PU reweighting)
-WJets                        | 	muon 		|	0.958411 +/- 0.00403732  	| 	Scale factor for QCD with QCD_MuFULL
+#WJets                       |  both        |   0.933630 +/- 0.00398281     |   Combined WJets scale factor based on weighted mean (no QCD PU reweighting)
+WJets                        |  both        |   1.0017336 +/- 0.0038789     |   Combined WJets scale factor based on weighted mean (with CosThetaL weights)
+#WJets                       |  both        |   0.9152746 +/- 0.0085351     |   Combined WJets scale factor based on weighted mean (with CosThetaL weights and HailMary cuts)
+###WJets                     |  both        |   0.9673070 +/- 0.00477564    |   Combined WJets scale factor based on weighted mean (with CosThetaL weights and HailMaryLoose cuts)
+#WJets                       |  electron    |   0.942684 +/- 0.00440136     |   Scale factor for QCD with QCDWeight_electron_control6_rebinMET20_rebinEta2.root and QCD_ElFULL
+#WJets                       |  electron    |   0.951146 +/- 0.00366689     |   Scale factor for QCD with QCDWeight_electron_control6_rebinMET20_rebinEta2.root and QCD_ElFULL before QCD PFIso upper cut
+#WJets                       |  electron    |   0.962543 +/- 0.0037695      |   Scale factor for QCD with QCDWeight_electron_control6_rebinMET20_rebinEta2.root and QCD_ElFULL (no PU reweighting for QCD)
+#WJets                       |  electron    |   1.0286   +/- 0.0024         |   Scale factor for WJets with Ricardo's QCDWeight_electron.root file
+#WJets                       |  electron    |   0.932891 +/- 0.00409988     |   Scale factor for QCD with QCDWeight_electron_control6_rebinMET20_rebinEta2.root and QCD_ElFULL
+WJets                        |  electron    |   1.04515  +/- 0.00509474     |   Scale factor for QCD with QCDWeight_electron_control6_rebinMET20_rebinEta2.root and QCD_ElFULL and CosThetaL weights
+#WJets                       |  electron    |   0.924216 +/- 0.0138887      |   Scale factor for QCD with QCDWeight_electron_control6_rebinMET20_rebinEta2.root and QCD_ElFULL and CosThetaL weights and HailMary cuts
+###WJets                     |  electron    |   1.00668  +/- 0.00771014     |   Scale factor for QCD with QCDWeight_electron_control6_rebinMET20_rebinEta2.root and QCD_ElFULL and CosThetaL weights and HailMaryLoose cuts
+#WJets                       |  electron    |   1.000    +/- 0.000596221    |   Scale factor for QCD with QCDWeight_electron_control6_rebinMET20_rebinEta2.root and QCD_ElFULL and CosThetaL weights and HailMaryLoose cuts based on a KS maximization
+#WJets                       |  muon        |   0.975701 +/- 0.00355249     |   Scale factor for QCD with QCD_MuFULL (no QCD PU reweighting)
+#WJets                       |  muon        |   0.958411 +/- 0.00403732     |   Scale factor for QCD with QCD_MuFULL
+WJets                        |  muon        |   0.969517 +/- 0.00442517     |   Scale factor for QCD with QCD_MuFULL and CosThetaL weights
+#WJets                       |  muon        |   0.908776 +/- 0.01070390     |   Scale factor for QCD with QCD_MuFULL and CosThetaL weights and HailMary cuts
+###WJets                     |  muon        |   0.936078 +/- 0.00599461     |   Scale factor for QCD with QCD_MuFULL and CosThetaL weights and HailMaryLoose cuts
+#WJets                       |  muon        |   1.000    +/- 0.000670303    |   Scale factor for QCD with QCD_MuFULL and CosThetaL weights and HailMaryLoose cuts and a KS maximization
 WJets_JESUp                  |  both        |   1.000    +/- 1.000          |
 WJets_JESDown                |  both        |   1.000    +/- 1.000          |
 WJets_matchingup             |  both        |   1.000    +/- 1.000          |
 WJets_matchingdown           |  both        |   1.000    +/- 1.000          |
 WJets_scaleup                |  both        |   1.000    +/- 1.000          |
 WJets_scaledown              |  both        |   1.000    +/- 1.000          |
+WJets_QCDEtaWeightUp         |  electron    |   1.0454   +/- 0.00508415     |
+WJets_QCDEtaWeightDown       |  electron    |   1.04437  +/- 0.0051283      |
+WJets_QCDEtaWeightUp         |  muon        |   0.969527 +/- 0.00442564     |
+WJets_QCDEtaWeightDown       |  muon        |   0.969496 +/- 0.00442457     |
 W1Jets                       |  both        |   1.000    +/- 1.000          |
 W2Jets                       |  both        |   1.000    +/- 1.000          |
 W3Jets                       |  both        |   1.000    +/- 1.000          |
 W4Jets                       |  both        |   1.000    +/- 1.000          |
-ZJets     					 |  both 		|	1.000    +/- 1.000 			|
-DYJets              		 |  both 		|	1.000    +/- 1.000 			|
-DYJets_JESUp           		 |  both 		|	1.0070493454 +/- 1.000		|   To account for 4 failed jobs when making the EventNtuple (99.3% successful)
-DYJets_JESDown         		 |  both 		|	1.0070493454 +/- 1.000		|   To account for 4 failed jobs when making the EventNtuple (99.3% successful)
-ZpJ     					 |  both 		|	1.000    +/- 1.000 			|
-QCD       					 |  both 		|	1.000    +/- 1.000 			|
-QCD_Pt20_MuEnriched     	 |  both 		|	1.000    +/- 1.000 			|
-QCD_MuEnriched          	 |  muon 		|	1.000    +/- 1.000 			|
-#QCD_MuFULL              	 |  muon 		|	1.000    +/- 1.000 			| 	Standard QCD_MuFULL Scale factor
-#QCD_MuFULL                  |  muon		| 	0.441045 +/- 0.0119889	    | 	Scale factor for QCD_MuFULL derived in ~/nobackup/Summer12ME8TeV/2014_06_30_ValidationPlots_PU_CSV_TTbar_QCDEta/signal/QCD_MuFULL
-QCD_MuFULL                   |  muon		| 	0.171316 +/- 0.00483161	    | 	Scale factor for QCD_MuFULL derived in ~/nobackup/Summer12ME8TeV/2014_07_16_ValidationPlots_PU_CSV_TTbar_QCDEta/signal/QCD_MuFULL
-#QCD_ElEnriched          	 |  electron 	| 	1.000    +/- 0.00 			|	Standard QCD Scale factor
-QCD_ElEnriched         		 |  electron 	| 	53.2876  +/- 1.58441 		|	Scale factor for QCD_ElEnriched with QCDWeight_electron_control6_rebinMET20_rebinEta2.root file
-#QCD_ElFULL               	 |  electron 	| 	1.000    +/- 0.00 			| 	Standard QCD Scale factor
-#QCD_ElFULL              	 |  electron 	| 	0.571779 +/- 0.0159207 		| 	scale factor with 18937.6012264 pb-1
-#QCD_ElFULL                  |  electron 	| 	0.526848 +/- 0.00813405 	| 	Scale factor for QCD_ElFULL with QCDWeight_electron_control6_rebinMET20_rebinEta2.root file before PFIso uper limit
-#QCD_ElFULL                  |  electron 	| 	1.05102  +/- 0.01764 	    | 	Scale factor for QCD_ElFULL with QCDWeight_electron_control6_rebinMET20_rebinEta2.root file (no QCD PU reweighting)
-QCD_ElFULL                   |  electron 	| 	0.572117 +/- 0.00942175 	| 	Scale factor for QCD_ElFULL with QCDWeight_electron_control6_rebinMET20_rebinEta2.root file
-QCD_Pt20to30_EMEnriched  	 |  both		|	1.000    +/- 0.00 			|
-QCD_Pt30to80_EMEnriched  	 |  both		|	1.000    +/- 0.00 			|
-QCD_Pt80to170_EMEnriched 	 |  both		|	1.000    +/- 0.00 			|
-QCD_Pt170to250_EMEnriched	 |  both		|	1.000    +/- 0.00 			|
-QCD_Pt250to350_EMEnriched	 |  both		|	1.000    +/- 0.00 			|
-QCD_Pt350_EMEnriched     	 |  both		|	1.000    +/- 0.00 			|
-WW        					 |  both		|	1.000    +/- 1.000 			|
-WW_JESUp   					 |  both		|	0.9975124378 +/- 1.000      |   Scaled down for failed jobs (401 out of 402)
-WW_JESDown 					 |  both		|	0.9975124378 +/- 1.000      |   Scaled down for failed jobs (401 out of 402)
-WZ        					 |  both		|	1.000    +/- 1.000 			|
-ZZ        					 |  both		|	1.000    +/- 1.000 			|
-WH100						 |	both		|	1.000 	 +/- 1.000 			|
-WH105						 |	both		|	1.000 	 +/- 1.000 			|
-WH110						 |	both		|	1.000 	 +/- 1.000 			|
-WH115						 |	both		|	1.000 	 +/- 1.000 			|
-WH120						 |	both		|	1.000 	 +/- 1.000 			|
-WH125						 |	both		|	1.000 	 +/- 1.000 			|
-WH125_HToBB					 |	both		|	1.000 	 +/- 1.000 			|
-WH_HToBB_M125_JESUp			 |	both		|	1.000 	 +/- 1.000 			|
-WH_HToBB_M125_JESDown		 |	both		|	1.000 	 +/- 1.000 			|
-WH125_HToZG					 |	both		|	1.000 	 +/- 1.000 			|
-WH130						 |	both		|	1.000 	 +/- 1.000 			|
-WH135						 |	both		|	1.000 	 +/- 1.000 			|
-WH140						 |	both		|	1.000 	 +/- 1.000 			|
-WH145						 |	both		|	1.000 	 +/- 1.000 			|
-WH150						 |	both		|	1.000 	 +/- 1.000 			|
-WH160						 |	both		|	1.000 	 +/- 1.000 			|
-WH170						 |	both		|	1.000 	 +/- 1.000 			|
-WH180						 |	both		|	1.000 	 +/- 1.000 			|
-WH190						 |	both		|	1.000 	 +/- 1.000 			|
-WH200						 |	both		|	1.000 	 +/- 1.000 			|
-WH250						 |	both		|	1.000 	 +/- 1.000 			|
-WH300						 |	both		|	1.000 	 +/- 1.000 			|
-ggH100						 |	both		|	1.000 	 +/- 1.000 			|
-ggH105						 |	both		|	1.000 	 +/- 1.000 			|
-ggH110						 |	both		|	1.000 	 +/- 1.000 			|
-ggH115						 |	both		|	1.000 	 +/- 1.000 			|
-ggH120						 |	both		|	1.000 	 +/- 1.000 			|
-ggH125						 |	both		|	1.000 	 +/- 1.000 			|
-ggh130						 |	both		|	1.000 	 +/- 1.000 			|
-ggh135						 |	both		|	1.000 	 +/- 1.000 			|
-ggh140						 |	both		|	1.000 	 +/- 1.000 			|
-ggh145						 |	both		|	1.000 	 +/- 1.000 			|
-ggh150						 |	both		|	1.000 	 +/- 1.000 			|
-ggh160						 |	both		|	1.000 	 +/- 1.000 			|
-ggh170						 |	both		|	1.000 	 +/- 1.000 			|
-ggh180						 |	both		|	1.000 	 +/- 1.000 			|
-ggh190						 |	both		|	1.000 	 +/- 1.000 			|
-ggh200						 |	both		|	1.000 	 +/- 1.000 			|
-ggh250						 |	both		|	1.000 	 +/- 1.000 			|
-ggh300						 |	both		|	1.000 	 +/- 1.000 			|
-ggh350						 |	both		|	1.000 	 +/- 1.000 			|
-ggh400						 |	both		|	1.000 	 +/- 1.000 			|
-ggh450						 |	both		|	1.000 	 +/- 1.000 			|
-ggh500						 |	both		|	1.000 	 +/- 1.000 			|
-ggh550						 |	both		|	1.000 	 +/- 1.000 			|
-ggh600						 |	both		|	1.000 	 +/- 1.000 			|
-ggh650						 |	both		|	1.000 	 +/- 1.000 			|
-ggh700						 |	both		|	1.000 	 +/- 1.000 			|
-ggh750						 |	both		|	1.000 	 +/- 1.000 			|
-ggh800						 |	both		|	1.000 	 +/- 1.000 			|
-ggh850						 |	both		|	1.000 	 +/- 1.000 			|
-ggh900						 |	both		|	1.000 	 +/- 1.000 			|
-ggh950						 |	both		|	1.000 	 +/- 1.000 			|
-ggh1000						 |	both		|	1.000 	 +/- 1.000 			|
-qqH100						 |	both		|	1.000 	 +/- 1.000 			|
-qqH105						 |	both		|	1.000 	 +/- 1.000 			|
-qqH110						 |	both		|	1.000 	 +/- 1.000 			|
-qqH115						 |	both		|	1.000 	 +/- 1.000 			|
-qqH120						 |	both		|	1.000 	 +/- 1.000 			|
-qqH125						 |	both		|	1.000 	 +/- 1.000 			|
-qqH125_JESUp				 |	both		|	1.000 	 +/- 1.000 			|
-qqH125_JESDown				 |	both		|	1.000 	 +/- 1.000 			|
-qqH130						 |	both		|	1.000 	 +/- 1.000 			|
-qqH135						 |	both		|	1.000 	 +/- 1.000 			|
-qqH140						 |	both		|	1.000 	 +/- 1.000 			|
-qqH145						 |	both		|	1.000 	 +/- 1.000 			|
-qqH150						 |	both		|	1.000 	 +/- 1.000 			|
-qqH160						 |	both		|	1.000 	 +/- 1.000 			|
-qqH170						 |	both		|	1.000 	 +/- 1.000 			|
-qqH180						 |	both		|	1.000 	 +/- 1.000 			|
-qqH190						 |	both		|	1.000 	 +/- 1.000 			|
-qqH200						 |	both		|	1.000 	 +/- 1.000 			|
-qqH250						 |	both		|	1.000 	 +/- 1.000 			|
-qqH300						 |	both		|	1.000 	 +/- 1.000 			|
-qqH350						 |	both		|	1.000 	 +/- 1.000 			|
-qqH400						 |	both		|	1.000 	 +/- 1.000 			|
-qqH450						 |	both		|	1.000 	 +/- 1.000 			|
-qqH500						 |	both		|	1.000 	 +/- 1.000 			|
-qqH550						 |	both		|	1.000 	 +/- 1.000 			|
-qqH600						 |	both		|	1.000 	 +/- 1.000 			|
-qqH650						 |	both		|	1.000 	 +/- 1.000 			|
-qqH700						 |	both		|	1.000 	 +/- 1.000 			|
-qqH750						 |	both		|	1.000 	 +/- 1.000 			|
-qqH800						 |	both		|	1.000 	 +/- 1.000 			|
-qqH850						 |	both		|	1.000 	 +/- 1.000 			|
-qqH900						 |	both		|	1.000 	 +/- 1.000 			|
-qqH950						 |	both		|	1.000 	 +/- 1.000 			|
-qqH1000						 |	both		|	1.000 	 +/- 1.000 			|
+ZJets                        |  both        |   1.000    +/- 1.000          |
+ZJets_JESUp                  |  both        |   1.0070493454 +/- 1.000      |   To account for 4 failed jobs when making the EventNtuple (99.3% successful)
+ZJets_JESDown                |  both        |   1.0070493454 +/- 1.000      |   To account for 4 failed jobs when making the EventNtuple (99.3% successful)
+ZJetsToLL_M10To50            |  both        |   1.5468132424 +/- 1.000      |
+ZJetsToLL_M50                |  both        |   1.000    +/- 1.000          |
+DYJets                       |  both        |   1.000    +/- 1.000          |
+DYJets_JESUp                 |  both        |   1.0070493454 +/- 1.000      |   To account for 4 failed jobs when making the EventNtuple (99.3% successful)
+DYJets_JESDown               |  both        |   1.0070493454 +/- 1.000      |   To account for 4 failed jobs when making the EventNtuple (99.3% successful)
+DYJetsToLL_M10To50           |  both        |   1.5468132424 +/- 1.000      |
+DYJetsToLL_M50               |  both        |   1.000    +/- 1.000          |
+ZpJ                          |  both        |   1.000    +/- 1.000          |
+QCD                          |  both        |   1.000    +/- 1.000          |
+QCD_Pt20_MuEnriched          |  both        |   1.000    +/- 1.000          |
+QCD_MuEnriched               |  muon        |   1.000    +/- 1.000          |
+#QCD_MuFULL                  |  muon        |   1.000    +/- 1.000          |   Standard QCD_MuFULL Scale factor
+#QCD_MuFULL                  |  muon        |   0.441045 +/- 0.0119889      |   Scale factor for QCD_MuFULL derived in ~/nobackup/Summer12ME8TeV/2014_06_30_ValidationPlots_PU_CSV_TTbar_QCDEta/signal/QCD_MuFULL
+#QCD_MuFULL                  |  muon        |   0.171316 +/- 0.00483161     |   Scale factor for QCD_MuFULL derived in ~/nobackup/Summer12ME8TeV/2014_07_16_ValidationPlots_PU_CSV_TTbar_QCDEta/signal/QCD_MuFULL
+QCD_MuFULL                   |  muon        |   0.145418 +/- 0.00669525     |   Scale factor for QCD_MuFULL derived in ~/nobackup/Summer12ME8TeV/2015_04_27_LimitHistograms_PU_CSV_TTbar_QCDEta_Scale/nominal_noWJetQCDScale/Jets2p/muon with CosThetaL weights
+#QCD_MuFULL                  |  muon        |   0.247458 +/- 0.0372462      |   Scale factor for QCD_MuFULL derived in ~/nobackup/Summer12ME8TeV/2015_04_27_LimitHistograms_PU_CSV_TTbar_QCDEta_Scale/nominal_noWJetQCDScale/Jets2p/muon with CosThetaL weights and HailMary cuts
+###QCD_MuFULL                |  muon        |   0.265947 +/- 0.0244422      |   Scale factor for QCD_MuFULL derived in ~/nobackup/Summer12ME8TeV/2015_04_27_LimitHistograms_PU_CSV_TTbar_QCDEta_Scale/nominal_noWJetQCDScale/Jets2p/muon with CosThetaL weights and HailMaryLoose cuts
+#QCD_MuFULL                  |  muon        |   0.31476  +/- 0.000303029    |   Scale factor for QCD_MuFULL derived in ~/nobackup/Summer12ME8TeV/2015_04_27_LimitHistograms_PU_CSV_TTbar_QCDEta_Scale/nominal_noWJetQCDScale/Jets2p/muon with CosThetaL weights and HailMaryLoose cuts and a KS maximization
+#QCD_ElEnriched              |  electron    |   1.000    +/- 0.00           |   Standard QCD Scale factor
+QCD_ElEnriched               |  electron    |   53.2876  +/- 1.58441        |   Scale factor for QCD_ElEnriched with QCDWeight_electron_control6_rebinMET20_rebinEta2.root file
+#QCD_ElFULL                  |  electron    |   1.000    +/- 0.00           |   Standard QCD Scale factor
+#QCD_ElFULL                  |  electron    |   0.571779 +/- 0.0159207      |   scale factor with 18937.6012264 pb-1
+#QCD_ElFULL                  |  electron    |   0.526848 +/- 0.00813405     |   Scale factor for QCD_ElFULL with QCDWeight_electron_control6_rebinMET20_rebinEta2.root file before PFIso uper limit
+#QCD_ElFULL                  |  electron    |   1.05102  +/- 0.01764        |   Scale factor for QCD_ElFULL with QCDWeight_electron_control6_rebinMET20_rebinEta2.root file (no QCD PU reweighting)
+#QCD_ElFULL                  |  electron    |   0.572117 +/- 0.00942175     |   Scale factor for QCD_ElFULL with QCDWeight_electron_control6_rebinMET20_rebinEta2.root file
+QCD_ElFULL                   |  electron    |   0.248858 +/- 0.0131115      |   Scale factor for QCD_ElFULL with QCDWeight_electron_control6_rebinMET20_rebinEta2.root file with CosThetaL weights
+#QCD_ElFULL                  |  electron    |   0.486140 +/- 0.0556396      |   Scale factor for QCD_ElFULL with QCDWeight_electron_control6_rebinMET20_rebinEta2.root file with CosThetaL weights and HailMary cuts
+###QCD_ElFULL                |  electron    |   0.364317 +/- 0.0398323      |   Scale factor for QCD_ElFULL with QCDWeight_electron_control6_rebinMET20_rebinEta2.root file with CosThetaL weights and HailMaryLoose cuts
+#QCD_ElFULL                  |  electron    |   0.381648 +/- 0.000347044    |   Scale factor for QCD_ElFULL with QCDWeight_electron_control6_rebinMET20_rebinEta2.root file with CosThetaL weights and HailMaryLoose cuts and a KS maximization
+QCD_MuFULL_QCDEtaWeightUp    |  muon        |   0.152692 +/- 0.00703245     |
+QCD_MuFULL_QCDEtaWeightDown  |  muon        |   0.159824 +/- 0.00735484     |
+QCD_ElFULL_QCDEtaWeightUp    |  electron    |   0.27547  +/- 0.0145152      |
+QCD_ElFULL_QCDEtaWeightDown  |  electron    |   0.508458 +/- 0.0267851      |
+QCD_Pt20to30_EMEnriched      |  both        |   1.000    +/- 0.00           |
+QCD_Pt30to80_EMEnriched      |  both        |   1.000    +/- 0.00           |
+QCD_Pt80to170_EMEnriched     |  both        |   1.000    +/- 0.00           |
+QCD_Pt170to250_EMEnriched    |  both        |   1.000    +/- 0.00           |
+QCD_Pt250to350_EMEnriched    |  both        |   1.000    +/- 0.00           |
+QCD_Pt350_EMEnriched         |  both        |   1.000    +/- 0.00           |
+WW                           |  both        |   1.000    +/- 1.000          |
+WW_JESUp                     |  both        |   0.9975124378 +/- 1.000      |   Scaled down for failed jobs (401 out of 402)
+WW_JESDown                   |  both        |   0.9975124378 +/- 1.000      |   Scaled down for failed jobs (401 out of 402)
+WZ                           |  both        |   1.000    +/- 1.000          |
+WZ_JESUp                     |  both        |   1.000    +/- 1.000          |
+WZ_JESDown                   |  both        |   1.000    +/- 1.000          |
+ZZ                           |  both        |   1.000    +/- 1.000          |
+WH100                        |  both        |   1.000    +/- 1.000          |
+WH105                        |  both        |   1.000    +/- 1.000          |
+WH110                        |  both        |   1.000    +/- 1.000          |
+WH115                        |  both        |   1.000    +/- 1.000          |
+WH120                        |  both        |   1.000    +/- 1.000          |
+WH125                        |  both        |   1.000    +/- 1.000          |
+WH125_HToBB                  |  both        |   1.000    +/- 1.000          |
+WH_HToBB_M125_JESUp          |  both        |   1.000    +/- 1.000          |
+WH_HToBB_M125_JESDown        |  both        |   1.000    +/- 1.000          |
+WH125_HToZG                  |  both        |   1.000    +/- 1.000          |
+WH130                        |  both        |   1.000    +/- 1.000          |
+WH135                        |  both        |   1.000    +/- 1.000          |
+WH140                        |  both        |   1.000    +/- 1.000          |
+WH145                        |  both        |   1.000    +/- 1.000          |
+WH150                        |  both        |   1.000    +/- 1.000          |
+WH160                        |  both        |   1.000    +/- 1.000          |
+WH170                        |  both        |   1.000    +/- 1.000          |
+WH180                        |  both        |   1.000    +/- 1.000          |
+WH190                        |  both        |   1.000    +/- 1.000          |
+WH200                        |  both        |   1.000    +/- 1.000          |
+WH250                        |  both        |   1.000    +/- 1.000          |
+WH300                        |  both        |   1.000    +/- 1.000          |
+ggH100                       |  both        |   1.000    +/- 1.000          |
+ggH105                       |  both        |   1.000    +/- 1.000          |
+ggH110                       |  both        |   1.000    +/- 1.000          |
+ggH115                       |  both        |   1.000    +/- 1.000          |
+ggH120                       |  both        |   1.000    +/- 1.000          |
+ggH125                       |  both        |   1.0054942815 +/- 1.000      |
+ggH125_JESUp                 |  both        |   1.000    +/- 1.000          |
+ggH125_JESDown               |  both        |   1.000    +/- 1.000          |
+ggh130                       |  both        |   1.000    +/- 1.000          |
+ggh135                       |  both        |   1.000    +/- 1.000          |
+ggh140                       |  both        |   1.000    +/- 1.000          |
+ggh145                       |  both        |   1.000    +/- 1.000          |
+ggh150                       |  both        |   1.000    +/- 1.000          |
+ggh160                       |  both        |   1.000    +/- 1.000          |
+ggh170                       |  both        |   1.000    +/- 1.000          |
+ggh180                       |  both        |   1.000    +/- 1.000          |
+ggh190                       |  both        |   1.000    +/- 1.000          |
+ggh200                       |  both        |   1.000    +/- 1.000          |
+ggh250                       |  both        |   1.000    +/- 1.000          |
+ggh300                       |  both        |   1.000    +/- 1.000          |
+ggh350                       |  both        |   1.000    +/- 1.000          |
+ggh400                       |  both        |   1.000    +/- 1.000          |
+ggh450                       |  both        |   1.000    +/- 1.000          |
+ggh500                       |  both        |   1.000    +/- 1.000          |
+ggh550                       |  both        |   1.000    +/- 1.000          |
+ggh600                       |  both        |   1.000    +/- 1.000          |
+ggh650                       |  both        |   1.000    +/- 1.000          |
+ggh700                       |  both        |   1.000    +/- 1.000          |
+ggh750                       |  both        |   1.000    +/- 1.000          |
+ggh800                       |  both        |   1.000    +/- 1.000          |
+ggh850                       |  both        |   1.000    +/- 1.000          |
+ggh900                       |  both        |   1.000    +/- 1.000          |
+ggh950                       |  both        |   1.000    +/- 1.000          |
+ggh1000                      |  both        |   1.000    +/- 1.000          |
+qqH100                       |  both        |   1.000    +/- 1.000          |
+qqH105                       |  both        |   1.000    +/- 1.000          |
+qqH110                       |  both        |   1.000    +/- 1.000          |
+qqH115                       |  both        |   1.000    +/- 1.000          |
+qqH120                       |  both        |   1.000    +/- 1.000          |
+qqH125                       |  both        |   1.000    +/- 1.000          |
+qqH125_JESUp                 |  both        |   1.000    +/- 1.000          |
+qqH125_JESDown               |  both        |   1.000    +/- 1.000          |
+qqH130                       |  both        |   1.000    +/- 1.000          |
+qqH135                       |  both        |   1.000    +/- 1.000          |
+qqH140                       |  both        |   1.000    +/- 1.000          |
+qqH145                       |  both        |   1.000    +/- 1.000          |
+qqH150                       |  both        |   1.000    +/- 1.000          |
+qqH160                       |  both        |   1.000    +/- 1.000          |
+qqH170                       |  both        |   1.000    +/- 1.000          |
+qqH180                       |  both        |   1.000    +/- 1.000          |
+qqH190                       |  both        |   1.000    +/- 1.000          |
+qqH200                       |  both        |   1.000    +/- 1.000          |
+qqH250                       |  both        |   1.000    +/- 1.000          |
+qqH300                       |  both        |   1.000    +/- 1.000          |
+qqH350                       |  both        |   1.000    +/- 1.000          |
+qqH400                       |  both        |   1.000    +/- 1.000          |
+qqH450                       |  both        |   1.000    +/- 1.000          |
+qqH500                       |  both        |   1.000    +/- 1.000          |
+qqH550                       |  both        |   1.000    +/- 1.000          |
+qqH600                       |  both        |   1.000    +/- 1.000          |
+qqH650                       |  both        |   1.000    +/- 1.000          |
+qqH700                       |  both        |   1.000    +/- 1.000          |
+qqH750                       |  both        |   1.000    +/- 1.000          |
+qqH800                       |  both        |   1.000    +/- 1.000          |
+qqH850                       |  both        |   1.000    +/- 1.000          |
+qqH900                       |  both        |   1.000    +/- 1.000          |
+qqH950                       |  both        |   1.000    +/- 1.000          |
+qqH1000                      |  both        |   1.000    +/- 1.000          |
 WH_ZH_TTH_HToWW_M125         |  both        |   1.000    +/- 1.000          |
 WH_ZH_TTH_HToWW_M125_JESUp   |  both        |   1.000    +/- 1.000          |
 WH_ZH_TTH_HToWW_M125_JESDown |  both        |   1.000    +/- 1.000          |
-WH_HToWW_M125 			     |  both        |   1.000    +/- 1.000          |
-ZH_HToWW_M125 			     |  both        |   1.000    +/- 1.000          |
-TTH_HToWW_M125			     |  both        |   1.000    +/- 1.000          |
+WH_HToWW_M125                |  both        |   1.000    +/- 1.000          |
+ZH_HToWW_M125                |  both        |   1.000    +/- 1.000          |
+TTH_HToWW_M125               |  both        |   1.000    +/- 1.000          |
+WH_HToWW_M125_JESUp          |  both        |   1.000    +/- 1.000          |
+ZH_HToWW_M125_JESUp          |  both        |   1.000    +/- 1.000          |
+TTH_HToWW_M125_JESUp         |  both        |   1.000    +/- 1.000          |
+WH_HToWW_M125_JESDown        |  both        |   1.000    +/- 1.000          |
+ZH_HToWW_M125_JESDown        |  both        |   1.000    +/- 1.000          |
+TTH_HToWW_M125_JESDown       |  both        |   1.000    +/- 1.000          |
 WH_ZH_TTH_HToZZ_M125         |  both        |   1.000    +/- 1.000          |
 WH_ZH_TTH_HToZZ_M125_JESUp   |  both        |   1.000    +/- 1.000          |
 WH_ZH_TTH_HToZZ_M125_JESDown |  both        |   1.000    +/- 1.000          |
-WH_HToZZ_M125 			     |  both        |   1.000    +/- 1.000          |
-ZH_HToZZ_M125 			     |  both        |   1.000    +/- 1.000          |
-TTH_HToZZ_M125			     |  both        |   1.000    +/- 1.000          |
+WH_HToZZ_M125                |  both        |   1.000    +/- 1.000          |
+ZH_HToZZ_M125                |  both        |   1.000    +/- 1.000          |
+TTH_HToZZ_M125               |  both        |   1.000    +/- 1.000          |
+WH_HToZZ_M125_JESUp          |  both        |   1.000    +/- 1.000          |
+ZH_HToZZ_M125_JESUp          |  both        |   1.000    +/- 1.000          |
+TTH_HToZZ_M125_JESUp         |  both        |   1.000    +/- 1.000          |
+WH_HToZZ_M125_JESDown        |  both        |   1.000    +/- 1.000          |
+ZH_HToZZ_M125_JESDown        |  both        |   1.000    +/- 1.000          |
+TTH_HToZZ_M125_JESDown       |  both        |   1.000    +/- 1.000          |
 TTH_HToBB_M125               |  both        |   1.000    +/- 1.000          |
-TTH_Inclusive_M125           |  both        |   1.000    +/- 1.000			|
+TTH_HToBB_M125_JESUp         |  both        |   1.000    +/- 1.000          |
+TTH_HToBB_M125_JESDown       |  both        |   1.000    +/- 1.000          |
+TTH_Inclusive_M125           |  both        |   1.000    +/- 1.000          |

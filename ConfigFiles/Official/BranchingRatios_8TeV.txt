@@ -13,28 +13,48 @@ STopT_T    					 |  1.000 	 +/- 0.00        |  Inclusive
 STopT_Tbar 					 |  1.000 	 +/- 0.00        |  Inclusive
 STopTW_T   					 |  1.000 	 +/- 0.00        |  Inclusive
 STopTW_Tbar					 |  1.000 	 +/- 0.00        |  Inclusive
+STopS_T_JESUp    			 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
+STopS_Tbar_JESUp 			 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
+STopT_T_JESUp    			 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
+STopT_Tbar_JESUp 			 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
+STopTW_T_JESUp   			 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
+STopTW_Tbar_JESUp			 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
+STopS_T_JESDown    			 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
+STopS_Tbar_JESDown 			 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
+STopT_T_JESDown    			 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
+STopT_Tbar_JESDown 			 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
+STopTW_T_JESDown   			 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
+STopTW_Tbar_JESDown			 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
 TTbar     					 |  1.000 	 +/- 0.00        |  Inclusive
-TTbar_JESUp					 |  1.000 	 +/- 0.00        |  Inclusive
-TTbar_JESDown				 |  1.000 	 +/- 0.00        |  Inclusive
+TTbar_JESUp					 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
+TTbar_JESDown				 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
 TTbarLJ   					 |  1.000 	 +/- 0.00        |  Inclusive
 TTbarDil  					 |  1.000 	 +/- 0.00        |  Inclusive
 Wbb       					 |  1.000 	 +/- 0.00        |  Inclusive
 Wcc       					 |  1.000 	 +/- 0.00        |  Inclusive
 WLight    					 |  1.000 	 +/- 0.00        |  Inclusive
 WJets     					 |  1.000 	 +/- 0.00        |  Inclusive
-WJets_JESUp					 |  1.000 	 +/- 0.00        |  Inclusive
-WJets_JESDown				 |  1.000 	 +/- 0.00        |  Inclusive
-WJets_matchingup			 |  1.000 	 +/- 0.00        |  Inclusive
-WJets_matchingdown			 |  1.000 	 +/- 0.00        |  Inclusive
-WJets_scaleup     			 |  1.000 	 +/- 0.00        |  Inclusive
-WJets_scaledown     		 |  1.000 	 +/- 0.00        |  Inclusiev
+WJets_JESUp					 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
+WJets_JESDown				 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
+WJets_matchingup			 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
+WJets_matchingdown			 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
+WJets_scaleup     			 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
+WJets_scaledown     		 |  1.000 	 +/- 0.00        |  Inclusiev, Systematic
 W1Jets     					 |  1.000 	 +/- 0.00        |  Inclusive
 W2Jets     					 |  1.000 	 +/- 0.00        |  Inclusive
 W3Jets     					 |  1.000 	 +/- 0.00        |  Inclusive
 W4Jets     					 |  1.000 	 +/- 0.00        |  Inclusive
 WpJ     					 |  1.000 	 +/- 0.00        |  Inclusive
 ZJets     					 |  1.000 	 +/- 0.00        |  Inclusive
+ZJets_JESUp     			 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
+ZJets_JESDown     			 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
+ZJetsToLL_M10To50			 |  1.000 	 +/- 0.00        |  Inclusive
+ZJetsToLL_M50				 |  1.000 	 +/- 0.00        |  Inclusive
 DYJets                  	 |  1.000 	 +/- 0.00        |  Inclusive
+DYJets_JESUp                 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
+DYJets_JESDown               |  1.000 	 +/- 0.00        |  Inclusive, Systematic
+DYJetsToLL_M10To50			 |  1.000 	 +/- 0.00        |  Inclusive
+DYJetsToLL_M50				 |  1.000 	 +/- 0.00        |  Inclusive
 ZpJ     		        	 |  1.000 	 +/- 0.00        |  Inclusive
 QCD       		        	 |  1.000 	 +/- 0.00        |  Inclusive
 QCD_Pt20_MuEnriched      	 |  1.000 	 +/- 0.00        |  Inclusive
@@ -52,7 +72,11 @@ QCD_Pt20to30_BCtoE       	 |  1.000 	 +/- 0.00        |  Inclusive
 QCD_Pt30to80_BCtoE       	 |  1.000 	 +/- 0.00        |  Inclusive
 QCD_Pt80to170_BCtoE      	 |  1.000 	 +/- 0.00        |  Inclusive
 WW        					 |  1.000    +/- 0.00        |  Inclusive
+WW_JESUp        			 |  1.000    +/- 0.00        |  Inclusive, Systematic
+WW_JESDown        			 |  1.000    +/- 0.00        |  Inclusive, Systematic
 WZ        					 |  1.000    +/- 0.00        |  Inclusive
+WZ_JESUp        			 |  1.000    +/- 0.00        |  Inclusive, Systematic
+WZ_JESDown        			 |  1.000    +/- 0.00        |  Inclusive, Systematic
 ZZ        					 |  1.000    +/- 0.00        |  Inclusive
 WH100						 |  0.0109	 +/- 0.0006213   |  WRONG
 WH105						 |  0.024	 +/- 0.001344    |  WRONG
@@ -96,6 +120,8 @@ ggH110						 |  0.00699  +/- 0.00        |  WRONG
 ggH115						 |  0.0126   +/- 0.00        |  WRONG
 ggH120						 |  0.0207   +/- 0.00        |  WRONG
 ggH125						 |  0.0947   +/- 0.00        |  H->WW * W+->l(e,mu,tau)nu * W+->jj * 2
+ggH125_JESUp				 |  0.0947   +/- 0.00        |  H->WW * W+->l(e,mu,tau)nu * W+->jj * 2
+ggH125_JESDown				 |  0.0947   +/- 0.00        |  H->WW * W+->l(e,mu,tau)nu * W+->jj * 2
 ggH130						 |  0.0443   +/- 0.00        |  WRONG
 ggH135						 |  0.0586   +/- 0.00        |  WRONG
 ggH140						 |  0.0734   +/- 0.00        |  WRONG
@@ -159,15 +185,29 @@ qqH1000						 |  0.0912   +/- 0.00        |  WRONG
 WH_ZH_TTH_HToWW_M125         |  0.2150   +/- 0.00        |  H(125)->WW
 WH_ZH_TTH_HToWW_M125_JESUp   |  0.2150   +/- 0.00        |  H(125)->WW
 WH_ZH_TTH_HToWW_M125_JESDown |  0.2150   +/- 0.00        |  H(125)->WW
-WH_HToWW_M125 			     |  0.2150   +/- 0.00        |  H(125)->WW
-ZH_HToWW_M125 			     |  0.2150   +/- 0.00        |  H(125)->WW
 TTH_HToWW_M125			     |  0.2150   +/- 0.00        |  H(125)->WW
+ZH_HToWW_M125 			     |  0.2150   +/- 0.00        |  H(125)->WW
+WH_HToWW_M125 			     |  0.2150   +/- 0.00        |  H(125)->WW
+WH_HToWW_M125_JESUp 		 |  0.2150   +/- 0.00        |  H(125)->WW
+ZH_HToWW_M125_JESUp 		 |  0.2150   +/- 0.00        |  H(125)->WW
+TTH_HToWW_M125_JESUp		 |  0.2150   +/- 0.00        |  H(125)->WW
+WH_HToWW_M125_JESDown 		 |  0.2150   +/- 0.00        |  H(125)->WW
+ZH_HToWW_M125_JESDown 		 |  0.2150   +/- 0.00        |  H(125)->WW
+TTH_HToWW_M125_JESDown		 |  0.2150   +/- 0.00        |  H(125)->WW
 WH_ZH_TTH_HToZZ_M125         |  0.0264   +/- 0.00        |  H(125)->ZZ
 WH_ZH_TTH_HToZZ_M125_JESUp   |  0.0264   +/- 0.00        |  H(125)->ZZ
 WH_ZH_TTH_HToZZ_M125_JESDown |  0.0264   +/- 0.00        |  H(125)->ZZ
 WH_HToZZ_M125 			     |  0.0264   +/- 0.00        |  H(125)->ZZ
 ZH_HToZZ_M125 			     |  0.0264   +/- 0.00        |  H(125)->ZZ
 TTH_HToZZ_M125			     |  0.0264   +/- 0.00        |  H(125)->ZZ
+WH_HToZZ_M125_JESUp 		 |  0.0264   +/- 0.00        |  H(125)->ZZ
+ZH_HToZZ_M125_JESUp 		 |  0.0264   +/- 0.00        |  H(125)->ZZ
+TTH_HToZZ_M125_JESUp		 |  0.0264   +/- 0.00        |  H(125)->ZZ
+WH_HToZZ_M125_JESDown 		 |  0.0264   +/- 0.00        |  H(125)->ZZ
+ZH_HToZZ_M125_JESDown 		 |  0.0264   +/- 0.00        |  H(125)->ZZ
+TTH_HToZZ_M125_JESDown		 |  0.0264   +/- 0.00        |  H(125)->ZZ
 TTH_HToBB_M125               |  0.5770   +/- 0.00        |  H(125)->bb
+TTH_HToBB_M125_JESUp         |  0.5770   +/- 0.00        |  H(125)->bb
+TTH_HToBB_M125_JESDown       |  0.5770   +/- 0.00        |  H(125)->bb
 TTH_Inclusive_M125           |  1.0000   +/- 0.00        |  Inclusive
 

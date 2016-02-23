@@ -2,159 +2,218 @@
 # the process BasePath contains the base path to be appended to all the processes
 CellClass=TableCellText
 
-Process                      |   FilePath_EventNtuple              					|   FilePath_MicroNtuple
-BasePath                     |   root://xrootd.unl.edu//eos/uscms/store/user/aperloff/MatrixElement/Summer12ME8TeV/MEInput/ |   root://xrootd.unl.edu//eos/uscms/store/user/aperloff/MatrixElement/Summer12ME8TeV/MEResults/2015_05_13_microNtuples_optimized_BDT/
-SingleEl_Data			     |   SingleEl_Data_19p148fb.root       					|   microSingleEl_Data_19p148fb_BaseCuts.root
-SingleMu_Data			     |   SingleMu_Data_19p279fb.root       					|   microSingleMu_Data_19p279fb_BaseCuts.root
-STopS_T    				     |   STopS_T.root                      					|   microSTopS_T_BaseCuts.root   
-STopS_Tbar 				     |   STopS_Tbar.root                   					|   microSTopS_Tbar_BaseCuts.root
-STopT_T    				     |   STopT_T.root                      					|   microSTopT_T_BaseCuts.root   
-STopT_Tbar 				     |   STopT_Tbar.root                   					|   microSTopT_Tbar_BaseCuts.root
-STopTW_T   				     |   STopTW_T.root                     					|   microSTopTW_T_BaseCuts.root   
-STopTW_Tbar				     |   STopTW_Tbar.root                  					|   microSTopTW_Tbar_BaseCuts.root
-TTbar     				     |   TTbar.root                        					|   microTTbar_BaseCuts.root
-TTbar_JESUp				     |   TTbar_JESUp.root                     				|   microTTbar_JESUp_BaseCuts.root
-TTbar_JESDown			     |   TTbar_JESDown.root                   				|   microTTbar_JESDown_BaseCuts.root
-TTbarLJ   				     |                                     					|
-TTbarDil  				     |                                     					|
-Wbb       				     |                                     					|
-Wcc       				     |                                     					|
-WLight    				     |                                     					|
-WJets     				     |   WJets.root                        					|   microWJets_BaseCuts.root
-WpJ     				     |   WJets.root                        					|   microWJets_BaseCuts.root
-WJets_part2                  |   WJets_part2.root                  					|
-W1Jets                       |   W1Jets.root                       					|   microW1Jets_BaseCuts.root
-W2Jets                       |   W2Jets.root                       					|   microW2Jets_BaseCuts.root
-W3Jets                       |   W3Jets.root                       					|   microW3Jets_BaseCuts.root
-W4Jets                       |   W4Jets.root                       					|   microW4Jets_BaseCuts.root
-WJets_matchingdown           |   WJets_matchingdown.root           					|   microWJets_matchingdown_BaseCuts.root
-WJets_matchingup             |   WJets_matchingup.root             					|   microWJets_matchingup_BaseCuts.root  
-WJets_scaledown              |   WJets_scaledown.root              					|   microWJets_scaledown_BaseCuts.root   
-WJets_scaleup                |   WJets_scaleup.root                					|   microWJets_scaleup_BaseCuts.root     
-ZJets     				     |   DYJets.root                       					|   microZJets_BaseCuts.root
-DYJets                       |   ZJets.root                        					|   microZJets_BaseCuts.root
-ZpJ     				     |   ZJets.root                        					|   microZJets_BaseCuts.root
-Ztautau                      |                                     					|
-QCD     				     |                                     					|
-QCD_Pt20_MuEnriched          |                                     					|
-QCD_MuEnriched               |                                     					|
-#QCD_ElEnriched              |  QCD_Electron.root                  					|   microQCD_Electron_Dp6p7_BaseCuts.root
-QCD_ElEnriched               |  QCD_Electron_Dp6p7.root                  			|   microQCD_Electron_Dp6p7_BaseCuts.root
-QCD_ElFULL                   |  SingleEl_Full.root                 					|   microSingleEl_Full_Subset_BaseCuts.root
-QCD_MuFULL                   |  SingleMu_Full.root                 					|   microSingleMu_Full_BaseCuts.root
-QCD_Pt20to30_EMEnriched      |  QCD_EM_20to30.root                 					|   QCD_EM_20to30.root               
-QCD_Pt30to80_EMEnriched      |  QCD_EM_30to80.root                 					|   QCD_EM_30to80.root               
-QCD_Pt80to170_EMEnriched     |  QCD_EM_80to170.root                					|   QCD_EM_80to170.root               
-QCD_Pt170to250_EMEnriched    |  QCD_EM_170to250.root               					|   QCD_EM_170to250.root               
-QCD_Pt250to350_EMEnriched    |  QCD_EM_250to350.root               					|   QCD_EM_250to350.root               
-QCD_Pt350_EMEnriched         |  QCD_EM_350.root                    					|   QCD_EM_350.root               
-QCD_Pt20to30_BCtoE           |                                     					|
-QCD_Pt30to80_BCtoE           |                                     					|
-QCD_Pt80to170_BCtoE          |                                     					|
-QCDMu                        |                                     					|
-QCDEl_Pt30to80               |                                     					|
-QCDEl_Pt80to170              |                                     					|
-QCDEl_BCtoE30to80            |                                     					|
-QCDEl_BCtoE80to170           |                                     					|
-WW      				     |   WW.root                           					|   microWW_BaseCuts.root
-WZ      				     |   WZ.root                           					|   microWZ_BaseCuts.root
-ZZ      				     |   ZZ.root                           					|   microZZ_BaseCuts.root
-WH100                        |                                     					|
-WH105	                     |	                              						|
-WH110	                     |	                              						|
-WH115	                     |	                              						|
-WH120	                     |	                              						|
-WH125	                     |  WH125_HToBB.root                      				|   microWH125_HToBB_BaseCuts.root
-WH125_HToBB                  |  WH125_HToBB.root                      				|   microWH125_HToBB_BaseCuts.root
-WH_HToBB_M125_JESUp          |  WH_HToBB_M125_JESUp.root                  			|   microWH_HToBB_M125_JESUp_BaseCuts.root
-WH_HToBB_M125_JESDown        |  WH_HToBB_M125_JESDown.root                			|   microWH_HToBB_M125_JESDown_BaseCuts.root
-WH130	                     |	                              						|
-WH135	                     |	                              						|	
-WH140	                     |                                     					|
-WH145	                     |                                     					|
-WH150	                     |                                     					|
-WH160	                     |                                     					|
-WH170	                     |                                     					|
-WH180	                     |                                     					|
-WH190	                     |                                     					|
-WH200	                     |                                     					|
-WH250	                     |                                     					|
-WH300	                     |                                     					|
-ggH100	                     |	                              						|
-ggH105	                     |	                              						|
-ggH110	                     |	ggH110.root                   						|   microggH100_BaseCuts.root
-ggH115	                     |	                              						|
-ggH120	                     |	ggH120.root                   						|	microggH120_BaseCuts.root
-ggH125	                     |	ggH125_BIG.root                						|	microggH125_BIG_BaseCuts.root
-ggH130	                     |	ggH130.root                   						|	microggH130_BaseCuts.root
-ggH135	                     |	                              						|
-ggH140	                     |	ggH140.root                   						|	microggH140_BaseCuts.root
-ggH145	                     |	                              						|
-ggH150	                     |	ggH150.root                   						|	microggH150_BaseCuts.root
-ggH160	                     |	ggH160.root                   						|	microggH160_BaseCuts.root
-ggH170	                     |	ggH170.root                   						|	microggH170_BaseCuts.root
-ggH180	                     |	ggH180.root                   						|	microggH180_BaseCuts.root
-ggH190	                     |	ggH190.root                   						|	microggH190_BaseCuts.root
-ggH200	                     |	ggH200.root                   						|	microggH200_BaseCuts.root
-ggH250	                     |	ggH250.root                   						|	microggH250_BaseCuts.root
-ggH300	                     |	ggH300.root                   						|	microggH300_BaseCuts.root
-ggH350	                     |	ggH350.root                   						|	microggH350_BaseCuts.root
-ggH400	                     |	ggH400.root                   						|	microggH400_BaseCuts.root
-ggH450	                     |	ggH450.root                   						|	microggH450_BaseCuts.root
-ggH500	                     |	ggH500.root                   						|	microggH500_BaseCuts.root
-ggH550	                     |	ggH550.root                   						|	microggH550_BaseCuts.root
-ggH600	                     |	ggH600.root                   						|	microggH600_BaseCuts.root
-ggH650	                     |	                              						|
-ggH700	                     |	ggH700.root                   						|	microggH700_BaseCuts.root
-ggH750	                     |	                              						|
-ggH800	                     |	ggH800.root                   						|	microggH800_BaseCuts.root
-ggH850	                     |	                              						|
-ggH900	                     |	ggH900.root                   						|	microggH900_BaseCuts.root
-ggH950	                     |	                              						|
-ggH1000	                     |	ggH1000.root                  						|	microggH1000_BaseCuts.root
-qqH100	                     |	                              						|
-qqH105	                     |	                              						|
-qqH110	                     |	                              						|
-qqH115	                     |	                              						|
-qqH120	                     |	                              						|
-qqH125	                     |	qqH125.root 	              						|	microqqH125_BaseCuts.root
-qqH130	                     |	                              						|
-qqH135	                     |	                              						|	
-qqH140	                     |	                              						|
-qqH145	                     |	                              						|
-qqH150	                     |	                              						|
-qqH160	                     |	                              						|
-qqH170	                     | qqH170.root 	              							|	microqqH170_BaseCuts.root
-qqH180	                     |	qqH180.root 	              						|	microqqH180_BaseCuts.root
-qqH190	                     |	qqH190.root 	              						|	microqqH190_BaseCuts.root
-qqH200	                     |	qqH200.root 	              						|	microqqH200_BaseCuts.root
-qqH250	                     |	qqH250.root 	              						|	microqqH250_BaseCuts.root
-qqH300	                     |	qqH300.root 	              						|	microqqH300_BaseCuts.root
-qqH350	                     |	qqH350.root 	              						|	microqqH350_BaseCuts.root
-qqH400	                     |	qqH400.root 	              						|	microqqH400_BaseCuts.root
-qqH450	                     |	qqH450.root 	              						|	microqqH450_BaseCuts.root
-qqH500	                     |	qqH500.root 	              						|	microqqH500_BaseCuts.root
-qqH550	                     |	qqH550.root 	              						|	microqqH550_BaseCuts.root
-qqH600	                     |	qqH600.root 	              						|	microqqH600_BaseCuts.root
-qqH650	                     |	            	              						|
-qqH700	                     |	qqH700.root 	              						|	microqqH700_BaseCuts.root
-qqH750	                     |	            	              						|
-qqH800	                     |	qqH800.root 	              						|	microqqH800_BaseCuts.root
-qqH850	                     |	            	              						|
-qqH900	                     |	qqH900.root 	              						|	microqqH900_BaseCuts.root
-qqH950	                     |	                              						|
-qqH1000	                     |	qqH1000.root                  						|	microqqH1000_BaseCuts.root
-WH_ZH_TTH_HToWW_M125         | WH_ZH_TTH_HToWW_M125.root 							| 	microWH_ZH_TTH_HToWW_M125_BaseCuts.root
-WH_ZH_TTH_HToWW_M125_JESUp   | WH_ZH_TTH_HToWW_M125_JESUp.root 						| 	microWH_ZH_TTH_HToWW_M125_BaseCuts_JESUp.root
-WH_ZH_TTH_HToWW_M125_JESDown | WH_ZH_TTH_HToWW_M125_JESDown.root 					| 	microWH_ZH_TTH_HToWW_M125_BaseCuts_JESDown.root
-WH_HToWW_M125 			     | WH_HToWW_M125.root									|   microWH_HToWW_M125_BaseCuts.root
-ZH_HToWW_M125 			     | ZH_HToWW_M125.root									|   microZH_HToWW_M125_BaseCuts.root
-TTH_HToWW_M125			     | TTH_HToWW_M125.root									|   microTTH_HToWW_M125_BaseCuts.root
-WH_ZH_TTH_HToZZ_M125         | WH_ZH_TTH_HToZZ_M125.root 							| 	microWH_ZH_TTH_HToZZ_M125_BaseCuts.root
-WH_ZH_TTH_HToZZ_M125_JESUp   | WH_ZH_TTH_HToZZ_M125_JESUp.root 						| 	microWH_ZH_TTH_HToZZ_M125_JESUp_BaseCuts.root
-WH_ZH_TTH_HToZZ_M125_JESDown | WH_ZH_TTH_HToZZ_M125_JESDown.root 					| 	microWH_ZH_TTH_HToZZ_M125_JESDown_BaseCuts.root
-WH_HToZZ_M125 			  	 | WH_HToZZ_M125.root									|   microWH_HToZZ_M125_BaseCuts.root
-ZH_HToZZ_M125 			  	 | ZH_HToZZ_M125.root									|   microZH_HToZZ_M125_BaseCuts.root
-TTH_HToZZ_M125			  	 | TTH_HToZZ_M125.root									|   microTTH_HToZZ_M125_BaseCuts.root
-TTH_HToBB_M125            	 | TTH_HToBB_M125.root       							| 	microTTH_HToBB_M125_BaseCuts.root
-TTH_Inclusive_M125        	 | TTH_Inclusive_M125.root   							| 	microTTH_Inclusive_M125_BaseCuts.root
+Process                      |   FilePath_EventNtuple                               |   FilePath_MicroNtuple
+#BasePath                     |   root://cmsxrootd.fnal.gov//store/user/aperloff/MatrixElement/Summer12ME8TeV/MEInput/ |   root://cmsxrootd.fnal.gov//store/user/aperloff/MatrixElement/Summer12ME8TeV/MEResults/2015_06_05_microNtuples_optimized_BDT/rootFiles/
+BasePath                     |   root://cmseos.fnal.gov//store/user/aperloff/MatrixElement/Summer12ME8TeV/MEInput/ |   root://cmseos.fnal.gov//store/user/aperloff/MatrixElement/Summer12ME8TeV/MEResults/2015_07_23_microNtuples_optimized_BDT/rootFiles/
+#BasePath                     |   /eos/uscms/store/user/aperloff/MatrixElement/Summer12ME8TeV/MEInput/ |   /eos/uscms/store/user/aperloff/MatrixElement/Summer12ME8TeV/MEResults/2015_06_05_microNtuples_optimized_BDT/rootFiles/
+SingleEl_Data                |   SingleEl_Data_19p148fb.root                        |   microSingleEl_Data_19p148fb_BaseCuts.root
+SingleMu_Data                |   SingleMu_Data_19p279fb.root                        |   microSingleMu_Data_19p279fb_BaseCuts.root
+STopS_T                      |   STopS_T.root                                       |   microSTopS_T_BaseCuts.root   
+STopS_Tbar                   |   STopS_Tbar.root                                    |   microSTopS_Tbar_BaseCuts.root
+STopT_T                      |   STopT_T.root                                       |   microSTopT_T_BaseCuts.root   
+STopT_Tbar                   |   STopT_Tbar.root                                    |   microSTopT_Tbar_BaseCuts.root
+STopTW_T                     |   STopTW_T.root                                      |   microSTopTW_T_BaseCuts.root   
+STopTW_Tbar                  |   STopTW_Tbar.root                                   |   microSTopTW_Tbar_BaseCuts.root
+STopS_T_JESUp                |   STopS_T_JESUp.root                                 |   microSTopS_T_JESUp_BaseCuts.root   
+STopS_Tbar_JESUp             |   STopS_Tbar_JESUp.root                              |   microSTopS_Tbar_JESUp_BaseCuts.root
+STopT_T_JESUp                |   STopT_T_JESUp.root                                 |   microSTopT_T_JESUp_BaseCuts.root   
+STopT_Tbar_JESUp             |   STopT_Tbar_JESUp.root                              |   microSTopT_Tbar_JESUp_BaseCuts.root
+STopTW_T_JESUp               |   STopTW_T_JESUp.root                                |   microSTopTW_T_JESUp_BaseCuts.root   
+STopTW_Tbar_JESUp            |   STopTW_Tbar_JESUp.root                             |   microSTopTW_Tbar_JESUp_BaseCuts.root
+STopS_T_JESDown              |   STopS_T_JESDown.root                               |   microSTopS_T_JESDown_BaseCuts.root   
+STopS_Tbar_JESDown           |   STopS_Tbar_JESDown.root                            |   microSTopS_Tbar_JESDown_BaseCuts.root
+STopT_T_JESDown              |   STopT_T_JESDown.root                               |   microSTopT_T_JESDown_BaseCuts.root   
+STopT_Tbar_JESDown           |   STopT_Tbar_JESDown.root                            |   microSTopT_Tbar_JESDown_BaseCuts.root
+STopTW_T_JESDown             |   STopTW_T_JESDown.root                              |   microSTopTW_T_JESDown_BaseCuts.root   
+STopTW_Tbar_JESDown          |   STopTW_Tbar_JESDown.root                           |   microSTopTW_Tbar_JESDown_BaseCuts.root
+TTbar                        |   TTbar.root                                         |   microTTbar_BaseCuts.root
+TTbar_JESUp                  |   TTbar_JESUp.root                                   |   microTTbar_JESUp_BaseCuts.root
+TTbar_JESDown                |   TTbar_JESDown.root                                 |   microTTbar_JESDown_BaseCuts.root
+TTbarLJ                      |                                                      |
+TTbarDil                     |                                                      |
+Wbb                          |                                                      |
+Wcc                          |                                                      |
+WLight                       |                                                      |
+WJets                        |   WJets.root                                         |   microWJets_BaseCuts.root
+WpJ                          |   WJets.root                                         |   microWJets_BaseCuts.root
+WJets_part2                  |   WJets_part2.root                                   |
+W1Jets                       |   W1Jets.root                                        |   microW1Jets_BaseCuts.root
+W2Jets                       |   W2Jets.root                                        |   microW2Jets_BaseCuts.root
+W3Jets                       |   W3Jets.root                                        |   microW3Jets_BaseCuts.root
+W4Jets                       |   W4Jets.root                                        |   microW4Jets_BaseCuts.root
+WJets_matchingdown           |   WJets_matchingdown.root                            |   microWJets_matchingdown_BaseCuts.root
+WJets_matchingup             |   WJets_matchingup.root                              |   microWJets_matchingup_BaseCuts.root  
+WJets_scaledown              |   WJets_scaledown.root                               |   microWJets_scaledown_BaseCuts.root   
+WJets_scaleup                |   WJets_scaleup.root                                 |   microWJets_scaleup_BaseCuts.root     
+WJets_JESUp                  |   WJets_JESUp.root                                   |   microWJets_JESUp_BaseCuts.root
+WJets_JESDown                |   WJets_JESDown.root                                 |   microWJets_JESDown_BaseCuts.root
+ZJets                        |   DYJets.root                                        |   microZJets_BaseCuts.root
+ZJets_JESUp                  |   DYJets_JESUp.root                                  |   microZJets_JESUp_BaseCuts.root
+ZJets_JESDown                |   DYJets_JESDown.root                                |   microZJets_JESDown_BaseCuts.root
+#Used for making the WlnuJets samples
+#ZJetsToLL_M10To50            |   DYJetsToLL_M-10To50.root                           |   microWlnuJets_M-10To50_BaseCuts.root
+#ZJetsToLL_M50                |   DYJetsToLL_M-50.root                               |   microWlnuJets_M-50_BaseCuts.root
+#Generator level information only
+#ZJetsToLL_M50                |   DYJetsToLL_M-50_GEN.root                           |   microWlnuJets_M-50_GEN_BaseCuts.root
+#Used for the plotter code (The high and low pT leptons were chosen with equal probability)
+#ZJetsToLL_M10To50            |   WlnuJets_M-10To50.root                             |   microWlnuJets_M-10To50_BaseCuts.root
+#ZJetsToLL_M50                |   WlnuJets_M-50.root                                 |   microWlnuJets_M-50_BaseCuts.root
+
+#Used for the plotter code (65% of the time the higher pT lepton was kept)
+#ZJetsToLL_M10To50            |   WlnuJets_M-10To50_HighPtLeptonKept65.root          |   microWlnuJets_M-10To50_HighPtLeptonKept65_BaseCuts.root
+#ZJetsToLL_M50                |   WlnuJets_M-50_HighPtLeptonKept65.root              |   microWlnuJets_M-50_HighPtLeptonKept65_BaseCuts.root
+#Used for the plotter code (MET/non-selected lepton was smeared out)
+#ZJetsToLL_M10To50            |   WlnuJets_M-10To50_SmearedMET.root                  |   microWlnuJets_M-10To50_SmearedMET_BaseCuts.root
+#ZJetsToLL_M50                |   WlnuJets_M-50_SmearedMET.root                      |   microWlnuJets_M-50_SmearedMET_BaseCuts.root
+#Used for the plotter code (65% of the time the higher pT lepton was kept and MET/non-selected lepton was smeared out)
+ZJetsToLL_M10To50            |   WlnuJets_M-10To50_HighPtLeptonKept65_SmearedMET_realphi04.root |   microWlnuJets_M-10To50_SmearedMET_BaseCuts.root
+ZJetsToLL_M50                |   WlnuJets_M-50_HighPtLeptonKept65_SmearedMET_realphi04.root     |   microWlnuJets_M-50_SmearedMET_BaseCuts.root
+
+DYJets                       |   ZJets.root                                         |   microZJets_BaseCuts.root
+ZpJ                          |   ZJets.root                                         |   microZJets_BaseCuts.root
+Ztautau                      |                                                      |
+QCD                          |                                                      |
+QCD_Pt20_MuEnriched          |                                                      |
+QCD_MuEnriched               |                                                      |
+#QCD_ElEnriched              |  QCD_Electron.root                                   |   microQCD_Electron_Dp6p7_BaseCuts.root
+QCD_ElEnriched               |  QCD_Electron_Dp6p7.root                             |   microQCD_Electron_Dp6p7_BaseCuts.root
+QCD_ElFULL                   |  SingleEl_Full.root                                  |   microSingleEl_Full_Subset_BaseCuts.root
+QCD_MuFULL                   |  SingleMu_Full.root                                  |   microSingleMu_Full_BaseCuts.root
+QCD_Pt20to30_EMEnriched      |  QCD_EM_20to30.root                                  |   QCD_EM_20to30.root               
+QCD_Pt30to80_EMEnriched      |  QCD_EM_30to80.root                                  |   QCD_EM_30to80.root               
+QCD_Pt80to170_EMEnriched     |  QCD_EM_80to170.root                                 |   QCD_EM_80to170.root               
+QCD_Pt170to250_EMEnriched    |  QCD_EM_170to250.root                                |   QCD_EM_170to250.root               
+QCD_Pt250to350_EMEnriched    |  QCD_EM_250to350.root                                |   QCD_EM_250to350.root               
+QCD_Pt350_EMEnriched         |  QCD_EM_350.root                                     |   QCD_EM_350.root               
+QCD_Pt20to30_BCtoE           |                                                      |
+QCD_Pt30to80_BCtoE           |                                                      |
+QCD_Pt80to170_BCtoE          |                                                      |
+QCDMu                        |                                                      |
+QCDEl_Pt30to80               |                                                      |
+QCDEl_Pt80to170              |                                                      |
+QCDEl_BCtoE30to80            |                                                      |
+QCDEl_BCtoE80to170           |                                                      |
+WW                           |   WW.root                                            |   microWW_BaseCuts.root
+WW_JESUp                     |   WW_JESUp.root                                      |   microWW_JESUp_BaseCuts.root
+WW_JESDown                   |   WW_JESDown.root                                    |   microWW_JESDown_BaseCuts.root
+WZ                           |   WZ.root                                            |   microWZ_BaseCuts.root
+WZ_JESUp                     |   WZ_JESUp.root                                      |   microWZ_JESUp_BaseCuts.root
+WZ_JESDown                   |   WZ_JESDown.root                                    |   microWZ_JESDown_BaseCuts.root
+ZZ                           |   ZZ.root                                            |   microZZ_BaseCuts.root
+WH100                        |                                                      |
+WH105                        |                                                      |
+WH110                        |                                                      |
+WH115                        |                                                      |
+WH120                        |                                                      |
+WH125                        |  WH125_HToBB.root                                    |   microWH125_HToBB_BaseCuts.root
+WH125_HToBB                  |  WH125_HToBB.root                                    |   microWH125_HToBB_BaseCuts.root
+WH_HToBB_M125_JESUp          |  WH_HToBB_M125_JESUp.root                            |   microWH_HToBB_M125_JESUp_BaseCuts.root
+WH_HToBB_M125_JESDown        |  WH_HToBB_M125_JESDown.root                          |   microWH_HToBB_M125_JESDown_BaseCuts.root
+WH130                        |                                                      |
+WH135                        |                                                      |   
+WH140                        |                                                      |
+WH145                        |                                                      |
+WH150                        |                                                      |
+WH160                        |                                                      |
+WH170                        |                                                      |
+WH180                        |                                                      |
+WH190                        |                                                      |
+WH200                        |                                                      |
+WH250                        |                                                      |
+WH300                        |                                                      |
+ggH100                       |                                                      |
+ggH105                       |                                                      |
+ggH110                       |  ggH110.root                                         |   microggH100_BaseCuts.root
+ggH115                       |                                                      |
+ggH120                       |  ggH120.root                                         |   microggH120_BaseCuts.root
+ggH125                       |  ggH125_BIG.root                                     |   microggH125_BIG_BaseCuts.root
+ggH125_JESUp                 |  ggH125_BIG_JESUp.root                               |   microggH125_BIG_JESUp_BaseCuts.root
+ggH125_JESDown               |  ggH125_BIG_JESDown.root                             |   microggH125_BIG_JESDown_BaseCuts.root
+ggH130                       |  ggH130.root                                         |   microggH130_BaseCuts.root
+ggH135                       |                                                      |
+ggH140                       |  ggH140.root                                         |   microggH140_BaseCuts.root
+ggH145                       |                                                      |
+ggH150                       |  ggH150.root                                         |   microggH150_BaseCuts.root
+ggH160                       |  ggH160.root                                         |   microggH160_BaseCuts.root
+ggH170                       |  ggH170.root                                         |   microggH170_BaseCuts.root
+ggH180                       |  ggH180.root                                         |   microggH180_BaseCuts.root
+ggH190                       |  ggH190.root                                         |   microggH190_BaseCuts.root
+ggH200                       |  ggH200.root                                         |   microggH200_BaseCuts.root
+ggH250                       |  ggH250.root                                         |   microggH250_BaseCuts.root
+ggH300                       |  ggH300.root                                         |   microggH300_BaseCuts.root
+ggH350                       |  ggH350.root                                         |   microggH350_BaseCuts.root
+ggH400                       |  ggH400.root                                         |   microggH400_BaseCuts.root
+ggH450                       |  ggH450.root                                         |   microggH450_BaseCuts.root
+ggH500                       |  ggH500.root                                         |   microggH500_BaseCuts.root
+ggH550                       |  ggH550.root                                         |   microggH550_BaseCuts.root
+ggH600                       |  ggH600.root                                         |   microggH600_BaseCuts.root
+ggH650                       |                                                      |
+ggH700                       |  ggH700.root                                         |   microggH700_BaseCuts.root
+ggH750                       |                                                      |
+ggH800                       |  ggH800.root                                         |   microggH800_BaseCuts.root
+ggH850                       |                                                      |
+ggH900                       |  ggH900.root                                         |   microggH900_BaseCuts.root
+ggH950                       |                                                      |
+ggH1000                      |  ggH1000.root                                        |   microggH1000_BaseCuts.root
+qqH100                       |                                                      |
+qqH105                       |                                                      |
+qqH110                       |                                                      |
+qqH115                       |                                                      |
+qqH120                       |                                                      |
+qqH125                       |  qqH125.root                                         |   microqqH125_BaseCuts.root
+qqH125_JESUp                 |  qqH125_JESUp.root                                   |   microqqH125_JESUp_BaseCuts.root
+qqH125_JESDown               |  qqH125_JESDown.root                                 |   microqqH125_JESDown_BaseCuts.root
+qqH130                       |                                                      |
+qqH135                       |                                                      |   
+qqH140                       |                                                      |
+qqH145                       |                                                      |
+qqH150                       |                                                      |
+qqH160                       |                                                      |
+qqH170                       |  qqH170.root                                         |   microqqH170_BaseCuts.root
+qqH180                       |  qqH180.root                                         |   microqqH180_BaseCuts.root
+qqH190                       |  qqH190.root                                         |   microqqH190_BaseCuts.root
+qqH200                       |  qqH200.root                                         |   microqqH200_BaseCuts.root
+qqH250                       |  qqH250.root                                         |   microqqH250_BaseCuts.root
+qqH300                       |  qqH300.root                                         |   microqqH300_BaseCuts.root
+qqH350                       |  qqH350.root                                         |   microqqH350_BaseCuts.root
+qqH400                       |  qqH400.root                                         |   microqqH400_BaseCuts.root
+qqH450                       |  qqH450.root                                         |   microqqH450_BaseCuts.root
+qqH500                       |  qqH500.root                                         |   microqqH500_BaseCuts.root
+qqH550                       |  qqH550.root                                         |   microqqH550_BaseCuts.root
+qqH600                       |  qqH600.root                                         |   microqqH600_BaseCuts.root
+qqH650                       |                                                      |
+qqH700                       |  qqH700.root                                         |   microqqH700_BaseCuts.root
+qqH750                       |                                                      |
+qqH800                       |  qqH800.root                                         |   microqqH800_BaseCuts.root
+qqH850                       |                                                      |
+qqH900                       |  qqH900.root                                         |   microqqH900_BaseCuts.root
+qqH950                       |                                                      |
+qqH1000                      |  qqH1000.root                                        |   microqqH1000_BaseCuts.root
+WH_ZH_TTH_HToWW_M125         | WH_ZH_TTH_HToWW_M125.root                            |   microWH_ZH_TTH_HToWW_M125_BaseCuts.root
+WH_ZH_TTH_HToWW_M125_JESUp   | WH_ZH_TTH_HToWW_M125_JESUp.root                      |   microWH_ZH_TTH_HToWW_M125_BaseCuts_JESUp.root
+WH_ZH_TTH_HToWW_M125_JESDown | WH_ZH_TTH_HToWW_M125_JESDown.root                    |   microWH_ZH_TTH_HToWW_M125_BaseCuts_JESDown.root
+WH_HToWW_M125                | WH_HToWW_M125.root                                   |   microWH_HToWW_M125_BaseCuts.root
+ZH_HToWW_M125                | ZH_HToWW_M125.root                                   |   microZH_HToWW_M125_BaseCuts.root
+TTH_HToWW_M125               | TTH_HToWW_M125.root                                  |   microTTH_HToWW_M125_BaseCuts.root
+WH_HToWW_M125_JESUp          | WH_HToWW_M125_JESUp.root                             |   microWH_HToWW_M125_JESUp_BaseCuts.root
+ZH_HToWW_M125_JESUp          | ZH_HToWW_M125_JESUp.root                             |   microZH_HToWW_M125_JESUp_BaseCuts.root
+TTH_HToWW_M125_JESUp         | TTH_HToWW_M125_JESUp.root                            |   microTTH_HToWW_M125_JESUp_BaseCuts.root
+WH_HToWW_M125_JESDown        | WH_HToWW_M125_JESDown.root                           |   microWH_HToWW_M125_JESDown_BaseCuts.root
+ZH_HToWW_M125_JESDown        | ZH_HToWW_M125_JESDown.root                           |   microZH_HToWW_M125_JESDown_BaseCuts.root
+TTH_HToWW_M125_JESDown       | TTH_HToWW_M125_JESDown.root                          |   microTTH_HToWW_M125_JESDown_BaseCuts.root
+WH_ZH_TTH_HToZZ_M125         | WH_ZH_TTH_HToZZ_M125.root                            |   microWH_ZH_TTH_HToZZ_M125_BaseCuts.root
+WH_ZH_TTH_HToZZ_M125_JESUp   | WH_ZH_TTH_HToZZ_M125_JESUp.root                      |   microWH_ZH_TTH_HToZZ_M125_JESUp_BaseCuts.root
+WH_ZH_TTH_HToZZ_M125_JESDown | WH_ZH_TTH_HToZZ_M125_JESDown.root                    |   microWH_ZH_TTH_HToZZ_M125_JESDown_BaseCuts.root
+WH_HToZZ_M125                | WH_HToZZ_M125.root                                   |   microWH_HToZZ_M125_BaseCuts.root
+ZH_HToZZ_M125                | ZH_HToZZ_M125.root                                   |   microZH_HToZZ_M125_BaseCuts.root
+TTH_HToZZ_M125               | TTH_HToZZ_M125.root                                  |   microTTH_HToZZ_M125_BaseCuts.root
+WH_HToZZ_M125_JESUp          | WH_HToZZ_M125_JESUp.root                             |   microWH_HToZZ_M125_JESUp_BaseCuts.root
+ZH_HToZZ_M125_JESUp          | ZH_HToZZ_M125_JESUp.root                             |   microZH_HToZZ_M125_JESUp_BaseCuts.root
+TTH_HToZZ_M125_JESUp         | TTH_HToZZ_M125_JESUp.root                            |   microTTH_HToZZ_M125_JESUp_BaseCuts.root
+WH_HToZZ_M125_JESDown        | WH_HToZZ_M125_JESDown.root                           |   microWH_HToZZ_M125_JESDown_BaseCuts.root
+ZH_HToZZ_M125_JESDown        | ZH_HToZZ_M125_JESDown.root                           |   microZH_HToZZ_M125_JESDown_BaseCuts.root
+TTH_HToZZ_M125_JESDown       | TTH_HToZZ_M125_JESDown.root                          |   microTTH_HToZZ_M125_JESDown_BaseCuts.root
+TTH_HToBB_M125               | TTH_HToBB_M125.root                                  |   microTTH_HToBB_M125_BaseCuts.root
+TTH_HToBB_M125_JESUp         | TTH_HToBB_M125_JESUp.root                            |   microTTH_HToBB_M125_JESUp_BaseCuts.root
+TTH_HToBB_M125_JESDown       | TTH_HToBB_M125_JESDown.root                          |   microTTH_HToBB_M125_JESDown_BaseCuts.root
+TTH_Inclusive_M125           | TTH_Inclusive_M125.root                              |   microTTH_Inclusive_M125_BaseCuts.root
