@@ -1,0 +1,26 @@
+CB = /uscms_data/d2/aperloff/YOURWORKINGAREA/MatrixElement/gitty/CMSSW_5_3_2_patch5/
+SD = $(CB)/src/
+TCD = $(SD)/TAMUWW/ConfigFiles
+LD = $(CB)/lib/slc5_amd64_gcc462/
+BD = $(CB)/bin/slc5_amd64_gcc462/
+WD = /uscms_data/d2/aperloff/Summer12ME8TeV/MEResults/2015_06_05_microNtuples_optimized/
+
+universe = vanilla
+Executable = microPROCESSGROUP_BaseCuts.sh
+Arguments = $(Process) EVENTSPERJOB
+transfer_input_files = $(TCD), $(BD)/makeMicroNtuple_x, $(LD)/libTAMUWWMatrixElement.so, $(LD)/libTAMUWWTools.so, $(LD)/libTAMUWWSpecialTools.so, $(LD)/libTAMUWWMEPATNtuple.so, $(LD)/libElectroWeakAnalysisVPlusJets.so, $(LD)/libEGammaEGammaAnalysisTools.so, $(LD)/libCondFormatsEgammaObjects.so, $(LD)/libDataFormatsPatCandidates.so, $(LD)/libJetMETAnalysisJetUtilities.so, $(LD)/libTAMUWWAuxFunctions.so, $(LD)/libTAMUWWDHELAS.so, $(LD)/libTAMUWWPDFs.so, $(LD)/libSHyFTTemplateMakers.so
+Requirements = OpSys == "LINUX" && (Arch != "DUMMY" )
+request_disk = 1000000
+request_memory = 1945
++BigMemoryJob = TRUE
+Should_Transfer_Files = ALWAYS
+WhenToTransferOutput = ON_EXIT_OR_EVICT
+x509userproxy = $ENV(X509_USER_PROXY)
+
+Output = $(WD)/microPROCESSGROUP_BaseCuts_C$(Cluster)_$(process).stdout
+Error  = $(WD)/microPROCESSGROUP_BaseCuts_C$(Cluster)_$(process).stderr
+Log    = $(WD)/microPROCESSGROUP_BaseCuts_C$(Cluster)_$(process).condor
+
+notify_user = aperloff@physics.tamu.edu
+
+Queue QUEUE
