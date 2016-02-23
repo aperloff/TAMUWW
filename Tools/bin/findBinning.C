@@ -38,13 +38,13 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////////////////
 // declare global variables
 ////////////////////////////////////////////////////////////////////////////////
-TString signalNames[] = {"ggH125","qqH125","WH125_HToBB","WH125_HToBB_M125","WH_ZH_TTH_HToWW","WH_ZH_TTH_HToZZ","WH_ZH_TTH_HToWW_M125","WH_ZH_TTH_HToZZ_M125"};
+TString signalNames[] = {"ggH125","qqH125","WH125_HToBB","WH125_HToBB_M125","WH_ZH_TTH_HToWW","WH_ZH_TTH_HToZZ","WH_HToWW_M125","ZH_HToWW_M125","TTH_HToWW_M125"/*,"WH_ZH_TTH_HToWW_M125"*/,"WH_HToZZ_M125","ZH_HToZZ_M125","TTH_HToZZ_M125"/*,"WH_ZH_TTH_HToZZ_M125"*/};
 TString backgroundNames[] = {"TTH_HToBB","TTH_HToBB_M125","WJets","ZJets","TTbar","Diboson","singleTop","QCD","QCD_ElFULL","QCD_MuFULL","WZ","STopS_T","STopS_Tbar","STopT_T","STopT_Tbar","STopTW_T","STopTW_Tbar","WW"};
 
 ////////////////////////////////////////////////////////////////////////////////
 // declare local functions
 ////////////////////////////////////////////////////////////////////////////////
-bool checkKey(TClass* cl, TString name, TString prefix, TString suffix, TString jetBin, bool verbose = false);
+bool checkKey(TClass* cl, TString name, TString prefix, TString suffix, TString jetBin, bool fromMC = false, bool verbose = false);
 
 bool checkSums(TH1F* signal, TH1F* background, TH1F* data, bool verbose = false);
 
@@ -67,7 +67,8 @@ void printBinning(TArrayD* binEdges);
 
 //______________________________________________________________________________
 void findBinning(TString filename, TString idir = "", TString jetBin = "",
-                 TString prefix = "", TString suffix = "", bool verbose = false) {
+                 TString prefix = "", TString suffix = "", bool sumMC = false,
+                 bool fromMC = false, bool verbose = false) {
 
 	//Open the file containing the histograms to be analyzed
 	TFile* ifile = TFile::Open(filename,"READ");
@@ -110,7 +111,7 @@ void findBinning(TString filename, TString idir = "", TString jetBin = "",
 		name = key->GetName();
 
 		//Do some sanity checks
-		if(!checkKey(cl,name,prefix,suffix,jetBin,verbose))
+		if(!checkKey(cl,name,prefix,suffix,jetBin,fromMC,verbose))
 			continue;
 
 		//Access the histogram object
@@ -144,11 +145,15 @@ void findBinning(TString filename, TString idir = "", TString jetBin = "",
 			backgroundSum->Add(h);
 
 			//Basically checks if the files are coming from Joey or Alexx
-			if(prefix.CompareTo("hist_")==0)
-				dataSum->Add(h);
+            //Only use sum of MC if sumMC flag is set. Otherwise use a different histogram
+			if(prefix.CompareTo("hist_")==0 && sumMC) {
+               cout << "Adding " << name << " to the data sum." << endl;
+               dataSum->Add(h);
+            }
 		}
 		//Don't double count the data if the files are coming from Joey
-		else if(name.Contains("data",TString::kIgnoreCase) && !prefix.CompareTo("hist_")==0) {
+		//else if(name.Contains("data",TString::kIgnoreCase) && !prefix.CompareTo("hist_")==0) {
+        else if(name.Contains("data",TString::kIgnoreCase)) {
 			cout << "Adding " << name << " to the data sum." << endl;
 			dataSum->Add(h);
 		}
@@ -192,6 +197,7 @@ void findBinning(TString filename, TString idir = "", TString jetBin = "",
 	originalLegend->AddEntry(dataSum,"Sum of the data","p");
 	originalLegend->Draw("same");
 
+    int mergeCounter = 0;
 	TArrayD* currentBinning = new TArrayD();
 	TArrayD* resetBinning = new TArrayD();
 	cout << endl << "Starting to loop through the background sum bins ... " << endl; 
@@ -207,6 +213,7 @@ void findBinning(TString filename, TString idir = "", TString jetBin = "",
 
 			cout << "Merging bin " << ibin << " with bin " << ibin+1 << " which makes a range of "
 				 << currentBinning->At(ibin-1) << " to ";
+            mergeCounter++;
 			if(ibin+1>=currentBinning->GetSize())
 				cout << currentBinning->At(currentBinning->GetSize()-1) << " ... ";
 			else
@@ -231,6 +238,7 @@ void findBinning(TString filename, TString idir = "", TString jetBin = "",
 		else if(ibin==backgroundSum->GetXaxis()->GetNbins() && checkMergeConditions(signalSum,backgroundSum,dataSum,ibin)) {
 			cout << "SPECIAL::Merging bin " << ibin-1 << " with bin " << ibin 
 				 << " which makes a range of " << currentBinning->At(ibin-2) << " to ";
+            mergeCounter++;
 			if(ibin+1>=currentBinning->GetSize())
 				cout << currentBinning->At(currentBinning->GetSize()-1) << " ... ";
 			else
@@ -253,7 +261,7 @@ void findBinning(TString filename, TString idir = "", TString jetBin = "",
 
 	//Print the final binning
 	cout << "////////////////////////////////////////////////////////////////////////////////" << endl
-		 << "// the final binning" << endl
+		 << "// the final binning (" << mergeCounter << " merges)" << endl
 		 << "////////////////////////////////////////////////////////////////////////////////" << endl;
 	printBinning(currentBinning);
 
@@ -277,7 +285,7 @@ void findBinning(TString filename, TString idir = "", TString jetBin = "",
 // implement local functions
 ////////////////////////////////////////////////////////////////////////////////
 //______________________________________________________________________________
-bool checkKey(TClass* cl, TString name, TString prefix, TString suffix, TString jetBin, bool verbose) {
+bool checkKey(TClass* cl, TString name, TString prefix, TString suffix, TString jetBin, bool fromMC, bool verbose) {
 	TString className = cl->ClassName();
 
 	//Check that the key is a histogram
@@ -294,20 +302,23 @@ bool checkKey(TClass* cl, TString name, TString prefix, TString suffix, TString 
 	}
 
 	//Check that the histogram name does not contain any of the systematics histograms
-	if(name.Contains("JECDown",TString::kIgnoreCase) || name.Contains("JECUp",TString::kIgnoreCase)
+	if(name.Contains("JESDown",TString::kIgnoreCase) || name.Contains("JESUp",TString::kIgnoreCase)
+       || name.Contains("JECDown",TString::kIgnoreCase) || name.Contains("JECUp",TString::kIgnoreCase)
 	   || name.Contains("EtaWUp",TString::kIgnoreCase) || name.Contains("EtaWDown",TString::kIgnoreCase)
 	   || name.Contains("matchingup",TString::kIgnoreCase) || name.Contains("matchingdown",TString::kIgnoreCase)
 	   || name.Contains("scaleup",TString::kIgnoreCase) || name.Contains("scaledown",TString::kIgnoreCase) 
-	   || name.Contains("PtUp",TString::kIgnoreCase) || name.Contains("PtDown",TString::kIgnoreCase)) {
+	   || name.Contains("PtUp",TString::kIgnoreCase) || name.Contains("PtDown",TString::kIgnoreCase)       || name.Contains("CMS_hww_lnujj",TString::kIgnoreCase) || name.Contains("CMS_scale_j",TString::kIgnoreCase)) {
 		if(verbose) cout << "WARNING::The histogram " << name << " contains data or is a systematic and will be skipped." << endl;
 		return false;
 	}
 
 	//Check that the histogram name contains the prefix and suffix
-	if(!name.Contains(prefix,TString::kIgnoreCase) || !name.Contains(suffix,TString::kIgnoreCase)) {
-		if(verbose) cout << "WARNING::The histogram " << name << " does not contain the prefix (" << prefix
-		                 << ") or suffix (" << suffix << ") and will be skipped." << endl;
-		return false;
+	if(!name.BeginsWith(prefix,TString::kIgnoreCase) || !name.Contains(suffix,TString::kIgnoreCase)) {
+       //if((!fromMC && !name.Contains("data_Electron",TString::kIgnoreCase) && !name.Contains("data_Muon",TString::kIgnoreCase)) || (fromMC && !name.Contains("data_fromMC",TString::kIgnoreCase))) {
+          if(verbose) cout << "WARNING::The histogram " << name << " does not contain the prefix (" << prefix
+                           << ") or suffix (" << suffix << ") and will be skipped." << endl;
+          return false;
+          //}
 	}
 
 	//Check that the jet bin names are all the same
@@ -324,7 +335,7 @@ bool checkKey(TClass* cl, TString name, TString prefix, TString suffix, TString 
 //______________________________________________________________________________
 bool checkSums(TH1F* signal, TH1F* background, TH1F* data, bool verbose) {
 	//Check that the histograms exist
-	if(!signal) {
+    if(!signal) {
 		if(verbose) cout << endl << "ERROR::The signal histogram does not exist." << endl;
 		return false;
 	}
@@ -360,6 +371,12 @@ bool checkSums(TH1F* signal, TH1F* background, TH1F* data, bool verbose) {
 		return false;
 	}
 
+    //Check that the integrals of all of the histograms are greater than zero
+    if(signal->Integral()==0 || background->Integral()==0 || data->Integral()==0) {
+       if(verbose) cout << endl << "ERROR:: The signal, background, and/or data histograms have an integral equal to zero." << endl; 
+       return false;
+    }
+
 	return true;
 }
 
@@ -367,9 +384,13 @@ bool checkSums(TH1F* signal, TH1F* background, TH1F* data, bool verbose) {
 bool checkMergeConditions(TH1F* signal, TH1F* background, TH1F* data, int ibin) {
 	if((background->GetBinContent(ibin)>0 && background->GetBinError(ibin)/background->GetBinContent(ibin)>0.1)
 		|| (signal->GetBinContent(ibin)>0 && background->GetBinContent(ibin)==0)
-		|| (background->GetBinContent(ibin)==0 && signal->GetBinContent(ibin)==0) ) {
+		|| (background->GetBinContent(ibin)==0 && signal->GetBinContent(ibin)==0)
+        || (data->GetBinContent(ibin)==0) 
+        || (data->GetBinError(ibin)/data->GetBinContent(ibin)>0.1) ) {
+       //cout << endl << background->GetBinContent(ibin) << " +\- "<< background->GetBinError(ibin) << " = " << background->GetBinError(ibin)/background->GetBinContent(ibin) << endl;
 		return true;
 	}
+    //cout << endl << background->GetBinContent(ibin) << " +\- "<< background->GetBinError(ibin) << " = " << background->GetBinError(ibin)/background->GetBinContent(ibin) << endl;
 	return false;
 }
 

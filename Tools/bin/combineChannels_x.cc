@@ -60,7 +60,7 @@ int main(int argc,char**argv) {
    //if(!outputPath.EndsWith("/")) outputPath += "/";
 
    cout << "Getting processes ... ";
-   vector <PhysicsProcess*> procs = DefaultValues::getProcessesHiggs(jetBin, tagCat, true, true, ntupleType, leptonCat);
+   vector <PhysicsProcess*> procs = DefaultValues::getProcessesHiggs(jetBin, tagCat, true, true, true, ntupleType, leptonCat);
    cout << "DONE" << endl;
 
    cout << "Opening the histogram files ... ";

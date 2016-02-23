@@ -18,6 +18,7 @@
 #include "TAMUWW/MEPATNtuple/interface/EventNtuple.hh"
 #include "TAMUWW/MEPATNtuple/interface/METree.hh"
 #include "TAMUWW/MEPATNtuple/interface/MicroNtuple.hh"
+#include "TAMUWW/Selection/bin/RunEventSet.h"
 
 
 using std::cout;
@@ -134,10 +135,18 @@ void microNtuple_subtraction(TString inputRootFile, TString compareTo, TString b
    t2->SetBranchStatus("*",0);
    t2->SetBranchStatus("event*",1);
    map<int,int> eventIndex;
+   map<int,int> duplicateIndex;
    int nIndex = microNtupleIndex->GetN();
    for( int i = 0; i < nIndex ; ++i ) {
       loadbar(i+1,nIndex);
       local = microNtupleIndex->GetIndex()[i];
+      if(eventIndex.find(microNtupleIndex->GetIndexValues()[i]>>31)!=eventIndex.end()) {
+         duplicateIndex[local] = microNtupleIndex->GetIndexValues()[i]>>31;
+         cout << "WARNING::makeMicroNtuple::There could be duplicate events in the chain" << endl;
+      }
+      if(local>t2->GetEntries()) {
+         cout << "WARNING::makeMicroNtuple::The local index is greater than the number of entries in the chain" << endl;
+      }
       eventIndex[microNtupleIndex->GetIndexValues()[i]>>31] = local;
    }
    t2->SetBranchStatus("*",1);
@@ -150,13 +159,22 @@ void microNtuple_subtraction(TString inputRootFile, TString compareTo, TString b
 
    //counters
    int eventsRemoved = 0;
+   int duplicates = 0;
+   // Holds the list of events to avoid duplication
+   RunEventSet runEventSet;
 
    cout << "Looping through the EventNtuple and filling subtracted MicroNtuple ... " << endl;
    for(int ientry=0; ientry<nEventNtuple; ientry++)
    {
       t1->GetEntry(ientry);
       loadbar(ientry+1,nEventNtuple);
-      if(eventIndex.find(ntuple->event)!=eventIndex.end()) {
+      if (runEventSet.alreadySeen(ntuple->run, ntuple->event)) {
+         cout << "WARNING, event Run = " << ntuple->run << ", Event = " << ntuple->event
+              <<" is duplicated" << endl << "We will skip this event." << endl;
+         duplicates++;
+         eventsRemoved++;
+      }
+      else if(eventIndex.find(ntuple->event)!=eventIndex.end()) {
          t2->GetEntry(eventIndex[ntuple->event]);
          newntuple->Fill();
       }
@@ -166,6 +184,7 @@ void microNtuple_subtraction(TString inputRootFile, TString compareTo, TString b
    
    cout << endl << "Events Removed: " << eventsRemoved << endl;
    cout << "Events Remaining: " << newntuple->GetEntries() << endl;
+   cout << "Duplicate Events: " << duplicateIndex.size() << " (" << duplicates << ")" << endl;
 
    newntuple->AutoSave();
    newntuple->Write();
@@ -293,7 +312,7 @@ void microNtuple_addition(TString inputRootFile, TString compareTo, TString addF
    //myfile.Close();
 }
 
-void splitNtupleByGenInfo(TString inputFilepath = "/eos/uscms/store/user/aperloff/MatrixElement/Summer12ME8TeV/MEInput/", TString outputDir = "./", TString hTo = "WW", bool eventNtupleOnly = true) {
+void splitNtupleByGenInfo(TString inputFilepath = "/eos/uscms/store/user/aperloff/MatrixElement/Summer12ME8TeV/MEInput/", TString outputDir = "./", TString hTo = "WW", bool eventNtupleOnly = true, TString postfix = "") {
 
    TString folderName = "";
    if(eventNtupleOnly)
@@ -306,11 +325,17 @@ void splitNtupleByGenInfo(TString inputFilepath = "/eos/uscms/store/user/aperlof
 
    cout << "Opening input files ... ";
    TFile* ifile;
-   if(eventNtupleOnly)
-      ifile = new TFile(inputFilepath+"WH_ZH_TTH_HTo"+hTo+"_M125.root","READ");
-   else
-      ifile = new TFile(inputFilepath+"microWH_ZH_TTH_HTo"+hTo+"_M125_BaseCuts.root","READ");
+   TString ifilename;
+   if(eventNtupleOnly) {
+      ifilename = inputFilepath+"WH_ZH_TTH_HTo"+hTo+"_M125"+postfix+".root";
+      ifile = new TFile(ifilename.Data(),"READ");
+   }
+   else {
+      ifilename = inputFilepath+"microWH_ZH_TTH_HTo"+hTo+"_M125"+postfix+"_BaseCuts.root";
+      ifile = new TFile(ifilename.Data(),"READ");
+   }
    cout << "DONE" << endl;
+   cout << "\t" << ifilename << endl;
 
    cout << "Making all of the input ntuples ... ";
    EventNtuple *ntuple      = new EventNtuple();
@@ -328,21 +353,26 @@ void splitNtupleByGenInfo(TString inputFilepath = "/eos/uscms/store/user/aperlof
    cout << "DONE" << endl;
 
    cout << endl << "Setting up the output file and chain ... " << flush;
-   TFile WHFile(outputDir+"WH_HTo"+hTo+"_M125.root", "RECREATE");
+   TString prefix = "";
+   if(!eventNtupleOnly) {
+      prefix = "micro";
+      postfix += "_BaseCuts";
+   }
+   TFile WHFile(outputDir+prefix+"WH_HTo"+hTo+"_M125"+postfix+".root", "RECREATE");
    if(eventNtupleOnly) {
       WHFile.mkdir("PS");
       WHFile.cd("PS");
    }
    TChain *WHEventNtuple = (TChain*)t1->CloneTree(0);
 
-   TFile ZHFile(outputDir+"ZH_HTo"+hTo+"_M125.root", "RECREATE");
+   TFile ZHFile(outputDir+prefix+"ZH_HTo"+hTo+"_M125"+postfix+".root", "RECREATE");
    if(eventNtupleOnly) {
       ZHFile.mkdir("PS");
       ZHFile.cd("PS");
    }
    TChain *ZHEventNtuple = (TChain*)t1->CloneTree(0);
 
-   TFile TTHFile(outputDir+"TTH_HTo"+hTo+"_M125.root", "RECREATE");
+   TFile TTHFile(outputDir+prefix+"TTH_HTo"+hTo+"_M125"+postfix+".root", "RECREATE");
    if(eventNtupleOnly) {
       TTHFile.mkdir("PS");
       TTHFile.cd("PS");
@@ -486,5 +516,6 @@ void splitNtupleByGenInfo(TString inputFilepath = "/eos/uscms/store/user/aperlof
    cout << "DONE" << endl;
 
 }
+
 
 
