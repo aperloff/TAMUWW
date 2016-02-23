@@ -26,6 +26,10 @@ process.TFileService.fileName=cms.string('PS.root')
 #! INPUT
 #!
 inputFiles = cms.untracked.vstring(
+######################
+# DYJets Monte Carlo #
+######################
+'/store/user/lnujj/PatTuples_8TeV_53X/custodio/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/SQWaT_PAT_53X_Summer12_v1/829f288d768dd564418efaaf3a8ab9aa/pat_53x_test_v03_100_1_qoN.root'
 ##################
 # WZ Monte Carlo #
 ##################
@@ -116,10 +120,10 @@ inputFiles = cms.untracked.vstring(
 # Joey Skim #
 #############
 #	'/store/user/jdg6y/HWW125_Part8_JECup_muskim/goodell/LQ-ggh125_Part8_GENSIM/SHYFT_pat532_HWW125_Part8_JECup_muskim/9fd1d441a8eb7f2c4f1541582aa0dd17/ljmet_skim_100_1_58H.root'
-	'file:/eos/uscms/store/user/aperloff/MatrixElement/LQ-ggh125_BIG_PAT_part8/aperloff/LQ-ggh125_Part8_GENSIM/SQWaT_PAT_53X_Spring14_HWW125_Part8/33519632dfb71bf616e1fd5cd9d10cef/pat_53x_test_v03_11_1_luM.root'
+#	'file:/eos/uscms/store/user/aperloff/MatrixElement/LQ-ggh125_BIG_PAT_part8/aperloff/LQ-ggh125_Part8_GENSIM/SQWaT_PAT_53X_Spring14_HWW125_Part8/33519632dfb71bf616e1fd5cd9d10cef/pat_53x_test_v03_11_1_luM.root'
     )
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(5000))
 process.source = cms.Source("PoolSource",
                             skipEvents = cms.untracked.uint32(0),
                             fileNames = inputFiles )
@@ -169,7 +173,7 @@ process.PS.noMVAIsoCut       = cms.bool(False)               # if true, turn off
 process.PS.doJER             = cms.bool(True)                # if true, JER corrections will be applied to all of the jets before passing selection
 process.PS.doMETPhi          = cms.bool(True)                # if true, the inherent METx and METy shifts will be corrected for using hard coded functions only needed before CMSSW_6_2_X
 process.PS.doJESUncertainty  = cms.bool(False)               # if true, turns on the jet uncertainty scaling
-process.PS.JESUncertainty    = cms.string("none")            # if none, the jet energy uncertainty is stored
+process.PS.JESUncertainty    = cms.string("up")              # if none, the jet energy uncertainty is stored
                                                              # if up, the jet energy is scaled up by the uncertainty
                                                              # if down, the jet energy is scaled down by the uncertainty
 process.PS.JESUncertaintyType= cms.string("TotalNoTime")     # JES uncertainty collection
@@ -180,7 +184,7 @@ process.PS.MCpTrigger        = cms.bool(True)                # if true, only eve
 process.PS.saveGenParticles  = cms.bool(True)                # save the generated particle information for hard scatter decays
 process.PS.particleStatus    = cms.int32(3)                  # The hard scatter particle status (eliminates the shower particles and protons). Pythia6 = 3, herwigpp = 2
 process.PS.saveMETPhiPlots   = cms.bool(False)               # save the TH1D and TH2D plots that have to do with MET Phi Corrections.
-process.PS.noMETCut          = cms.bool(False)               # disregard the MET cut when storing the events
+process.PS.noMETCut          = cms.bool(True)               # disregard the MET cut when storing the events
 process.PS.invertEID         = cms.bool(False)               # electrons which *fail* at least two of the EID requirements will be kept instead
 process.PS.PFlowLoose        = cms.bool(False)               # use the collections with the PF2PAT postfix=PFlowLoose (instead of PFlow)
 process.PS.elONLY            = cms.bool(False)               # only save the output if the lepton is an electron
@@ -194,6 +198,7 @@ process.PS.elcnt_Prim                 = cms.int32(0)
 process.PS.elcnt_Loose                = cms.int32(0)
 process.PS.mucnt_Prim                 = cms.int32(0)
 process.PS.mucnt_Loose                = cms.int32(0)
+process.PS.leptonCnt                  = cms.int32(2)
 process.PS.jcnt_tot                   = cms.int32(0)
 process.PS.EvtTotCount                = cms.int32(0)
 process.PS.mu_passAll                 = cms.bool(False)
