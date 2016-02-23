@@ -18,13 +18,14 @@ PhysicsProcess::PhysicsProcess (string procName,
    fileName(fileNameTEMP),
    chain (0)
 {
-   TFile * file = new TFile(fileName,"READ");//TFile::Open(fileName);
-   if (!file->IsOpen())
+   TString currentDir = gDirectory->GetPathStatic();
+   TFile * file = TFile::Open(fileName,"READ");//TFile::Open(fileName);
+   if (!file)
    {
       cout << "ERROR PhysicsProcess::PhysicsProcess() could not open file " << fileName << endl;
       return;
    }
-
+   gDirectory->cd(currentDir);
    /*
    if (!file->cd("PS"))
    {
