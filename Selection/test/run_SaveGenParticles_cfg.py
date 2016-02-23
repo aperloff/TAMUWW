@@ -19,27 +19,32 @@ process = cms.Process("SaveGenParticlesProcess")
 process.load('FWCore.MessageLogger.MessageLogger_cfi')
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 process.load('CommonTools.UtilAlgos.TFileService_cfi')
-process.TFileService.fileName=cms.string('SGP.root')
+process.TFileService.fileName=cms.string('SGP_WJets.root')
 
 
 #!
 #! INPUT
 #!
-inputFiles = cms.untracked.vstring(
+#inputFiles = cms.untracked.vstring(
 ######################
 # ggH125 Monte Carlo #
 ######################
 #    '/store/user/aperloff/LQ-ggh125_SIM/LQ-ggh125_AODSIM/51bfef3f471c3bed6331eb644e144b83/gghlvjj-125_AODSIM_24_1_aNW.root'
-########
-# Jeff #
-######## 
-'/store/user/lpctau/HighMassTau/isuarez/isuarez/W2Jets_TuneZ2_7TeV-madgraph-tauola/ElecTauTauSkim/1f3af44863a202f6442f2462b30b9200/elecTauTauPatSkim_100_1_aGj.root'
-    )
+#)
+######################
+# DYJets Monte Carlo #
+######################
+#process.load("TAMUWW.Selection.DYJetsToLL_M50_8TeV_53X_pat_cff")
+#####################
+# WJets Monte Carlo #
+#####################
+process.load("TAMUWW.Selection.WJetsToLNu_8TeV_53X_pat_cff")
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
-process.source = cms.Source("PoolSource",
-                            skipEvents = cms.untracked.uint32(0),
-                            fileNames = inputFiles )
+
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000000))
+#process.source = cms.Source("PoolSource",
+#                            skipEvents = cms.untracked.uint32(0),
+#                            fileNames = inputFiles )
 
 
 #!
