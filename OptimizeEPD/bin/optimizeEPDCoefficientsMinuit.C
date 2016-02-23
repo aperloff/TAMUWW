@@ -65,7 +65,7 @@ vector<PhysicsProcessForOpt*> loadProcessesIntoMemory(DEFS::Ana::Type anaType, D
   } else if(anaType == DEFS::Ana::WWAnalysis){
     phy_processes = DefaultValues::getProcessesWW(jetBin, tagcat, false, false, DEFS::MicroNtuple);
   } else if(anaType == DEFS::Ana::HiggsAnalysis){
-    phy_processes = DefaultValues::getProcessesHiggs(jetBin, tagcat, false, false, DEFS::MicroNtuple);
+    phy_processes = DefaultValues::getProcessesHiggs(jetBin, tagcat, false, false, false, DEFS::MicroNtuple);
   }
 
   // Now construct a set of PhysicsProcessForOpt out of them
