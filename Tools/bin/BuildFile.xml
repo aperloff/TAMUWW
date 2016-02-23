@@ -11,8 +11,12 @@
 <use   name="rootgraphics"/>  
 <use   name="root"/>
 <use   name="rootminuit2"/>
+<use   name="rootmath"/>
+<use   name="rootcore"/>
+<use   name="rootspectrum"/>
 <bin   name="TableProduction_x"          file="TableProduction_x.cc" />
 <bin   name="plotter_x"                  file="plotter_x.cc" />
+<bin   name="plotter_from_file_x"        file="plotter_from_file_x.cc" />
 <bin   name="BackgroundEstimator_x" 	 file="BackgroundEstimator_x.cc" />
 <bin   name="TestRebinBGEst_x"      	 file="TestRebinBGEst_x.cc" />
 <bin   name="onVsOffShell_x"        	 file="onVsOffShell_x.cc" />
@@ -31,4 +35,7 @@
 <bin   name="MakeMinimalNtuple_x"        file="MakeMinimalNtuple_x.cc" />
 <bin   name="ProduceLimitsDatacard_x"    file="ProduceLimitsDatacard_x.cc" />
 <bin   name="combineChannels_x"          file="combineChannels_x.cc" />
+<bin   name="CompareSystematicShapes_x"  file="CompareSystematicShapes_x.cc" />
+<bin   name="MakeWPtWeights_x"           file="MakeWPtWeights_x.cc" />
+<bin   name="ConvertZllJetsToWlnuJets_x" file="ConvertZllJetsToWlnuJets_x.cc" />
 <!--comment-->

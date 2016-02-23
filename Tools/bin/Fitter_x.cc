@@ -3,9 +3,11 @@
 
 using namespace std;
 
-int Fitter_x(string lep, string cat, string inFileLoc, string outFileLoc, vector<string> fproc, vector<string> signals, double FOM=3.0)
+int Fitter_x(string lep, string cat, string inFileLoc, string outFileLoc, vector<string> fproc,
+             vector<string> signals, double FOM=3.0, string minimization = "chi2")
 {
    Fitter histFit(lep, cat, fproc, inFileLoc, outFileLoc);
+   histFit.setMinimization(minimization);
    histFit.readHistograms();
    
    // DEBUG
@@ -49,6 +51,7 @@ int main(int argc,char**argv)
    vector<string> fproc        = cl.getVector<string> ("fproc",               "WJets:::QCD");
    vector<string> signals      = cl.getVector<string> ("signals", "ggH125:::qqH125:::WH125");
    double         fom          = cl.getValue<double>  ("fom",                           3.0);
+   string         minimization = cl.getValue<string>  ("minimization",               "chi2");
    
    if (!cl.check()) 
       return 0;
@@ -74,7 +77,7 @@ int main(int argc,char**argv)
    if(outFileLocCL == "")
       outFileLocCL = "Fitter_" + leptonCL + "_" + objectCL + ".root";
 
-   Fitter_x(leptonCL, objectCL, inFileLocCL, outFileLocCL, fproc, signals, fom);
+   Fitter_x(leptonCL, objectCL, inFileLocCL, outFileLocCL, fproc, signals, fom, minimization);
 
    return 0;
 }

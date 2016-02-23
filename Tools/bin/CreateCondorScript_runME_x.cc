@@ -68,10 +68,10 @@ using namespace std;
 
       TFile* infile;
       if(pbsScripts)
-         infile = new TFile(rootInputDir+rootinputBaseName+filenameSuffix);
+         infile = TFile::Open(rootInputDir+rootinputBaseName+filenameSuffix);
          //infile = new TFile(rootInputDir+processes[np]+"/"+rootinputBaseName+filenameSuffix);
       else
-         infile = new TFile(rootInputDir+rootinputBaseName+filenameSuffix);
+         infile = TFile::Open(rootInputDir+rootinputBaseName+filenameSuffix);
       TTree* InTree;
 
       if ( !insideTDirectoryFile ) {

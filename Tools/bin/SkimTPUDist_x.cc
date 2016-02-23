@@ -67,7 +67,7 @@ int main(int argc,char**argv) {
    m_benchmark->Start("event");
 
    // The vector holding all processes.
-   vector <PhysicsProcess*> procs = DefaultValues::getProcessesHiggs(DEFS::jets2, DEFS::pretag, true, false, DEFS::EventNtuple);
+   vector <PhysicsProcess*> procs = DefaultValues::getProcessesHiggs(DEFS::jets2, DEFS::pretag, true, true, false, DEFS::EventNtuple);
       
    Table fileTable = DefaultValues::getFileLocationTable(DEFS::pretag);
 
@@ -96,6 +96,8 @@ vector<TH1D*> skimHistograms(vector<PhysicsProcess*> procs, Table& fileTable, st
 
    for(unsigned int p=0; p<procs.size(); p++) {
       
+      cout << "Doing Process " << procs[p]->name << " ... " << endl;
+
       // find the file location for that process
       TableCellText * cellFile = (TableCellText *) fileTable.getCellRowColumn(string(procs[p]->name),"FilePath_"+DEFS::getNtupleTypeString(DEFS::EventNtuple));
       
@@ -108,7 +110,7 @@ vector<TH1D*> skimHistograms(vector<PhysicsProcess*> procs, Table& fileTable, st
          return ret;
       }
 
-      TFile * file = new TFile(TString(cellFile->text),"READ");
+      TFile * file = TFile::Open(TString(cellFile->text),"READ");
       if (!file->IsOpen())
       {
          cout << "ERROR SkimTPUDist_x::skimHistograms() could not open file " << cellFile->text << endl;
@@ -285,4 +287,22 @@ fWH->Close()
 fZH->Close()
 fTTH->Close()
 fMerged->Close()
+*/
+//Add npv histograms from data samples to the data pileup distributions
+/*
+TFile* fpu = new TFile("pileup12_noTrig_minBiasXsec69400_coarseBinning_withAdditionalNPVHist.root","UPDATE")
+TFile* fel = new TFile("/eos/uscms/store/user/aperloff/MatrixElement/Summer12ME8TeV/MEInput/SingleEl_Data_19p148fb.root","READ")
+TFile* fmu = new TFile("/eos/uscms/store/user/aperloff/MatrixElement/Summer12ME8TeV/MEInput/SingleMu_Data_19p279fb.root","READ")
+fel->cd("PS")
+TH1D* hel = new TH1D("pileup_SingleEl","pileup_SingleEl",60,0,60)
+jets2p->Draw("vLV[0].npv>>pileup_SingleEl")
+fmu->cd("PS")
+TH1D* hmu = new TH1D("pileup_SingleMu","pileup_SingleMu",60,0,60)
+jets2p->Draw("vLV[0].npv>>pileup_SingleMu")
+fpu->cd()
+hel->Write()
+hmu->Write()
+fel->Close()
+fmu->Close()
+fpu->Close()
 */

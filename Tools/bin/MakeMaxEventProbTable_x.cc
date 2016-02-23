@@ -214,7 +214,7 @@ int main(int argc, char**argv) {
    m_benchmark->Reset();
    m_benchmark->Start("event");
 
-   vector<PhysicsProcess*> processes = DefaultValues::getProcessesHiggs(jetBin, tagcat, false, false, DEFS::MicroNtuple);
+   vector<PhysicsProcess*> processes = DefaultValues::getProcessesHiggs(jetBin, tagcat, false, true, false, DEFS::MicroNtuple);
    if(debug) {
       processes.erase(processes.begin(),processes.begin()+11);
    }

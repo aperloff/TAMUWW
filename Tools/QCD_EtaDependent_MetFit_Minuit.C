@@ -150,8 +150,12 @@ void getHistosFromPlotterOutput(TH2D *& hd, TH2D *& hw, TH2D *& hq, TH2D  *& hr,
   backs.push_back(hn+"qqH125_"+lepton);
   backs.push_back(hn+"WH125_HToBB_"+lepton);
   backs.push_back(hn+"TTH_HToBB_M125_"+lepton);
-  backs.push_back(hn+"WH_ZH_TTH_HToWW_M125_"+lepton);
-  backs.push_back(hn+"WH_ZH_TTH_HToZZ_M125_"+lepton);
+  backs.push_back(hn+"WH_HToWW_M125_"+lepton);
+  backs.push_back(hn+"ZH_HToWW_M125_"+lepton);
+  backs.push_back(hn+"TTH_HToWW_M125_"+lepton);
+  backs.push_back(hn+"WH_HToZZ_M125_"+lepton);
+  backs.push_back(hn+"ZH_HToZZ_M125_"+lepton);
+  backs.push_back(hn+"TTH_HToZZ_M125_"+lepton);
    
   // Open the input file and get all histos
   //  TFile *_file0 = TFile::Open("/uscms_data/d2/eusebi/validationForQCD/histos_electron.root");
