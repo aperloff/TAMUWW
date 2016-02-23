@@ -98,10 +98,10 @@ void TMVAGui( const char* fName = "TMVA.root" )
    TObjString* str = 0;
    char ch = 'a';
    while ((str = (TObjString*)it())) {
-      TString tmp   = str->GetString();
+      TString tmp2   = str->GetString();
       TString title = Form( "Input variables '%s'-transformed (training sample)", 
-                            tmp.ReplaceAll("InputVariables_","").Data() );
-      if (tmp.Contains( "Id" )) title = "Input variables (training sample)";
+                            tmp2.ReplaceAll("InputVariables_","").Data() );
+      if (tmp2.Contains( "Id" )) title = "Input variables (training sample)";
       ActionButton( cbar, 
                     Form( "(%i%c) %s", ic, ch++, title.Data() ),
                     Form( ".x variables.C(\"%s\",\"%s\",\"%s\")", fName, str->GetString().Data(), title.Data() ),
@@ -113,10 +113,10 @@ void TMVAGui( const char* fName = "TMVA.root" )
    // correlation scatter plots 
    it.Reset(); ch = 'a';
    while ((str = (TObjString*)it())) {
-      TString tmp   = str->GetString();
+      TString tmp2   = str->GetString();
       TString title = Form( "Input variable correlations '%s'-transformed (scatter profiles)", 
-                            tmp.ReplaceAll("InputVariables_","").Data() );
-      if (tmp.Contains( "Id" )) title = "Input variable correlations (scatter profiles)";
+                            tmp2.ReplaceAll("InputVariables_","").Data() );
+      if (tmp2.Contains( "Id" )) title = "Input variable correlations (scatter profiles)";
       ActionButton( cbar, 
                     Form( "(%i%c) %s", ic, ch++, title.Data() ),
                     Form( ".x CorrGui.C(\"%s\",\"%s\",\"%s\")", fName, str->GetString().Data(), title.Data() ),

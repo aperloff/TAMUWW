@@ -169,8 +169,36 @@ void TAMUWWMVA::TMVAClassification() {
    Use["SVM"]             = 1;
    // ---
    Use["BDT"]             = 1;
+   Use["BDT_user0"]       = 1;
+   Use["BDT_user1"]       = 1;
+   Use["BDT_user1.1"]     = 1;
+   Use["BDT_user1.2"]     = 1;
+   Use["BDT_user2"]       = 1;
+   Use["BDT_user3"]       = 1;
+   Use["BDT_user4"]       = 1;
+   Use["BDT_user5"]       = 1;
+   Use["BDT_user6"]       = 1;
+   Use["BDT_user7"]       = 1;
+   Use["BDT_user8"]       = 1;
+   Use["BDT_user9"]       = 1;
+   Use["BDT_user9.1"]     = 1;
+   Use["BDT_user9.2"]     = 1;
+   Use["BDT_user9.3"]     = 1;
+   Use["BDT_user9.4"]     = 1;
+   Use["BDT_user9.5"]     = 1;
+   Use["BDT_user9.6"]     = 1;
    Use["BDTD"]            = 1;
    Use["BDTG"]            = 1;
+   Use["BDTG_user1"]      = 1;
+   Use["BDTG_user2"]      = 1;
+   Use["BDTG_user2.1"]    = 1;
+   Use["BDTG_user2.2"]    = 1;
+   Use["BDTG_user2.3"]    = 1;
+   Use["BDTG_user2.4"]    = 1;
+   Use["BDTG_user3"]      = 1;
+   Use["BDTG_user4"]      = 1;
+   Use["BDTG_user5"]      = 1;
+   Use["BDTG_user6"]      = 1;
    Use["BDTB"]            = 1;
    // ---
    Use["RuleFit"]         = 1;
@@ -246,34 +274,34 @@ void TAMUWWMVA::TMVAClassification() {
          //factory->AddSignalTree(processes[p]->chain, processes[p]->getScaleFactor(leptonCat));
          if(processes[p]->getName()=="ggH125") {
             factory->AddSignalTree(processes[p]->chain,signalWeight1);
-            cout << "Weight = " << signalWeight1 << endl;
+            cout << "                             : Weight = " << signalWeight1 << endl;
          }
          else if(processes[p]->getName()=="qqH125") {
             factory->AddSignalTree(processes[p]->chain,signalWeight2);
-            cout << "Weight = " << signalWeight2 << endl;
+            cout << "                             : Weight = " << signalWeight2 << endl;
          }
          else if(processes[p]->getName()=="WH_ZH_TTH_HToWW_M125") {
             factory->AddSignalTree(processes[p]->chain,signalWeight3);
-            cout << "Weight = " << signalWeight3 << endl;
+            cout << "                             : Weight = " << signalWeight3 << endl;
          }
          else if(processes[p]->getName()=="WH_HToWW_M125") {
             factory->AddSignalTree(processes[p]->chain,signalWeight3);
-            cout << "Weight = " << signalWeight3 << endl;
+            cout << "                             : Weight = " << signalWeight3 << endl;
          }
          else if(processes[p]->getName()=="ZH_HToWW_M125") {
             factory->AddSignalTree(processes[p]->chain,signalWeight3);
-            cout << "Weight = " << signalWeight3 << endl;
+            cout << "                             : Weight = " << signalWeight3 << endl;
          }
          else if(processes[p]->getName()=="TTH_HToWW_M125") {
             factory->AddSignalTree(processes[p]->chain,signalWeight3);
-            cout << "Weight = " << signalWeight3 << endl;
+            cout << "                             : Weight = " << signalWeight3 << endl;
          }
          sob = "signal";
       }
       else if (backgrounds.size()>0 && DefaultValues::vfind(backgrounds,processes[p]->getName())>-1) {
          //factory->AddBackgroundTree(processes[p]->chain, processes[p]->getScaleFactor(leptonCat));
          factory->AddBackgroundTree(processes[p]->chain, backgroundWeight);
-         cout << "Weight = " << backgroundWeight << endl;
+         cout << "                             : Weight = " << backgroundWeight << endl;
          sob = "background";
       }
       else if (backgrounds.size()>0 && DefaultValues::vfind(backgrounds,processes[p]->getName())<0) {
@@ -283,10 +311,12 @@ void TAMUWWMVA::TMVAClassification() {
          factory->AddBackgroundTree(processes[p]->chain, processes[p]->getScaleFactor(leptonCat));
          sob = "background";
       }
+      /*
       cout << "                             : Weight for " << sob << " (" << processes[p]->getName() << ") is " 
            << processes[p]->sigma[leptonCat] << " * " << processes[p]->branching_ratio[leptonCat] << " * "
            << processes[p]->scaleFactor[leptonCat] << " * " << processes[p]->intLum[leptonCat] << " // " 
            << processes[p]->initial_events[leptonCat] << " = " << processes[p]->getScaleFactor(leptonCat) << endl;
+      */
    }
 
    // ====== register trees ====================================================
@@ -411,12 +441,12 @@ void TAMUWWMVA::TMVAClassification() {
    TCut jPt2("jLV[1].Pt()>25.0");
    TCut jEta1("TMath::Abs(jLV[0].Eta())<2.4");
    TCut jEta2("TMath::Abs(jLV[1].Eta())<2.4");
-   TCut eq0tag("Sum$(jLV.jBtagCSV==1)==0");
-   TCut eq1tag("Sum$(jLV.jBtagCSV==1)==1");
-   TCut eq2tag("Sum$(jLV.jBtagCSV==1)==2");
-   TCut ge0tag("Sum$(jLV.jBtagCSV==1)>=0");
-   TCut ge1tag("Sum$(jLV.jBtagCSV==1)>=1");
-   TCut ge2tag("Sum$(jLV.jBtagCSV==1)>=2");
+   TCut eq0tag("Sum$(jLV.jBtagDiscriminatorCSV>0.4)==0");
+   TCut eq1tag("Sum$(jLV.jBtagDiscriminatorCSV>0.4)==1");
+   TCut eq2tag("Sum$(jLV.jBtagDiscriminatorCSV>0.4)==2");
+   TCut ge0tag("Sum$(jLV.jBtagDiscriminatorCSV>0.4)>=0");
+   TCut ge1tag("Sum$(jLV.jBtagDiscriminatorCSV>0.4)>=1");
+   TCut ge2tag("Sum$(jLV.jBtagDiscriminatorCSV>0.4)>=2");
    TCut jets2Bin("@jLV.size()==2");
    TCut jets3Bin("@jLV.size()==3");
    TCut jets4pBin("@jLV.size()>=4");
@@ -462,8 +492,7 @@ void TAMUWWMVA::TMVAClassification() {
       // mycuts = TCut(branchStatus1 && validity && lpt && METPt && jPt1 && jPt2);
 
    // tell the factory to use all remaining events in the trees after training for testing:
-   factory->PrepareTrainingAndTestTree(mycuts, mycuts,"nTrain_Signal=0:nTrain_Background=0:SplitMode=Random:NormMode=NumEvents:"
-                                       "V=true:VerboseLevel=Debug" ); //set this line to "!V" for less verbosity
+   factory->PrepareTrainingAndTestTree(mycuts, mycuts,"nTrain_Signal=0:nTrain_Background=0:SplitMode=Random:NormMode=NumEvents:V=true:VerboseLevel=Debug" ); //set this line to "!V" for less verbosity
 
    // If no numbers of events are given, half of the events in the tree are used for training, and 
    // the other half for testing:
@@ -622,11 +651,167 @@ void TAMUWWMVA::TMVAClassification() {
    if (Use["BDTG"]) // Gradient Boost
       factory->BookMethod( TMVA::Types::kBDT, "BDTG", 
                            "!H:!V:NTrees=1000:BoostType=Grad:Shrinkage=0.30:UseBaggedGrad:GradBaggingFraction=0.6:SeparationType=GiniIndex:nCuts=20:NNodesMax=5" );
+      // "standard BDT"
+      //factory->BookMethod( TMVA::Types::kBDT,"BDTG",
+      //                     "!H:!V:NTrees=1000:BoostType=Grad:Shrinkage=0.10:UseBaggedGrad=F:nCuts=20000:MaxDepth=3:SeparationType=GiniIndex" );
+      // "low BKG bdt"
+      // [6/23/15, 4:17:41 PM] violatingcp: very deep trees
+      // [6/23/15, 4:17:53 PM] violatingcp: cuts to very low bkg
+      // [6/23/15, 4:17:59 PM] violatingcp: with minNodeSize
+      // [6/23/15, 4:18:09 PM] violatingcp: you can lower the shrinkage
+      // [6/23/15, 4:18:12 PM] violatingcp: to make it more robust
+      //factory->BookMethod( TMVA::Types::kBDT, "BDTG",
+      //                     "!H:!V:NTrees=50:MinNodeSize=0.2%:BoostType=Grad:Shrinkage=0.10:nCuts=1000000:NNodesMax=1000000:MaxDepth=10" );
+      //For testing
+   if (Use["BDTG_user1"]) // Gradient Boost
+      factory->BookMethod( TMVA::Types::kBDT,"BDTG_user1",
+                           "!H:!V:NTrees=850:nEventsMin=150:BoostType=Grad:Shrinkage=0.10:nCuts=-1:NNodesMax=20:MaxDepth=3:SeparationType=GiniIndex:PruneMethod=NoPruning:UseBaggedGrad:GradBaggingFraction=0.6" );
 
-   if (Use["BDT"])  // Adaptive Boost
-      factory->BookMethod( TMVA::Types::kBDT, "BDT", 
-                           "!H:!V:NTrees=400:nEventsMin=400:MaxDepth=3:BoostType=AdaBoost:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning:CreateMVAPdfs=true:PDFInterpolMVAPdf=Spline2:NbinsMVAPdf=60:NsmoothMVAPdf=10" );
+   if (Use["BDTG_user2"]) // Gradient Boost
+      factory->BookMethod( TMVA::Types::kBDT,"BDTG_user2",
+                           "!H:!V:NTrees=85000:nEventsMin=150:BoostType=Grad:Shrinkage=0.0010:nCuts=-1:NNodesMax=20:MaxDepth=3:SeparationType=GiniIndex:PruneMethod=NoPruning:UseBaggedGrad:GradBaggingFraction=0.6" );
+
+   if (Use["BDTG_user2.1"]) // Gradient Boost
+      factory->BookMethod( TMVA::Types::kBDT,"BDTG_user2.1",
+                           "!H:!V:NTrees=20000:nEventsMin=150:BoostType=Grad:Shrinkage=0.0010:nCuts=-1:NNodesMax=20:MaxDepth=3:SeparationType=GiniIndex:PruneMethod=NoPruning:UseBaggedGrad:GradBaggingFraction=0.6" );
+
+   if (Use["BDTG_user2.2"]) // Gradient Boost
+      factory->BookMethod( TMVA::Types::kBDT,"BDTG_user2.2",
+                           "!H:!V:NTrees=85000:nEventsMin=150:BoostType=Grad:Shrinkage=0.0050:nCuts=-1:NNodesMax=20:MaxDepth=3:SeparationType=GiniIndex:PruneMethod=NoPruning:UseBaggedGrad:GradBaggingFraction=0.6" );
+
+   if (Use["BDTG_user2.3"]) // Gradient Boost
+      factory->BookMethod( TMVA::Types::kBDT,"BDTG_user2.3",
+                           "!H:!V:NTrees=85000:BoostType=Grad:Shrinkage=0.0010:nCuts=-1:NNodesMax=20:MaxDepth=3:SeparationType=GiniIndex:PruneMethod=NoPruning:UseBaggedGrad:GradBaggingFraction=0.6" );
+
+   if (Use["BDTG_user2.4"]) // Gradient Boost
+      factory->BookMethod( TMVA::Types::kBDT,"BDTG_user2.4",
+                           "!H:!V:NTrees=100000:nEventsMin=150:BoostType=Grad:Shrinkage=0.0010:nCuts=-1:NNodesMax=20:MaxDepth=3:SeparationType=GiniIndex:PruneMethod=NoPruning:UseBaggedGrad:GradBaggingFraction=0.6" );
+
+   if (Use["BDTG_user3"]) // Gradient Boost
+      factory->BookMethod( TMVA::Types::kBDT,"BDTG_user3",
+                           "!H:!V:NTrees=2000:nEventsMin=150:BoostType=Grad:Shrinkage=0.05:nCuts=-1:NNodesMax=20:MaxDepth=3:SeparationType=GiniIndex:PruneMethod=NoPruning:UseBaggedGrad:GradBaggingFraction=0.6" );
+
+   if (Use["BDTG_user4"]) // Gradient Boost
+      factory->BookMethod( TMVA::Types::kBDT,"BDTG_user4",
+                           "!H:!V:NTrees=2000:nEventsMin=150:BoostType=Grad:Shrinkage=0.01:nCuts=-1:NNodesMax=20:MaxDepth=3:SeparationType=GiniIndex:PruneMethod=NoPruning:UseBaggedGrad:GradBaggingFraction=0.6" );
+
+   if (Use["BDTG_user5"]) // Gradient Boost
+      factory->BookMethod( TMVA::Types::kBDT,"BDTG_user5",
+                           "!H:!V:NTrees=2000:nEventsMin=150:BoostType=Grad:Shrinkage=0.005:nCuts=-1:NNodesMax=20:MaxDepth=3:SeparationType=GiniIndex:PruneMethod=NoPruning:UseBaggedGrad:GradBaggingFraction=0.6" );
+
+   if (Use["BDTG_user6"]) // Gradient Boost
+      factory->BookMethod( TMVA::Types::kBDT,"BDTG_user6",
+                           "!H:!V:NTrees=10000:nEventsMin=150:BoostType=Grad:Shrinkage=0.05:nCuts=-1:NNodesMax=20:MaxDepth=3:SeparationType=GiniIndex:PruneMethod=NoPruning:UseBaggedGrad:GradBaggingFraction=0.6" );
+
+   if (Use["BDT"]) { // Adaptive Boost
+      //default settings
+      //"!H:!V:NTrees=400:nEventsMin=400:MaxDepth=3:BoostType=AdaBoost:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning:CreateMVAPdfs=true:PDFInterpolMVAPdf=Spline2:NbinsMVAPdf=60:NsmoothMVAPdf=10"
+      TString settingsString = "";
+      int ntrees = 400;
+      int nEventsMin = 400;
+      int MaxDepth = 3;
+      int nCuts = 20;
+      double adaBoostBeta = 1.0;
+      TString randomTrees = "";
+      if(jetBin == DEFS::jets2 || jetBin == DEFS::jets3 || jetBin == DEFS::jets4) {
+         ntrees = 850;
+         if(DefaultValues::vfind(vars,"MEBDT")>-1 || (eventProbs.size()>0 && eventProbs[0]>-1) || (eventProbs.size()==0)) {
+            nEventsMin = 150;
+            MaxDepth = 3;
+            //if(jetBin == DEFS::jets4) {
+            //   //ntrees = 400;
+            //   MaxDepth = 2;
+            //}
+            if(vars.size()>20) {
+               int ntrainevts = (jetBin==DEFS::jets4) ? 13200 : 42000;
+               randomTrees = Form(":UseRandomisedTrees=true:UseNvars=8:UseNTrainEvents=%i",ntrainevts);
+            }
+         }
+         else {
+            nEventsMin = 100;
+            if(jetBin == DEFS::jets2) {
+               MaxDepth = 4;
+            }
+            else {
+               MaxDepth = 3;
+            }
+         }
+         nCuts = 20;
+         adaBoostBeta = 0.5;
+      }
+      settingsString = Form("!H:!V:NTrees=%i:nEventsMin=%i:MaxDepth=%i:BoostType=AdaBoost:adaBoostBeta=%f:SeparationType=GiniIndex:nCuts=%i:PruneMethod=NoPruning:CreateMVAPdfs=true:PDFInterpolMVAPdf=Spline2:NbinsMVAPdf=60:NsmoothMVAPdf=10%s",ntrees,nEventsMin,MaxDepth,adaBoostBeta,nCuts,randomTrees.Data());
+      cout << "--- Factory                  : Settings string for the BDT training is \"" << settingsString << "\"" << endl;
+      factory->BookMethod( TMVA::Types::kBDT, "BDT", settingsString );
+   }
+   if (Use["BDT_user0"])  // Adaptive Boost
+      factory->BookMethod( TMVA::Types::kBDT, "BDT_user0",       
+                           "!H:!V:NTrees=850:nEventsMin=100:adaBoostBeta=0.5:MaxDepth=4:BoostType=AdaBoost:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning:CreateMVAPdfs=true:PDFInterpolMVAPdf=Spline2:NbinsMVAPdf=60:NsmoothMVAPdf=10" );
+   if (Use["BDT_user1"])  // Adaptive Boost
+      factory->BookMethod( TMVA::Types::kBDT, "BDT_user1",       
+                           "!H:!V:NTrees=850:nEventsMin=100:adaBoostBeta=0.5:MaxDepth=3:BoostType=AdaBoost:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning:CreateMVAPdfs=true:PDFInterpolMVAPdf=Spline2:NbinsMVAPdf=60:NsmoothMVAPdf=10" );
+   if (Use["BDT_user1.1"])  // Adaptive Boost
+      factory->BookMethod( TMVA::Types::kBDT, "BDT_user1.1",       
+                           "!H:!V:NTrees=850:nEventsMin=100:adaBoostBeta=0.2:MaxDepth=3:BoostType=AdaBoost:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning:CreateMVAPdfs=true:PDFInterpolMVAPdf=Spline2:NbinsMVAPdf=60:NsmoothMVAPdf=10" );
+   if (Use["BDT_user1.2"])  // Adaptive Boost
+      factory->BookMethod( TMVA::Types::kBDT, "BDT_user1.2",       
+                           "!H:!V:NTrees=850:nEventsMin=100:adaBoostBeta=0.8:MaxDepth=3:BoostType=AdaBoost:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning:CreateMVAPdfs=true:PDFInterpolMVAPdf=Spline2:NbinsMVAPdf=60:NsmoothMVAPdf=10" );
    
+   if (Use["BDT_user2"])  // Adaptive Boost
+      factory->BookMethod( TMVA::Types::kBDT, "BDT_user2",       
+                           "!H:!V:NTrees=850:nEventsMin=150:adaBoostBeta=0.5:MaxDepth=3:BoostType=AdaBoost:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning:CreateMVAPdfs=true:PDFInterpolMVAPdf=Spline2:NbinsMVAPdf=60:NsmoothMVAPdf=10" );
+
+   if (Use["BDT_user3"])  // Adaptive Boost
+      factory->BookMethod( TMVA::Types::kBDT, "BDT_user3",       
+                           "!H:!V:NTrees=100:nEventsMin=1:adaBoostBeta=0.2:MaxDepth=7:BoostType=AdaBoost:SeparationType=GiniIndex:nCuts=80:PruneMethod=NoPruning:CreateMVAPdfs=true:PDFInterpolMVAPdf=Spline2:NbinsMVAPdf=60:NsmoothMVAPdf=10" );
+
+   if (Use["BDT_user4"])  // Adaptive Boost
+      factory->BookMethod( TMVA::Types::kBDT, "BDT_user4",       
+                           "!H:!V:NTrees=850:nEventsMin=400:adaBoostBeta=0.5:MaxDepth=3:BoostType=AdaBoost:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning:CreateMVAPdfs=true:PDFInterpolMVAPdf=Spline2:NbinsMVAPdf=60:NsmoothMVAPdf=10" );
+
+   if (Use["BDT_user5"])  // Adaptive Boost
+      factory->BookMethod( TMVA::Types::kBDT, "BDT_user5",       
+                           "!H:!V:NTrees=850:nEventsMin=800:adaBoostBeta=0.5:MaxDepth=3:BoostType=AdaBoost:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning:CreateMVAPdfs=true:PDFInterpolMVAPdf=Spline2:NbinsMVAPdf=60:NsmoothMVAPdf=10" );
+
+   if (Use["BDT_user6"])  // Adaptive Boost
+      factory->BookMethod( TMVA::Types::kBDT, "BDT_user6",       
+                           "!H:!V:NTrees=850:nEventsMin=150:adaBoostBeta=0.5:MaxDepth=2:BoostType=AdaBoost:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning:CreateMVAPdfs=true:PDFInterpolMVAPdf=Spline2:NbinsMVAPdf=60:NsmoothMVAPdf=10" );
+
+   if (Use["BDT_user7"])  // Adaptive Boost
+      factory->BookMethod( TMVA::Types::kBDT, "BDT_user7",       
+                           "!H:!V:NTrees=850:nEventsMin=150:adaBoostBeta=0.5:MaxDepth=3:BoostType=AdaBoost:SeparationType=GiniIndex:nCuts=20:PruneMethod=CostComplexity:PruneStrength=50:CreateMVAPdfs=true:PDFInterpolMVAPdf=Spline2:NbinsMVAPdf=60:NsmoothMVAPdf=10" );
+
+   if (Use["BDT_user8"])  // Adaptive Boost
+      factory->BookMethod( TMVA::Types::kBDT, "BDT_user8",       
+                           "!H:!V:NTrees=850:nEventsMin=150:MaxDepth=3:BoostType=Bagging:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning:CreateMVAPdfs=true:PDFInterpolMVAPdf=Spline2:NbinsMVAPdf=60:NsmoothMVAPdf=10" );
+
+   if (Use["BDT_user9"])  // Adaptive Boost
+      factory->BookMethod( TMVA::Types::kBDT, "BDT_user9",       
+                           "!H:!V:NTrees=850:nEventsMin=150:MaxDepth=3:BoostType=AdaBoost:adaBoostBeta=0.5:UseRandomisedTrees=true:UseNvars=8:UseNTrainEvents=42000:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning:CreateMVAPdfs=true:PDFInterpolMVAPdf=Spline2:NbinsMVAPdf=60:NsmoothMVAPdf=10" );
+
+   if (Use["BDT_user9.1"])  // Adaptive Boost
+      factory->BookMethod( TMVA::Types::kBDT, "BDT_user9.1",       
+                           "!H:!V:NTrees=850:nEventsMin=150:MaxDepth=3:BoostType=AdaBoost:adaBoostBeta=0.5:UseRandomisedTrees=true:UseNvars=8:UseNTrainEvents=10000:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning:CreateMVAPdfs=true:PDFInterpolMVAPdf=Spline2:NbinsMVAPdf=60:NsmoothMVAPdf=10" );
+
+   if (Use["BDT_user9.2"])  // Adaptive Boost
+      factory->BookMethod( TMVA::Types::kBDT, "BDT_user9.2",       
+                           "!H:!V:NTrees=850:nEventsMin=150:MaxDepth=3:BoostType=AdaBoost:adaBoostBeta=0.5:UseRandomisedTrees=true:UseNvars=8:UseNTrainEvents=30000:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning:CreateMVAPdfs=true:PDFInterpolMVAPdf=Spline2:NbinsMVAPdf=60:NsmoothMVAPdf=10" );
+
+   if (Use["BDT_user9.3"])  // Adaptive Boost
+      factory->BookMethod( TMVA::Types::kBDT, "BDT_user9.3",       
+                           "!H:!V:NTrees=850:nEventsMin=150:MaxDepth=3:BoostType=AdaBoost:adaBoostBeta=0.5:UseRandomisedTrees=true:UseNvars=7:UseNTrainEvents=42000:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning:CreateMVAPdfs=true:PDFInterpolMVAPdf=Spline2:NbinsMVAPdf=60:NsmoothMVAPdf=10" );
+
+   if (Use["BDT_user9.4"])  // Adaptive Boost
+      factory->BookMethod( TMVA::Types::kBDT, "BDT_user9.4",       
+                           "!H:!V:NTrees=850:nEventsMin=150:MaxDepth=3:BoostType=AdaBoost:adaBoostBeta=0.5:UseRandomisedTrees=true:UseNvars=6:UseNTrainEvents=42000:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning:CreateMVAPdfs=true:PDFInterpolMVAPdf=Spline2:NbinsMVAPdf=60:NsmoothMVAPdf=10" );
+
+   if (Use["BDT_user9.5"])  // Adaptive Boost
+      factory->BookMethod( TMVA::Types::kBDT, "BDT_user9.5",       
+                           "!H:!V:NTrees=850:nEventsMin=150:MaxDepth=3:BoostType=AdaBoost:adaBoostBeta=0.5:UseRandomisedTrees=true:UseNvars=9:UseNTrainEvents=42000:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning:CreateMVAPdfs=true:PDFInterpolMVAPdf=Spline2:NbinsMVAPdf=60:NsmoothMVAPdf=10" );
+
+   if (Use["BDT_user9.6"])  // Adaptive Boost
+      factory->BookMethod( TMVA::Types::kBDT, "BDT_user9.6",       
+                           "!H:!V:NTrees=850:nEventsMin=150:MaxDepth=3:BoostType=AdaBoost:adaBoostBeta=0.5:UseRandomisedTrees=true:UseNvars=10:UseNTrainEvents=42000:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning:CreateMVAPdfs=true:PDFInterpolMVAPdf=Spline2:NbinsMVAPdf=60:NsmoothMVAPdf=10" );
+
    if (Use["BDTB"]) // Bagging
       factory->BookMethod( TMVA::Types::kBDT, "BDTB", 
                            "!H:!V:NTrees=400:BoostType=Bagging:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning" );

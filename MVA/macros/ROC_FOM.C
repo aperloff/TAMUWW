@@ -2,7 +2,8 @@
 #include "Math/Polynomial.h"
 #include "Math/Interpolator.h"
 
-void plot_ROC_FOM( TFile* file, Int_t type = 2, TDirectory* BinDir)
+void plot_ROC_FOM( TFile* file, Int_t type = 2,
+                   TDirectory* BinDir, TString method )
 {
   // input:   - Input file (result from TMVA),
   //          - type = 1 --> plot efficiency(B) versus eff(S)
@@ -70,20 +71,22 @@ void plot_ROC_FOM( TFile* file, Int_t type = 2, TDirectory* BinDir)
   Int_t nmva  = 0;
   TKey *key, *hkey;
 
-  TString hNameRef = "effBvsS_simple";
-  if (type == 2) hNameRef = "rejBvsS_simple";
+  TString hNameRef = Form("effBvsS_%s_simple",method.Data());
+  if (type == 2) hNameRef = Form("rejBvsS_%s_simple",method.Data());
 
   // begin section from Joey
   Int_t nbins = 1000;
   Float_t xmin = -1.0, xmax = 1.0;
   TTree* tmvaTestTree = (TTree*)gDirectory->Get("TestTree");
   TTree* tmvaTrainTree = (TTree*)gDirectory->Get("TrainTree");
-  TH1F * TMVA_BDT_bkg = new TH1F("TMVA_BDT_bkg","Bkg BDT ",nbins, xmin, xmax);
-  TH1F * TMVA_BDT_sig = new TH1F("TMVA_BDT_sig","Sig BDT ",nbins, xmin, xmax);
+  TH1F * TMVA_BDT_bkg = new TH1F(Form("TMVA_%s_bkg",method.Data()),
+                                 Form("Bkg %s ",method.Data()),nbins, xmin, xmax);
+  TH1F * TMVA_BDT_sig = new TH1F(Form("TMVA_%s_sig",method.Data()),
+                                 Form("Sig %s ",method.Data()),nbins, xmin, xmax);
   Float_t BDT_test, BDT_train;
   Int_t classID_test, classID_train;
-  tmvaTestTree->SetBranchAddress("BDT",&BDT_test);
-  tmvaTrainTree->SetBranchAddress("BDT",&BDT_train);
+  tmvaTestTree->SetBranchAddress(method,&BDT_test);
+  tmvaTrainTree->SetBranchAddress(method,&BDT_train);
   tmvaTestTree->SetBranchAddress("classID",&classID_test);
   tmvaTrainTree->SetBranchAddress("classID",&classID_train);
 
@@ -101,9 +104,9 @@ void plot_ROC_FOM( TFile* file, Int_t type = 2, TDirectory* BinDir)
   }
 
   TGraph * rocBDT = new TGraph();
-  rocBDT->SetNameTitle("rocBDT",ftit);
+  rocBDT->SetNameTitle(Form("roc%s",method.Data()),ftit);
   TGraph * rocBDT_int = new TGraph();
-  rocBDT_int->SetNameTitle("rocBDT_int",ftit+" (Interpolated Values)");
+  rocBDT_int->SetNameTitle(Form("roc%s_int",method.Data()),ftit+" (Interpolated Values)");
   TGraph * bestLine = new TGraph();
   bestLine->SetNameTitle("bestLineGraph","bestLineGraph");
 
@@ -174,8 +177,8 @@ void plot_ROC_FOM( TFile* file, Int_t type = 2, TDirectory* BinDir)
   bestLine->SetLineColor(kBlue);
   bestLine->SetMarkerStyle(20);
   bestLine->SetMarkerSize(1);
-  legend->AddEntry(rocBDT,"BDT","lp");
-  legend->AddEntry(rocBDT_int,"BDT (Interpolated Points)","p");
+  legend->AddEntry(rocBDT,method,"lp");
+  legend->AddEntry(rocBDT_int,Form("%s (Interpolated Points)",method.Data()),"p");
   legend->AddEntry(bestLine,Form("Distance to (1,1) = %.4f",minDist),"l");
   legend->AddEntry((TObject*)0,Form("Best Point = (%.4f,%.4f)",minPointX,minPointY),"");
   legend->AddEntry((TObject*)0,Form("Area Under Curve = %.4f",area_under_curve),"");
@@ -209,7 +212,8 @@ void plot_ROC_FOM( TFile* file, Int_t type = 2, TDirectory* BinDir)
   return;
 }
 
-void ROC_FOM( TString fin = "TMVA.root", Int_t type = 2, Bool_t useTMVAStyle = kTRUE )
+void ROC_FOM( TString fin = "TMVA.root", TString method = "BDT",
+              Int_t type = 2, Bool_t useTMVAStyle = kTRUE )
 {
   // argument: type = 1 --> plot efficiency(B) versus eff(S)
   //           type = 2 --> plot rejection (B) versus efficiency (S)
@@ -220,7 +224,7 @@ void ROC_FOM( TString fin = "TMVA.root", Int_t type = 2, Bool_t useTMVAStyle = k
   // checks if file with name "fin" is already open, and if not opens one
   TFile* file = TMVAGlob::OpenFile( fin );
 
-  plot_ROC_FOM( file, type, gDirectory );
+  plot_ROC_FOM( file, type, gDirectory, method );
 
   return;
 }

@@ -31,6 +31,7 @@
  **********************************************************************************/
 
 //Our libraries
+#include "TAMUWW/MVA/macros/tmvaglob.C"
 #include "TAMUWW/MVA/interface/TAMUWWMVA.hh"
 #include "TAMUWW/SpecialTools/interface/DefaultValues.hh"
 #include "TAMUWW/SpecialTools/interface/Defs.hh"
@@ -96,8 +97,11 @@ int main(int argc, char**argv) {
    m_benchmark->Reset();
    m_benchmark->Start("event");
 
+   //Set the TMVA style
+   TMVAGlob::SetTMVAStyle();
+
    //vector<PhysicsProcess*> processes = DefaultValues::getProcessesHiggs(jetBin, tagcat, false, false, DEFS::MicroNtuple);
-   vector<PhysicsProcess*> processes = DefaultValues::getProcessesHiggs(DEFS::jets2, tagcat, false, false, DEFS::MicroNtuple);
+   vector<PhysicsProcess*> processes = DefaultValues::getProcessesHiggs(DEFS::jets2, tagcat, false, false, false, DEFS::MicroNtuple);
 
    TAMUWWMVA* mva = new TAMUWWMVA();
    mva->IsBatch(batch);
