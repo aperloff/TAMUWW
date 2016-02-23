@@ -42,6 +42,7 @@
 #include "TAMUWW/SpecialTools/interface/TableCellVal.hh"
 #include "TAMUWW/SpecialTools/interface/TableCellText.hh"
 #include "TAMUWW/SpecialTools/interface/Value.hh"
+#include "TAMUWW/Selection/bin/RunEventSet.h"
 
 using namespace std;
 
@@ -110,7 +111,7 @@ public:
 
    //Member Functions
    // WARNING!!! is the microNtuple as bigger than 2Gs the code crashes
-   void createMicroNtuple(TString inputPath = "/uscms_data/d3/ilyao/Winter12to13ME8TeV/MEResults/rootOutput/", TString outputPath = "/uscms_data/d3/ilyao/Winter12to13ME8TeV/MEResults/microNtuples/", int largeProcessCase=0, TString smallProcessLabel="");
+   void createMicroNtuple(TString inputPath = "/uscms_data/d3/ilyao/Winter12to13ME8TeV/MEResults/rootOutput/", TString outputPath = "/uscms_data/d3/ilyao/Winter12to13ME8TeV/MEResults/microNtuples/", TString outputSuffix = "", int largeProcessCase=0, TString smallProcessLabel="");
    //Created by RE to automatize the doing of MicroNtuples
    void makeMicroNtuple(TString location, TString output, unsigned nJets, bool doLight=false, bool doNonW= false, bool doUntag= false);
    //Created by RE to automatize the doing of MicroNtuples
@@ -119,17 +120,25 @@ public:
    void makeMicroNtuple(TChain& chain, TString output, unsigned nJets, 
                         bool doLight=false, bool doNonW= false, bool doUntag=false);
    void setEventNtuplePath(TString mnen) {mergeNewEventNtuple = mnen;}
+   void setStartEndEntries(pair<int,int> see) {startEndEntries = see;}
    void setProcess(TString p) {currentProcess = p;}
    void setAddDir(vector<TString> ad) {addDir = ad;}
    void setXROOTD(bool uxrd) {useXROOTD = uxrd;}
    void setOutputPath(TString p) {outputPath = p;}
    void setMissingEventsFlag(bool f) {missingEventsFlag = f;}
+   void setDuplicateEventsFlag(bool f) {duplicateEventsFlag = f;}
    void setFillBDT(bool f) {fillBDT = f;}
    void setDebug(bool d) {debug = d;}
+   bool copyEventProbs(EventNtuple* mergeEventNtuple, EventNtuple* eventNtuple, METree* meNtuple, MicroNtuple* microNtuple);
+   void setSizeRunEvent(EventNtuple* eventNtuple, METree* meNtuple, MicroNtuple* microNtuple);
+   void setEPDs(METree* meNtuple, MicroNtuple* microNtuple);
+   void setTMVAInformation(EventNtuple* eventNtuple, MicroNtuple* microNtuple);
+   void setBDTReadersFromTable();
    void setAllBDTReaders();
    pair<int,int> setMVAVar(EventNtuple * ntuple, MicroNtuple * mnt);
    void writeMissingEventsFile(map<int,int> &missingME);
    int  getIntLength(int i);
+   void updateMicroNtuple(TString outputPath, TString updateMicroNtuple);
 
    static inline void loadbar(unsigned int x, unsigned int n, unsigned int w = 50) {
     if ( (x != n) && (x % (n/100) != 0) ) return;
@@ -143,7 +152,7 @@ public:
     cout << "]\r" << flush;
   }
   static inline void loadbar2(unsigned int x, unsigned int n, unsigned int w = 50) {
-    if ( (x != n) && (x % (n/100) != 0) ) return;
+    if ( (x != n) && n>=100 && (x % (n/100) != 0) ) return;
  
     float ratio  =  x/(float)n;
     int   c      =  ratio * w;
@@ -189,18 +198,24 @@ private:
    vector<TString> addDir;
    bool useXROOTD;
    unsigned nentries;
+   unsigned startEntry;
+   unsigned endEntry;
    bool missingEventsFlag;
-   TString mergeNewEventNtuple;   
+   bool duplicateEventsFlag;
+   TString mergeNewEventNtuple;
+   pair<int,int> startEndEntries;
    TChain* mergeChain;
    TTree* mergeTree;
    TTreeIndex* index;
    EventNtuple * mergeEventNtuple;
    map<int,int> eventIndex;
    map<int,int> duplicateIndex;
+   map<TString,TString> files_with_duplicates;
    bool imFilled;
    map<int,int> missingME;
    bool fillBDT;
    vector<pair<MVAVarMap, TMVA::Reader*> > BDTReaders;
    bool debug;
+   RunEventSet runEventSet;
 };
 #endif

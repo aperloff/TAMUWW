@@ -18,12 +18,17 @@ using namespace std;
    vector<TString> addDir                    = cl.getVector<TString> ("addDir",                                                                    "");
    bool            useXROOTD                 = cl.getValue<bool>     ("useXROOTD",                                                              false);
    TString         outputPath                = cl.getValue<TString>  ("outputPath",  "/uscms_data/d2/aperloff/Summer12ME8TeV/MEResults/microNtuples/");
+   TString         outputSuffix              = cl.getValue<TString>  ("outputSuffix",                                                              "");
    int             largeProcessCase          = cl.getValue<int>      ("largeProcessCase",                                                           0);
    //TString         smallProcessLabel         = cl.getValue<TString>  ("smallProcessLabel",                                                  "ggH170");
    vector<TString> processes                 = cl.getVector<TString> ("processes", "ggH125:::qqH125:::WH125:::WW:::WZ:::ZZ:::ZJets:::TTbar:::STopS_T:::STopS_Tbar:::STopT_T:::STopT_Tbar:::STopTW_T:::STopTW_Tbar:::WJets");
    TString         mergeNewEventNtuple       = cl.getValue<TString>  ("mergeNewEventNtuple",                                                       "");
+   int             startEntry                = cl.getValue<int>      ("startEntry",                                                                 0);
+   int             endEntry                  = cl.getValue<int>      ("endEntry",                                                                  -1);
    bool            saveMissingEvents         = cl.getValue<bool>     ("saveMissingEvents",                                                      false);
+   bool            saveDuplicateEvents       = cl.getValue<bool>     ("saveDuplicateEvents",                                                    false);
    bool            fillBDT                   = cl.getValue<bool>     ("fillBDT",                                                                false);
+   TString         updateMicroNtuple         = cl.getValue<TString>  ("updateMicroNtuple",                                                         "");
    bool            debug                     = cl.getValue<bool>     ("debug",                                                                  false);
 
    if (!cl.check()) return 0;
@@ -55,6 +60,16 @@ using namespace std;
            << "Make bloody sure this is what you want!" << endl;
    }
 
+   //If merging files based on an eventNtuple then check the start and end entry
+   if(!mergeNewEventNtuple.IsNull() && startEntry!=0 && endEntry!=-1) {
+      if(endEntry!=-1 && endEntry<startEntry) {
+         cout << "ERROR::makeMicroNtuple_x The endEntry must be greater than the startEntry." << endl;
+         return 0;
+      }
+      cout << "WARNING::makeMicroNtuple_x You will be merging the files based on an eventNtuple." << endl
+           << "However, you will only be using " << endEntry-startEntry << " entries of the eventNtuple (entry " << startEntry << " to " << endEntry << ")" << endl;
+   }
+
    if(!outputPath.EndsWith("/")) outputPath += "/";
    for(unsigned int ip=0; ip<inputPaths.size(); ip++)
       if(!inputPaths[ip].EndsWith("/")) inputPaths[ip] += "/";
@@ -63,14 +78,21 @@ using namespace std;
    for(unsigned int i=0; i<processes.size(); i++) {
       mnm = new MicroNtupleMaker(); 
       mnm->setEventNtuplePath(mergeNewEventNtuple);
+      mnm->setStartEndEntries(make_pair(startEntry,endEntry));
       mnm->setProcess(processes[i]);
       mnm->setAddDir(addDir);
       mnm->setXROOTD(useXROOTD);
       mnm->setOutputPath(outputPath);
       mnm->setMissingEventsFlag(saveMissingEvents);
+      mnm->setDuplicateEventsFlag(saveDuplicateEvents);
       mnm->setFillBDT(fillBDT);
       mnm->setDebug(debug);
-      mnm->createMicroNtuple(inputPaths[i],outputPath,largeProcessCase,processes[i]);
+      if(!updateMicroNtuple.IsNull()) {
+         mnm->updateMicroNtuple(outputPath,updateMicroNtuple);
+      }
+      else {
+         mnm->createMicroNtuple(inputPaths[i],outputPath,outputSuffix,largeProcessCase,processes[i]);
+      }
       delete mnm;
    }      
 

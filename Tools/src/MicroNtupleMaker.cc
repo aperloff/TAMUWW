@@ -19,7 +19,7 @@ MicroNtupleMaker::~MicroNtupleMaker() {
 }//D'tor
 
 //______________________________________________________________________________
-void MicroNtupleMaker::createMicroNtuple(TString inputPath, TString outputPath, int largeProcessCase, TString smallProcessLabel){
+void MicroNtupleMaker::createMicroNtuple(TString inputPath, TString outputPath, TString outputSuffix, int largeProcessCase, TString smallProcessLabel){
 //// Large processes need to be split up into parts 'by hand'
 //// largeProcessCase=0 corresponds to small processes
 //// The files with similar names, but which need to be ran on separately should be put into separate directories (e.g. STopT_T and STopT_Tbar)
@@ -69,6 +69,8 @@ void MicroNtupleMaker::createMicroNtuple(TString inputPath, TString outputPath, 
          }
          else {
             for(unsigned int idir=0; idir<addDir.size(); idir++) {
+               if(addDir[idir].CompareTo("/")==0)
+                  continue;
                fileLocations.AddDir((addDir[idir]+inputName).Data());
             }
          }
@@ -194,7 +196,7 @@ void MicroNtupleMaker::createMicroNtuple(TString inputPath, TString outputPath, 
    for ( vector<MyStr>::iterator it = listOfMicroNtuples.begin();
          it != listOfMicroNtuples.end(); it++){
     
-      makeMicroNtuple(it->GetLocationVector(inputPath), outputPath+ it->name + ".root", nJet, it->mistag, it->nonw, it->untag);
+      makeMicroNtuple(it->GetLocationVector(inputPath), outputPath+ it->name + outputSuffix + ".root", nJet, it->mistag, it->nonw, it->untag);
     
    }//for
 
@@ -408,24 +410,7 @@ void MicroNtupleMaker::makeMicroNtuple(TChain& chain, TString output, unsigned n
    // If the paths for the BDT weights are set, store them in the tree
    //
    if (fillBDT) {
-      map<TString,MVAVar> empty;
-      for(int i=0; i<6; i++) {
-         BDTReaders.push_back(make_pair(empty,new TMVA::Reader( "!Color:!Silent" )));
-         MVAVar::setVarMap(BDTReaders.back().first);
-      }
-      if(debug) cout << "Setting BDT variables for " << DefaultValues::getBDTLocation(DEFS::jets2,DEFS::eq0tag,DEFS::UVa,true) << " ... " << endl;
-      MVAVar::setUseFromTable(BDTReaders[0].first, DefaultValues::getBDTLocation(DEFS::jets2,DEFS::eq0tag,DEFS::UVa,true));
-      if(debug) cout << "Setting BDT variables for " << DefaultValues::getBDTLocation(DEFS::jets3,DEFS::eq0tag,DEFS::UVa,true) << " ... " << endl;
-      MVAVar::setUseFromTable(BDTReaders[1].first, DefaultValues::getBDTLocation(DEFS::jets3,DEFS::eq0tag,DEFS::UVa,true));
-      if(debug) cout << "Setting BDT variables for " << DefaultValues::getBDTLocation(DEFS::jets4,DEFS::eq0tag,DEFS::UVa,true) << " ... " << endl;
-      MVAVar::setUseFromTable(BDTReaders[2].first, DefaultValues::getBDTLocation(DEFS::jets4,DEFS::eq0tag,DEFS::UVa,true));
-      if(debug) cout << "Setting BDT variables for " << DefaultValues::getBDTLocation(DEFS::jets2,DEFS::eq0tag,DEFS::TAMU,true) << " ... " << endl;
-      MVAVar::setUseFromTable(BDTReaders[3].first, DefaultValues::getBDTLocation(DEFS::jets2,DEFS::eq0tag,DEFS::TAMU,true));
-      if(debug) cout << "Setting BDT variables for " << DefaultValues::getBDTLocation(DEFS::jets3,DEFS::eq0tag,DEFS::TAMU,true) << " ... " << endl;
-      MVAVar::setUseFromTable(BDTReaders[4].first, DefaultValues::getBDTLocation(DEFS::jets3,DEFS::eq0tag,DEFS::TAMU,true));
-      if(debug) cout << "Setting BDT variables for " << DefaultValues::getBDTLocation(DEFS::jets4,DEFS::eq0tag,DEFS::TAMU,true) << " ... " << endl;
-      MVAVar::setUseFromTable(BDTReaders[5].first, DefaultValues::getBDTLocation(DEFS::jets4,DEFS::eq0tag,DEFS::TAMU,true));
-      setAllBDTReaders();
+      setBDTReadersFromTable();
    }
 
    // Get the entries and report if zero
@@ -436,13 +421,20 @@ void MicroNtupleMaker::makeMicroNtuple(TChain& chain, TString output, unsigned n
       return;
    }
 
+   // If the start and end entries are not 0 and -1 respectively then only loop through the requested entries
+   startEndEntries.first!=0 ? startEntry = startEndEntries.first : startEntry = 0;
+   startEndEntries.second!=-1 ? endEntry = startEndEntries.second : endEntry = nentries;
+   // Check if the user made a mistake and the endEntry requested is greater than the last entry in the TChain or TTree
+   endEntry>nentries ? endEntry = nentries : endEntry = endEntry;
+   cout << "MicroNtupleMaker::makeMicroNtuple Starting with entry " << startEntry << " and ending with entry " << endEntry << endl;
+
    //Loop over all the entries in the original chain. The idea is to copy everything to microNtuple
    cout << "MicroNtupleMaker::makeMicroNtuple Filling MicroNtuple ..." << endl;
    if(missingEventsFlag){
       mergeTree->SetBranchStatus("*",0);
       mergeTree->SetBranchStatus("event",1);
    }
-   for (unsigned ientry = 0; ientry < nentries; ++ientry){
+   for (unsigned ientry = startEntry; ientry < endEntry; ++ientry){
 
       loadbar2(ientry+1,nentries);
 
@@ -467,6 +459,16 @@ void MicroNtupleMaker::makeMicroNtuple(TChain& chain, TString output, unsigned n
       }
       else {
          chain.GetEntry(ientry);
+         //Check and remove duplicates here
+         if (addDir.size()!=0 && runEventSet.alreadySeen(eventNtuple->run, eventNtuple->event)) {
+            //cout << "WARNING, event Run = " << eventNtuple->run
+            //     << ", Event = " << eventNtuple->event
+            //     <<" is duplicated" << endl
+            //     << "We will skip this event." << endl;
+            duplicateIndex[ientry] = eventNtuple->event;
+            if(!duplicateEventsFlag)
+               continue;
+         }
       }
 
       if (!imFilled) {
@@ -488,100 +490,20 @@ void MicroNtupleMaker::makeMicroNtuple(TChain& chain, TString output, unsigned n
          cout << endl << endl << chain.GetFile()->GetName() << endl << endl;
          cout << endl << endl << endl;
       }
-      assert(meNtuple->getNProbStat()>0);
-      for (int i = 0; i < meNtuple->getNProbStat(); ++i){
-         microNtuple->eventProb[i]    = meNtuple->getProbStat(i)->tEventProb;
-         if(currentProcess.CompareTo("TTbar")!=0) {
-            assert(meNtuple->getProbStat(i)->tEventProb!=0);
-            assert(microNtuple->eventProb[i]!=0);
-         }
-         microNtuple->eventMaxProb[i] = meNtuple->getProbStat(i)->tEventMaxProb;  
-      }   
-
-      microNtuple->size = meNtuple->getNProbStat();
-      microNtuple->run = eventNtuple->run;//meNtuple->getRun();
-      microNtuple->event = eventNtuple->event;//meNtuple->getEvent();
-
-      microNtuple->epdPretagWWandWZ = microNtuple->calcWZEPD(DEFS::pretag);
-      microNtuple->epd0tagWWandWZ = microNtuple->calcWZEPD(DEFS::eq0tag);
-      microNtuple->epd1tagWWandWZ = microNtuple->calcWZEPD(DEFS::eq1tag);
-      microNtuple->epd2tagWWandWZ = microNtuple->calcWZEPD(DEFS::eq2tag);
-      int counterHWW = 0;
-      int counterWH = 0;
-      int counterH = 0;
-      //If using TArrayD
-      //microNtuple->epdPretagHiggs.Set(MicroNtuple::nHiggsMasses);
-      for(int i = 0; i < meNtuple->getNProbStat(); ++i) {
-         if(meNtuple->getProbStat(i)->tmeType == DEFS::EP::HWW) {
-            microNtuple->epd1tagHWW[counterHWW] = microNtuple->calcHWWEPD(DEFS::eq1tag,meNtuple->getProbStat(i)->tmeParam);
-            microNtuple->epd2tagHWW[counterHWW++] = microNtuple->calcHWWEPD(DEFS::eq2tag,meNtuple->getProbStat(i)->tmeParam);
-         }
-         if(meNtuple->getProbStat(i)->tmeType == DEFS::EP::WH) {
-            microNtuple->epd1tagWH[counterWH] = microNtuple->calcWHEPD(DEFS::eq1tag,meNtuple->getProbStat(i)->tmeParam);
-            microNtuple->epd2tagWH[counterWH++] = microNtuple->calcWHEPD(DEFS::eq2tag,meNtuple->getProbStat(i)->tmeParam);
-         }
-         if(meNtuple->getProbStat(i)->tmeType == DEFS::EP::HWW || meNtuple->getProbStat(i)->tmeType == DEFS::EP::WH) {
-            //Used to absorb the error of the missing first entry
-            microNtuple->absorbError[counterH] = -1;
-            microNtuple->epdPretagHiggs[counterH] = microNtuple->calcHiggsEPD(DEFS::pretag,meNtuple->getProbStat(i)->tmeParam);
-            microNtuple->epd1tagHiggs[counterH] = microNtuple->calcHiggsEPD(DEFS::eq1tag,meNtuple->getProbStat(i)->tmeParam);
-            microNtuple->epd2tagHiggs[counterH++] = microNtuple->calcHiggsEPD(DEFS::eq2tag,meNtuple->getProbStat(i)->tmeParam);
-         }
+      bool passCopy = copyEventProbs(mergeEventNtuple,eventNtuple,meNtuple,microNtuple);
+      if(!passCopy) {
+         microNtuple->clear();
+         continue;
       }
+      setSizeRunEvent(eventNtuple,meNtuple,microNtuple);
+      setEPDs(meNtuple, microNtuple);
 
       // TMVA variables
       if(mergeNewEventNtuple.CompareTo("")!=0) {
-         microNtuple->dPhiJetJet = mergeEventNtuple->getDeltaPhiJetJet();
-         microNtuple->dPhiMETJet = mergeEventNtuple->getDeltaPhiMETJet();
-         microNtuple->minDPhiMETJet = mergeEventNtuple->getMinDeltaPhiMETJet();
-         microNtuple->minDPhiLepJet = mergeEventNtuple->getMinDPhiLepJet();
-         mergeEventNtuple->getAngularVariables(microNtuple->Cos_dPhiWW,microNtuple->Cos_dPhiWH,microNtuple->CosTheta_l,
-                                               microNtuple->CosTheta_j,microNtuple->CosTheta_WH,microNtuple->JacksonAngle);
-         microNtuple->JacobePeak = mergeEventNtuple->getJacobePeak();
-         microNtuple->dRlepjj = mergeEventNtuple->getDeltaRlepjj();
-         microNtuple->sumJetEt = mergeEventNtuple->getSumJetEt();
-
-         if(fillBDT) {
-            pair<int,int> readerIndex = setMVAVar(mergeEventNtuple,microNtuple);
-            if(eventNtuple->jLV.size()>1 && eventNtuple->jLV.size()<5 && eventNtuple->getNBTags()==0) {
-               microNtuple->KinBDT = BDTReaders[readerIndex.first].second->EvaluateMVA("BDT method");
-               microNtuple->MEBDT = BDTReaders[readerIndex.second].second->EvaluateMVA("BDT method");
-            }
-            else {
-               microNtuple->KinBDT = -9999;
-               microNtuple->MEBDT = -9999;
-            }
-         }
-         else {
-            microNtuple->KinBDT = -9999;
-            microNtuple->MEBDT = -9999;
-         }
+         setTMVAInformation(mergeEventNtuple,microNtuple);
       }
       else {
-         microNtuple->dPhiMETJet = eventNtuple->getDeltaPhiMETJet();
-         microNtuple->minDPhiMETJet = eventNtuple->getMinDeltaPhiMETJet();
-         microNtuple->minDPhiLepJet = eventNtuple->getMinDPhiLepJet();
-         eventNtuple->getAngularVariables(microNtuple->Cos_dPhiWW,microNtuple->Cos_dPhiWH,microNtuple->CosTheta_l,
-                                               microNtuple->CosTheta_j,microNtuple->CosTheta_WH,microNtuple->JacksonAngle);
-         microNtuple->JacobePeak = eventNtuple->getJacobePeak();
-         microNtuple->dRlepjj = eventNtuple->getDeltaRlepjj();
-         microNtuple->sumJetEt = eventNtuple->getSumJetEt();
-
-         if(fillBDT) {
-            pair<int,int> readerIndex = setMVAVar(eventNtuple,microNtuple);
-            if(eventNtuple->jLV.size()>1 && eventNtuple->jLV.size()<5 && eventNtuple->getNBTags()==0) {
-               microNtuple->KinBDT = BDTReaders[readerIndex.first].second->EvaluateMVA("BDT method");
-               microNtuple->MEBDT = BDTReaders[readerIndex.second].second->EvaluateMVA("BDT method");
-            }
-            else {
-               microNtuple->KinBDT = -9999;
-               microNtuple->MEBDT = -9999;
-            }
-         }
-         else {
-            microNtuple->KinBDT = -9999;
-            microNtuple->MEBDT = -9999;
-         }
+         setTMVAInformation(eventNtuple,microNtuple);
       }
       microNtuple->reader = 0;
 
@@ -739,6 +661,33 @@ int MicroNtupleMaker::getIntLength(int i) {
    return power;
 }//getIntLength
 
+void MicroNtupleMaker::setBDTReadersFromTable() {
+   map<TString,MVAVar> empty;
+   for(int i=0; i<9; i++) {
+      BDTReaders.push_back(make_pair(empty,new TMVA::Reader( "!Color:!Silent" )));
+      MVAVar::setVarMap(BDTReaders.back().first);
+   }
+   if(debug) cout << "Setting BDT variables for " << DefaultValues::getBDTLocation(DEFS::jets2,DEFS::eq0tag,DEFS::UVa,true) << " ... " << endl;
+   MVAVar::setUseFromTable(BDTReaders[0].first, DefaultValues::getBDTLocation(DEFS::jets2,DEFS::eq0tag,DEFS::UVa,true));
+   if(debug) cout << "Setting BDT variables for " << DefaultValues::getBDTLocation(DEFS::jets3,DEFS::eq0tag,DEFS::UVa,true) << " ... " << endl;
+   MVAVar::setUseFromTable(BDTReaders[1].first, DefaultValues::getBDTLocation(DEFS::jets3,DEFS::eq0tag,DEFS::UVa,true));
+   if(debug) cout << "Setting BDT variables for " << DefaultValues::getBDTLocation(DEFS::jets4,DEFS::eq0tag,DEFS::UVa,true) << " ... " << endl;
+   MVAVar::setUseFromTable(BDTReaders[2].first, DefaultValues::getBDTLocation(DEFS::jets4,DEFS::eq0tag,DEFS::UVa,true));
+   if(debug) cout << "Setting BDT variables for " << DefaultValues::getBDTLocation(DEFS::jets2,DEFS::eq0tag,DEFS::TAMU,true) << " ... " << endl;
+   MVAVar::setUseFromTable(BDTReaders[3].first, DefaultValues::getBDTLocation(DEFS::jets2,DEFS::eq0tag,DEFS::TAMU,true));
+   if(debug) cout << "Setting BDT variables for " << DefaultValues::getBDTLocation(DEFS::jets3,DEFS::eq0tag,DEFS::TAMU,true) << " ... " << endl;
+   MVAVar::setUseFromTable(BDTReaders[4].first, DefaultValues::getBDTLocation(DEFS::jets3,DEFS::eq0tag,DEFS::TAMU,true));
+   if(debug) cout << "Setting BDT variables for " << DefaultValues::getBDTLocation(DEFS::jets4,DEFS::eq0tag,DEFS::TAMU,true) << " ... " << endl;
+   MVAVar::setUseFromTable(BDTReaders[5].first, DefaultValues::getBDTLocation(DEFS::jets4,DEFS::eq0tag,DEFS::TAMU,true));
+   if(debug) cout << "Setting BDT variables for " << DefaultValues::getBDTLocation(DEFS::jets2,DEFS::eq0tag,DEFS::Combined,true) << " ... " << endl;
+   MVAVar::setUseFromTable(BDTReaders[6].first, DefaultValues::getBDTLocation(DEFS::jets2,DEFS::eq0tag,DEFS::Combined,true));
+   if(debug) cout << "Setting BDT variables for " << DefaultValues::getBDTLocation(DEFS::jets3,DEFS::eq0tag,DEFS::Combined,true) << " ... " << endl;
+   MVAVar::setUseFromTable(BDTReaders[7].first, DefaultValues::getBDTLocation(DEFS::jets3,DEFS::eq0tag,DEFS::Combined,true));
+   if(debug) cout << "Setting BDT variables for " << DefaultValues::getBDTLocation(DEFS::jets4,DEFS::eq0tag,DEFS::Combined,true) << " ... " << endl;
+   MVAVar::setUseFromTable(BDTReaders[8].first, DefaultValues::getBDTLocation(DEFS::jets4,DEFS::eq0tag,DEFS::Combined,true));
+   setAllBDTReaders();
+}
+
 void MicroNtupleMaker::setAllBDTReaders() {
    vector<TString> weightfiles;
    weightfiles.push_back(DefaultValues::getBDTLocation(DEFS::jets2,DEFS::eq0tag,DEFS::UVa));
@@ -747,6 +696,9 @@ void MicroNtupleMaker::setAllBDTReaders() {
    weightfiles.push_back(DefaultValues::getBDTLocation(DEFS::jets2,DEFS::eq0tag,DEFS::TAMU));
    weightfiles.push_back(DefaultValues::getBDTLocation(DEFS::jets3,DEFS::eq0tag,DEFS::TAMU));
    weightfiles.push_back(DefaultValues::getBDTLocation(DEFS::jets4,DEFS::eq0tag,DEFS::TAMU));
+   weightfiles.push_back(DefaultValues::getBDTLocation(DEFS::jets2,DEFS::eq0tag,DEFS::Combined));
+   weightfiles.push_back(DefaultValues::getBDTLocation(DEFS::jets3,DEFS::eq0tag,DEFS::Combined));
+   weightfiles.push_back(DefaultValues::getBDTLocation(DEFS::jets4,DEFS::eq0tag,DEFS::Combined));
    for(unsigned int i=0; i<BDTReaders.size(); i++) {
       cout << "Doing weightfile " << weightfiles[i] << " ... " << endl;
       TString var;
@@ -766,7 +718,7 @@ void MicroNtupleMaker::setAllBDTReaders() {
          for(map<TString,MVAVar>::iterator it=BDTReaders[i].first.begin(); it!=BDTReaders[i].first.end(); ++it) {
             if(it->second.use && !it->second.isSpectator && it->second.index == size) {
                cout << "Using variable " << it->second.name << " in the TMVA::Reader" << endl;
-               if(i<BDTReaders.size()/2)
+               if(i<3)
                   BDTReaders[i].second->AddVariable(it->second.name,&it->second.value);
                else
                   BDTReaders[i].second->AddVariable(it->second.definition,&it->second.value);
@@ -818,21 +770,30 @@ pair<int,int> MicroNtupleMaker::setMVAVar(EventNtuple * ntuple, MicroNtuple * mn
       BDTReaders[0].first["CosTheta_l"].value = mnt->CosTheta_l;
       BDTReaders[0].first["CosTheta_WH"].value = mnt->CosTheta_WH;
 
-      //TAMU
-      for(int i=0; i<13; i++)
-         BDTReaders[3].first[Form("logEventProb%i",i)].value = TMath::Log(mnt->eventProb[i]);
-      BDTReaders[3].first["logEventProb19"].value = TMath::Log(mnt->eventProb[19]);
-      BDTReaders[3].first["logEventProb54"].value = TMath::Log(mnt->eventProb[54]);
-      BDTReaders[3].first["event"].value = ntuple->event;
-      BDTReaders[3].first["lumi"].value = ntuple->lumi;
-      BDTReaders[3].first["run"].value = ntuple->run;
+      //Combined
+      BDTReaders[6].first["leptonPt"].value = ntuple->lLV[0].Pt();
+      BDTReaders[6].first["lepMT"].value = TMath::Sign(TMath::Sqrt(TMath::Abs(TMath::Power(ntuple->lLV[0].Pt()+ntuple->METLV[0].Pt(),2)-(TMath::Power(ntuple->lLV[0].Px()+ntuple->METLV[0].Px(),2)+TMath::Power(ntuple->lLV[0].Py()+ntuple->METLV[0].Py(),2)+TMath::Power(0,2)))),TMath::Power(ntuple->lLV[0].Pt()+ntuple->METLV[0].Pt(),2)-(TMath::Power(ntuple->lLV[0].Px()+ntuple->METLV[0].Px(),2)+TMath::Power(ntuple->lLV[0].Py()+ntuple->METLV[0].Py(),2)+TMath::Power(0,2)));
+      BDTReaders[6].first["jet1dRLep"].value = ntuple->jLV[0].DRlj;
+      BDTReaders[6].first["jet2dRLep"].value = ntuple->jLV[1].DRlj;
+      tmpHT = 0.0;
+      for(unsigned int i=0; i<ntuple->jLV.size(); i++) {
+         tmpHT+=ntuple->jLV[i].Et();
+      }
+      tmpHT+=ntuple->lLV[0].Pt();
+      BDTReaders[6].first["ht"].value = tmpHT;
+      BDTReaders[6].first["Ptlnujj"].value = TMath::Sqrt(TMath::Power(ntuple->jLV[0].Px()+ntuple->jLV[1].Px()+ntuple->lLV[0].Px()+ntuple->METLV[0].Px(),2)+TMath::Power(ntuple->jLV[0].Py()+ntuple->jLV[1].Py()+ntuple->lLV[0].Py()+ntuple->METLV[0].Py(),2));
+      BDTReaders[6].first["dRlepjj"].value = mnt->dRlepjj;
+      BDTReaders[6].first["dPhiMETJet"].value = mnt->dPhiMETJet;
+      BDTReaders[6].first["dPhiJetJet"].value = mnt->dPhiJetJet;
+      BDTReaders[6].first["CosTheta_l"].value = mnt->CosTheta_l;
+      BDTReaders[6].first["CosTheta_WH"].value = mnt->CosTheta_WH;
    }
    else if(ntuple->jLV.size()==3 && ntuple->getNBTags()==0) {
       ret = make_pair(1,4);
 
       //UVa
       BDTReaders[1].first["leptonPt"].value = ntuple->lLV[0].Pt();
-      BDTReaders[1].first["leptonEtaCharge"].value = ntuple->lLV[0].lQ;
+      BDTReaders[1].first["leptonEtaCharge"].value = ntuple->lLV[0].Eta()*ntuple->lLV[0].lQ;
       BDTReaders[1].first["jet2dRLep"].value = ntuple->jLV[1].DRlj;
       BDTReaders[1].first["jet3dRLep"].value = ntuple->jLV[2].DRlj;
       double tmpHT = 0.0;
@@ -850,20 +811,31 @@ pair<int,int> MicroNtupleMaker::setMVAVar(EventNtuple * ntuple, MicroNtuple * mn
       BDTReaders[1].first["CosTheta_j"].value = mnt->CosTheta_j;
       BDTReaders[1].first["CosTheta_WH"].value = mnt->CosTheta_WH;
 
-      //TAMU
-      for(int i=0; i<13; i++)
-         BDTReaders[4].first[Form("logEventProb%i",i)].value = TMath::Log(mnt->eventProb[i]);
-      BDTReaders[4].first["logEventProb19"].value = TMath::Log(mnt->eventProb[19]);
-      BDTReaders[4].first["logEventProb54"].value = TMath::Log(mnt->eventProb[54]);
-      BDTReaders[4].first["event"].value = ntuple->event;
-      BDTReaders[4].first["lumi"].value = ntuple->lumi;
-      BDTReaders[4].first["run"].value = ntuple->run;
+      //Combined
+      BDTReaders[7].first["leptonPt"].value = ntuple->lLV[0].Pt();
+      BDTReaders[7].first["leptonEtaCharge"].value = ntuple->lLV[0].Eta()*ntuple->lLV[0].lQ;
+      BDTReaders[7].first["jet2dRLep"].value = ntuple->jLV[1].DRlj;
+      BDTReaders[7].first["jet3dRLep"].value = ntuple->jLV[2].DRlj;
+      tmpHT = 0.0;
+      for(unsigned int i=0; i<ntuple->jLV.size(); i++) {
+         tmpHT+=ntuple->jLV[i].Et();
+      }
+      tmpHT+=ntuple->lLV[0].Pt();
+      BDTReaders[7].first["ht"].value = tmpHT;
+      BDTReaders[7].first["Mlnujj"].value = TMath::Sign(TMath::Sqrt(TMath::Abs(TMath::Power(ntuple->jLV[0].E()+ntuple->jLV[1].E()+ntuple->lLV[0].E()+ntuple->METLV[0].E(),2)-(TMath::Power(ntuple->jLV[0].Px()+ntuple->jLV[1].Px()+ntuple->lLV[0].Px()+ntuple->METLV[0].Px(),2)+TMath::Power(ntuple->jLV[0].Py()+ntuple->jLV[1].Py()+ntuple->lLV[0].Py()+ntuple->METLV[0].Py(),2)+TMath::Power(ntuple->jLV[0].Pz()+ntuple->jLV[1].Pz()+ntuple->lLV[0].Pz()+ntuple->METLV[0].Pz(),2)))),TMath::Power(ntuple->jLV[0].E()+ntuple->jLV[1].E()+ntuple->lLV[0].E()+ntuple->METLV[0].E(),2)-(TMath::Power(ntuple->jLV[0].Px()+ntuple->jLV[1].Px()+ntuple->lLV[0].Px()+ntuple->METLV[0].Px(),2)+TMath::Power(ntuple->jLV[0].Py()+ntuple->jLV[1].Py()+ntuple->lLV[0].Py()+ntuple->METLV[0].Py(),2)+TMath::Power(ntuple->jLV[0].Pz()+ntuple->jLV[1].Pz()+ntuple->lLV[0].Pz()+ntuple->METLV[0].Pz(),2)));
+      BDTReaders[7].first["dRlepjj"].value = mnt->dRlepjj;
+      BDTReaders[7].first["dPhiMETJet"].value = mnt->dPhiMETJet;
+      BDTReaders[7].first["dEtaJetJet"].value = TMath::Abs(ntuple->jLV[0].Eta()-ntuple->jLV[1].Eta());
+      BDTReaders[7].first["minDPhiLepJet"].value = mnt->minDPhiLepJet;
+      BDTReaders[7].first["CosTheta_l"].value = mnt->CosTheta_l;
+      BDTReaders[7].first["CosTheta_j"].value = mnt->CosTheta_j;
+      BDTReaders[7].first["CosTheta_WH"].value = mnt->CosTheta_WH;
    }
-   else if(ntuple->jLV.size()==4 && ntuple->getNBTags()==0) {
+   else if(ntuple->jLV.size()>=4 && ntuple->getNBTags()==0) {
       ret = make_pair(2,5);
 
       //UVa
-      BDTReaders[2].first["leptonEtaCharge"].value = ntuple->lLV[0].lQ;
+      BDTReaders[2].first["leptonEtaCharge"].value = ntuple->lLV[0].Eta()*ntuple->lLV[0].lQ;
       BDTReaders[2].first["jet2dRLep"].value = ntuple->jLV[1].DRlj;
       BDTReaders[2].first["jet3dRLep"].value = ntuple->jLV[2].DRlj;
       double tmpHT = 0.0;
@@ -876,24 +848,243 @@ pair<int,int> MicroNtupleMaker::setMVAVar(EventNtuple * ntuple, MicroNtuple * mn
       BDTReaders[2].first["dPhiMETJet"].value = mnt->dPhiMETJet;
       BDTReaders[2].first["dPhiMETLep"].value = TMath::Abs(ntuple->METLV[0].Phi()-ntuple->lLV[0].Phi());
 
-      //TAMU
-      for(int i=0; i<13; i++)
-         BDTReaders[5].first[Form("logEventProb%i",i)].value = TMath::Log(mnt->eventProb[i]);
-      BDTReaders[5].first["logEventProb19"].value = TMath::Log(mnt->eventProb[19]);
-      BDTReaders[5].first["logEventProb54"].value = TMath::Log(mnt->eventProb[54]);
-      BDTReaders[5].first["event"].value = ntuple->event;
-      BDTReaders[5].first["lumi"].value = ntuple->lumi;
-      BDTReaders[5].first["run"].value = ntuple->run;
+      //Combined
+      BDTReaders[8].first["leptonEtaCharge"].value = ntuple->lLV[0].Eta()*ntuple->lLV[0].lQ;
+      BDTReaders[8].first["jet2dRLep"].value = ntuple->jLV[1].DRlj;
+      BDTReaders[8].first["jet3dRLep"].value = ntuple->jLV[2].DRlj;
+      tmpHT = 0.0;
+      for(unsigned int i=0; i<ntuple->jLV.size(); i++) {
+         tmpHT+=ntuple->jLV[i].Et();
+      }
+      tmpHT+=ntuple->lLV[0].Pt();
+      BDTReaders[8].first["ht"].value = tmpHT;
+      BDTReaders[8].first["Mlnujj"].value = TMath::Sign(TMath::Sqrt(TMath::Abs(TMath::Power(ntuple->jLV[0].E()+ntuple->jLV[1].E()+ntuple->lLV[0].E()+ntuple->METLV[0].E(),2)-(TMath::Power(ntuple->jLV[0].Px()+ntuple->jLV[1].Px()+ntuple->lLV[0].Px()+ntuple->METLV[0].Px(),2)+TMath::Power(ntuple->jLV[0].Py()+ntuple->jLV[1].Py()+ntuple->lLV[0].Py()+ntuple->METLV[0].Py(),2)+TMath::Power(ntuple->jLV[0].Pz()+ntuple->jLV[1].Pz()+ntuple->lLV[0].Pz()+ntuple->METLV[0].Pz(),2)))),TMath::Power(ntuple->jLV[0].E()+ntuple->jLV[1].E()+ntuple->lLV[0].E()+ntuple->METLV[0].E(),2)-(TMath::Power(ntuple->jLV[0].Px()+ntuple->jLV[1].Px()+ntuple->lLV[0].Px()+ntuple->METLV[0].Px(),2)+TMath::Power(ntuple->jLV[0].Py()+ntuple->jLV[1].Py()+ntuple->lLV[0].Py()+ntuple->METLV[0].Py(),2)+TMath::Power(ntuple->jLV[0].Pz()+ntuple->jLV[1].Pz()+ntuple->lLV[0].Pz()+ntuple->METLV[0].Pz(),2)));
+      BDTReaders[8].first["dPhiMETJet"].value = mnt->dPhiMETJet;
+      BDTReaders[8].first["dPhiMETLep"].value = TMath::Abs(ntuple->METLV[0].Phi()-ntuple->lLV[0].Phi());
+   }
+
+   //TAMU+Combined
+   if(ntuple->jLV.size()>=2) {
+      for(unsigned int ireader=3; ireader<BDTReaders.size(); ireader++) {
+         for(int i=0; i<13; i++)
+            BDTReaders[ireader].first[Form("logEventProb%i",i)].value = TMath::Log(mnt->eventProb[i]);
+         BDTReaders[ireader].first["logEventProb19"].value = TMath::Log(mnt->eventProb[19]);
+         BDTReaders[ireader].first["logEventProb54"].value = TMath::Log(mnt->eventProb[54]);
+         BDTReaders[ireader].first["event"].value = ntuple->event;
+         BDTReaders[ireader].first["lumi"].value = ntuple->lumi;
+         BDTReaders[ireader].first["run"].value = ntuple->run;
+      }
    }
 
    return ret;
 
 }//setMVAVar
 
+bool MicroNtupleMaker::copyEventProbs(EventNtuple* mergeEventNtuple, EventNtuple* eventNtuple, METree* meNtuple, MicroNtuple* microNtuple) {
+   //assert(meNtuple->getNProbStat()>0);
+   if(meNtuple->getNProbStat()==0) {
+      cout << "WARNING::MicroNtupleMaker::copyEventProbs Skipping event because NProbStat==0" << endl
+           << "\tProbably a TTbar event" << endl;
+      return false;
+   }
+   for (int i = 0; i < meNtuple->getNProbStat(); ++i){
+      microNtuple->eventProb[i]    = meNtuple->getProbStat(i)->tEventProb;
+      if(currentProcess.Contains("TTbar") && meNtuple->getProbStat(i)->tEventProb==0) {
+         cout << "WARNING::MicroNtupleMaker::copyEventProbs Skipping event because tEventProb for ProbStat(" << i << ")==0" << endl
+              << "\tThis is a TTbar event." << endl;
+         return false;
+      }
+      else if(currentProcess.CompareTo("TTbar")!=0) {
+         assert(meNtuple->getProbStat(i)->tEventProb!=0);
+         assert(microNtuple->eventProb[i]!=0);
+      }
+      microNtuple->eventMaxProb[i] = meNtuple->getProbStat(i)->tEventMaxProb;  
+   }
+   return true;   
+}
 
+void MicroNtupleMaker::setSizeRunEvent(EventNtuple* eventNtuple, METree* meNtuple, MicroNtuple* microNtuple) {
+   microNtuple->size = meNtuple->getNProbStat();
+   microNtuple->run = eventNtuple->run;//meNtuple->getRun();
+   microNtuple->event = eventNtuple->event;//meNtuple->getEvent();
+}
 
+void MicroNtupleMaker::setEPDs(METree* meNtuple, MicroNtuple* microNtuple) {
+   microNtuple->epdPretagWWandWZ = microNtuple->calcWZEPD(DEFS::pretag);
+   microNtuple->epd0tagWWandWZ = microNtuple->calcWZEPD(DEFS::eq0tag);
+   microNtuple->epd1tagWWandWZ = microNtuple->calcWZEPD(DEFS::eq1tag);
+   microNtuple->epd2tagWWandWZ = microNtuple->calcWZEPD(DEFS::eq2tag);
+   int counterHWW = 0;
+   int counterWH = 0;
+   int counterH = 0;
+   //If using TArrayD
+   //microNtuple->epdPretagHiggs.Set(MicroNtuple::nHiggsMasses);
+   for(int i = 0; i < meNtuple->getNProbStat(); ++i) {
+      if(meNtuple->getProbStat(i)->tmeType == DEFS::EP::HWW) {
+         microNtuple->epd1tagHWW[counterHWW] = microNtuple->calcHWWEPD(DEFS::eq1tag,meNtuple->getProbStat(i)->tmeParam);
+         microNtuple->epd2tagHWW[counterHWW++] = microNtuple->calcHWWEPD(DEFS::eq2tag,meNtuple->getProbStat(i)->tmeParam);
+      }
+      if(meNtuple->getProbStat(i)->tmeType == DEFS::EP::WH) {
+         microNtuple->epd1tagWH[counterWH] = microNtuple->calcWHEPD(DEFS::eq1tag,meNtuple->getProbStat(i)->tmeParam);
+         microNtuple->epd2tagWH[counterWH++] = microNtuple->calcWHEPD(DEFS::eq2tag,meNtuple->getProbStat(i)->tmeParam);
+      }
+      if(meNtuple->getProbStat(i)->tmeType == DEFS::EP::HWW || meNtuple->getProbStat(i)->tmeType == DEFS::EP::WH) {
+         //Used to absorb the error of the missing first entry
+         microNtuple->absorbError[counterH] = -1;
+         microNtuple->epdPretagHiggs[counterH] = microNtuple->calcHiggsEPD(DEFS::pretag,meNtuple->getProbStat(i)->tmeParam);
+         microNtuple->epd1tagHiggs[counterH] = microNtuple->calcHiggsEPD(DEFS::eq1tag,meNtuple->getProbStat(i)->tmeParam);
+         microNtuple->epd2tagHiggs[counterH++] = microNtuple->calcHiggsEPD(DEFS::eq2tag,meNtuple->getProbStat(i)->tmeParam);
+      }
+   }
+}
 
+void MicroNtupleMaker::setTMVAInformation(EventNtuple* eventNtuple, MicroNtuple* microNtuple) {
+   microNtuple->dPhiJetJet = eventNtuple->getDeltaPhiJetJet();
+   microNtuple->dPhiMETJet = eventNtuple->getDeltaPhiMETJet();
+   microNtuple->minDPhiMETJet = eventNtuple->getMinDeltaPhiMETJet();
+   microNtuple->minDPhiLepJet = eventNtuple->getMinDPhiLepJet();
+   eventNtuple->getAngularVariables(microNtuple->Cos_dPhiWW,microNtuple->Cos_dPhiWH,microNtuple->CosTheta_l,
+                                    microNtuple->CosTheta_j,microNtuple->CosTheta_WH,microNtuple->JacksonAngle);
+   microNtuple->JacobePeak = eventNtuple->getJacobePeak();
+   microNtuple->dRlepjj = eventNtuple->getDeltaRlepjj();
+   microNtuple->sumJetEt = eventNtuple->getSumJetEt();
 
+   if(fillBDT) {
+      pair<int,int> readerIndex = setMVAVar(eventNtuple,microNtuple);
+      //if(eventNtuple->jLV.size()>1 && eventNtuple->jLV.size()<5 && eventNtuple->getNBTags()==0) {
+      if(eventNtuple->jLV.size()>1 && eventNtuple->getNBTags()==0) {
+         microNtuple->KinBDT = BDTReaders[readerIndex.first].second->EvaluateMVA("BDT method");
+         microNtuple->MEBDT = BDTReaders[readerIndex.second].second->EvaluateMVA("BDT method");
+         microNtuple->KinMEBDT = BDTReaders[readerIndex.second+3].second->EvaluateMVA("BDT method");
+      }
+      else {
+         microNtuple->KinBDT = -9999;
+         microNtuple->MEBDT = -9999;
+         microNtuple->KinMEBDT = -9999;
+      }
+   }
+   else {
+      microNtuple->KinBDT = -9999;
+      microNtuple->MEBDT = -9999;
+      microNtuple->KinMEBDT = -9999;
+   }
+}
+
+void MicroNtupleMaker::updateMicroNtuple(TString outputPath, TString updateMicroNtuple) {
+
+   TFile* file_to_update = TFile::Open(updateMicroNtuple,"READ");
+   TTree* tree_to_update = (TTree*)gDirectory->Get("METree");
+   if(!tree_to_update) {
+      cout << "ERROR::MicroNtupleMaker::updateMicroNtuple Could not find the tree METree in the file " << updateMicroNtuple << endl;
+      assert(tree_to_update); 
+   }
+
+   cout << "MicroNtupleMaker::updateMicroNtuple Make ntuples ... ";
+   // Create the base objects
+   EventNtuple * eventNtuple      = new EventNtuple();
+   METree      * meNtuple         = new METree();
+   MicroNtuple * microNtuple      = new MicroNtuple(2);
+   cout << "DONE" << endl;
+
+   cout << "MicroNtupleMaker::updateMicroNtuple Set EvtTree, METree, and MicroNtuple branches ... ";
+   tree_to_update->SetBranchStatus("mnt*",0);
+   tree_to_update->SetBranchAddress("EvtTree", &eventNtuple);
+   tree_to_update->SetBranchAddress("METree", &meNtuple);
+   cout << "DONE" << endl;   
+
+   cout << "MicroNtupleMaker::updateMicroNtuple Create output file and setup output tree ... ";
+   // Create and output file and clone the tree that will be in the output and set microNtuple that fills it
+   TString output = outputPath+"micro"+currentProcess+"_BaseCuts.root";
+   TFile outputFile(output, "RECREATE");
+   TTree* outputTree = new TTree(tree_to_update->GetName(),tree_to_update->GetTitle());
+   outputTree->Branch("EvtTree", "EventNtuple", &eventNtuple);
+   outputTree->Branch("METree", "METree", &meNtuple);
+   outputTree->Branch("mnt", "MicroNtuple", &microNtuple);
+   cout << "DONE" << endl << endl << endl;
+
+   // The index map has not been filled yet
+   imFilled = false;
+
+   //
+   // If the paths for the BDT weights are set, store them in the tree
+   //
+   if (fillBDT) {
+      setBDTReadersFromTable();
+   }
+
+   // Get the entries and report if zero
+   nentries = static_cast<unsigned>(tree_to_update->GetEntries());
+   cout << endl << endl << "Original chain has " << nentries << " entries" << endl;
+   if (nentries == 0){
+      cout << "\t\tNo entries found!  Aborting.\n";
+      return;
+   }
+
+   // If the start and end entries are not 0 and -1 respectively then only loop through the requested entries
+   startEndEntries.first!=0 ? startEntry = startEndEntries.first : startEntry = 0;
+   startEndEntries.second!=-1 ? endEntry = startEndEntries.second : endEntry = nentries;
+   // Check if the user made a mistake and the endEntry requested is greater than the last entry in the TChain or TTree
+   endEntry>nentries ? endEntry = nentries : endEntry = endEntry;
+   cout << "MicroNtupleMaker::updateMicroNtuple Starting with entry " << startEntry << " and ending with entry " << endEntry << endl;
+
+   //Loop over all the entries in the original chain. The idea is to copy everything to microNtuple
+   cout << "MicroNtupleMaker::updateMicroNtuple Filling MicroNtuple ..." << endl;
+
+   for (unsigned ientry = startEntry; ientry < endEntry; ++ientry){
+
+      loadbar2(ientry+1,nentries);
+
+      // get the entry
+      tree_to_update->GetEntry(ientry);
+
+      if (!imFilled) {
+         microNtuple->indexMap = meNtuple->fillIndexMap();
+         imFilled = true;
+      }
+
+      // clear the microNtuple
+      microNtuple->clear();
+
+      // First copy all the event probabilities
+      if(meNtuple->getNProbStat()<1) {
+         cout << endl << endl << "ientry = " << ientry << "\tThis is eventNtuple->event " << eventNtuple->event
+              << ", meNtuple->getEvent() " << meNtuple->getEvent() << endl << endl;
+         cout << endl << endl<< "There is a problem with getNProbStat (size = " << meNtuple->getNProbStat()
+                                          << ") in entry " << meNtuple->getEvent() << " or " << eventNtuple->event << endl << endl; 
+         cout << endl << endl << endl;
+         continue;
+      }
+      bool passCopy = copyEventProbs(0,eventNtuple,meNtuple,microNtuple);
+      if(!passCopy) {
+         microNtuple->clear();
+         continue;
+      }
+      setSizeRunEvent(eventNtuple,meNtuple,microNtuple);
+      setEPDs(meNtuple, microNtuple);
+      setTMVAInformation(eventNtuple,microNtuple);
+      microNtuple->reader = 0;
+
+      //
+      // Finalize the output tree
+      //
+
+      outputTree->Fill();
+
+      microNtuple->clear();
+      meNtuple->clear();
+   }//for entries
+
+   //
+   // Report some results
+   //
+   cout << endl << endl << "Wrote " << output << " with " << outputTree->GetEntries() << " entries" << endl;
+   outputFile.Write();
+   outputFile.Close();
+   file_to_update->Close();
+   delete meNtuple;
+   delete microNtuple;
+   delete eventNtuple;    
+}
 
 
 

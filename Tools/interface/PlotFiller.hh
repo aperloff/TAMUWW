@@ -15,6 +15,7 @@
 #include "TAMUWW/MEPATNtuple/interface/METree.hh"
 #include "TAMUWW/MEPATNtuple/interface/MicroNtuple.hh"
 #include "TAMUWW/SpecialTools/interface/MVAVar.hh"
+#include "TAMUWW/SpecialTools/interface/ProgressBar.hh"
 #include "TAMUWW/Tools/interface/PUreweight.hh"
 #include "TAMUWW/Tools/interface/TriggerEfficiency.hh"
 
@@ -43,14 +44,15 @@ public:
    ~PlotFiller();
    
    // Simple functions to change the functionality of the code.
-   void setWeightFunction(double (*userWeightFuncTemp) (EventNtuple*, const PhysicsProcess*));
-   void setCutFunction(bool (*userCutFuncTemp) (EventNtuple*, const PhysicsProcess*));
+   void setWeightFunction(double (*userWeightFuncTemp) (EventNtuple*, MicroNtuple*, const PhysicsProcess*));
+   void setCutFunction(bool (*userCutFuncTemp) (EventNtuple*, MicroNtuple*, const PhysicsProcess*, map<TString,MVAVar>&, vector<TString>));
    void setProcessFunction(void (*userProcessFuncTemp) (EventNtuple*, const PhysicsProcess*));
    void setInitializeEventFunction(void (*userInitEventFuncTemp) (EventNtuple*, const PhysicsProcess*));
    void setMVAWeightDir(TString MVAWD);
    void setMVAMethods(vector<TString> MVAM);
    void setMVAVar(vector<TString> mvav);
    void setMVASpec(vector<TString> mvas);
+   void setLimitBranches(int lb);
    
    // Debug functions
    void setMaximumEventsDEBUG(unsigned int maxEvts);
@@ -65,6 +67,7 @@ private:
    unsigned int numberOfEvents;
    unsigned int debugNumberOfEvents;
    bool debug;
+   int limitBranches;
    TString MVAWeightDir;
       vector<TString> MVAMethods, MVAV, MVAS;
    std::map<TString,MVAVar> MVAVars;
@@ -75,20 +78,20 @@ private:
    // Fills the plots
    void (*userFillFunc) (MapOfPlots &, TString, EventNtuple*, METree*, MicroNtuple*, vector<TString>, std::map<TString,MVAVar>&, double);
    // Returns a double that will multiply the weight
-   double (*userWeightFunc) (EventNtuple*, const PhysicsProcess*);
+   double (*userWeightFunc) (EventNtuple*, MicroNtuple*, const PhysicsProcess*);
    // Returns true if the event passes the cut
-   bool (*userCutFunc) (EventNtuple*, const PhysicsProcess*);
+   bool (*userCutFunc) (EventNtuple*, MicroNtuple*, const PhysicsProcess*, map<TString,MVAVar>&, vector<TString>);
    // This function is called once for each process before the events are run
    void (*userProcessFunc) (EventNtuple*, const PhysicsProcess*);
    // This function is called once for each event before any cuts are made
    void (*userInitEventFunc) (EventNtuple*, const PhysicsProcess*);
    
    // These default functions allow the user to only have to create functions for weights etc that he/she wants to add.
-   static bool defaultCutFunc(EventNtuple*, const PhysicsProcess*)
+   static bool defaultCutFunc(EventNtuple*, MicroNtuple*, const PhysicsProcess*, map<TString,MVAVar>&, vector<TString>)
    {
       return true;
    }
-   static double defaultWeightFunc(EventNtuple*, const PhysicsProcess*)
+   static double defaultWeightFunc(EventNtuple*, MicroNtuple*, const PhysicsProcess*)
    {
       return 1.0;
    }

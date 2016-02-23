@@ -50,10 +50,12 @@ typedef PlotFiller::MapOfPlots MapOfPlots;
 namespace UserFunctions
 {
    TString outDir;
+   TString signalTitle;
    DEFS::ControlRegion controlRegion;
    DEFS::TagCat tagCat;
    DEFS::LeptonCat leptonCat;
    DEFS::JetBin jetBin;
+   DEFS::NtupleType ntupleType;
    PUreweight* puweight;
    CSVreweight* csvweight;
    TTbarreweight* ttbarweight;
@@ -64,6 +66,7 @@ namespace UserFunctions
    bool doJER;
    bool doMETPhiCorrection;
    bool doPUreweight;
+   TString pileupSystematic;
    bool doCSVreweight;
    TString doCSVsys;
    bool doTTbarreweight;
@@ -74,13 +77,29 @@ namespace UserFunctions
    bool fillTMDF;
    bool  QCDweight;
    TH1D* QCDWeightFunc = 0;
+   TString QCDweightSys;
+   bool CosThetaLweight;
+   TH1D* CosThetaLWeightFunc = 0;
+   TString CosThetaLweightSys;
+   bool WPtWeight;
+   TH1D* WPtWeightFunc = 0;
    bool  PtWeight;
    TH1D* PtWeightFunc = 0;
+   bool  ZllPtWeight;
+   TH1D* ZllPtWeightFunc = 0;
    bool WJweight;
    TH2D* WJetsWeightFunc= 0;
    TF2 * WJetsWeightTF2 = 0;
    bool  fill2D = 0;
    bool  fillNonStandard = 0;
+   bool  fillEPD = 0;
+   bool  fillBumpCrossCheck = 0;
+   bool  fillWJetsFlavor = 0;
+   bool  fillLimitTemplatesOnly = 0;
+   bool  fillGen = 0;
+   int   limitBranches = 0;
+   bool  createMVADiscriminatorPlot = 0;
+   bool  doBCJetWeight;
    bool verbose; // adds or takes away cout statements when running
    map<int,pair<double, double> > maxEventProbs;
    bool doBenchmarks = false;
@@ -97,24 +116,17 @@ namespace UserFunctions
    void fillPlots(MapOfPlots &  plots, TString processName, EventNtuple * ntuple, 
                   METree * metree, MicroNtuple * mnt, vector<TString>, 
                   map<TString, MVAVar>& evMap, double weight = 1.0);
+   // compute the combined BDT
+   double computeCombinedBDT(EventNtuple * ntuple, MicroNtuple * mnt, map<TString,
+                             MVAVar>& evMap, vector<TString>, TString valueType = "response");
    // returns a boolean if the event passes the specified cuts
-   bool eventPassCuts(EventNtuple * ntuple, const PhysicsProcess*);
+   bool eventPassCuts(EventNtuple * ntuple, MicroNtuple * mnt, const PhysicsProcess*,
+                      map<TString,MVAVar>& evMap, vector<TString> MVAMethods);
+                                  
    // returns a double
-   double weightFunc(EventNtuple* ntuple, const PhysicsProcess* proc);
+   double weightFunc(EventNtuple* ntuple, MicroNtuple* mnt, const PhysicsProcess* proc);
    // Is run once for each process before events (initializes PU Reweighting
    void processFunc(EventNtuple* ntuple, const PhysicsProcess* proc);
-   // returns a number based on if the particle is a lepton or quark based on its pdgId
-   int leptonOrQuark(int x);
-   // returns the charge of a particle based on its pdgId
-   double charge(int x);
-   // returns the mass of the hadronic W and the leptonic W
-   pair<double,double> onVsOffShell(EventNtuple * ntuple);
-   pair<double,double> onVsOffShellInclusive(EventNtuple * ntuple);
-   //pair<double,double> ttbarPt(const EventNtuple * ntuple);
-   //double ttbarWeight(const EventNtuple * ntuple, const PhysicsProcess* proc = 0);
-   // returns a number rounded away from zero
-   double round(double r);
-   int round_int(double r);
    // concat any two streamable objects into a string
    template <class T, class U>
    std::string concatString(const T& obj1, const U& obj2);
@@ -137,7 +149,7 @@ void UserFunctions::fillPlots(MapOfPlots &  plots, TString processName, EventNtu
 
    //WARNING!!! Make sure that ntuple, metree, and mnt are set before using!!! 
    // Example::metree and mnt will not be set if you are running on an MEInput file.
-   if (ntuple) {
+   if (ntuple && !UserFunctions::fillLimitTemplatesOnly) {
       double WmT = sqrt(pow(ntuple->lLV[0].Et()+ntuple->METLV[0].Pt(), 2) -
                         pow(ntuple->lLV[0].Px()+ntuple->METLV[0].Px(), 2) -
                         pow(ntuple->lLV[0].Py()+ntuple->METLV[0].Py(), 2));
@@ -189,42 +201,48 @@ void UserFunctions::fillPlots(MapOfPlots &  plots, TString processName, EventNtu
       plots[leptonCat]["LeptPhi"]->Fill(ntuple->lLV[0].Phi(),weight);
       plots[leptonCat]["LeptPFIso"]->Fill(ntuple->lLV[0].lpfIso ,weight);
       plots[leptonCat]["MET"]->Fill(ntuple->METLV[0].Pt(),weight);
-      plots[leptonCat]["MET_vs_LeptEta"]->Fill(ntuple->lLV[0].Eta(),
-					       ntuple->METLV[0].Pt(),
-					       weight);
-      plots[leptonCat]["MET_vs_LeptPt"]->Fill(ntuple->lLV[0].Pt(),
-                                              ntuple->METLV[0].Pt(),
-                                              weight); 
-      plots[leptonCat]["MET_vs_AbsLeptEta"]->Fill(fabs(ntuple->lLV[0].Eta()),
-						  ntuple->METLV[0].Pt(),
-						  weight);
       plots[leptonCat]["METPhi"]->Fill(ntuple->METLV[0].Phi(),weight);
+      plots[leptonCat]["Ptlv"]->Fill((ntuple->lLV[0]+ntuple->METLV[0]).Pt(),weight);
       plots[leptonCat]["WmT"]->Fill(WmT, weight);
       plots[leptonCat]["Jet1Pt"]->Fill(ntuple->jLV[0].Pt(),weight);
       plots[leptonCat]["Jet1Eta"]->Fill(ntuple->jLV[0].Eta(),weight);
       plots[leptonCat]["Jet1Phi"]->Fill(ntuple->jLV[0].Phi(),weight);
+      plots[leptonCat]["DeltaPhi_LJ1"]->Fill(ntuple->lLV[0].DeltaPhi(ntuple->jLV[0]),weight);
+      plots[leptonCat]["DeltaPhi_METJ1"]->Fill(ntuple->jLV[0].DeltaPhi(ntuple->METLV[0]),weight);
+      plots[leptonCat]["DeltaPhi_LMET"]->Fill(ntuple->lLV[0].DeltaPhi(ntuple->METLV[0]),weight);
       plots[leptonCat]["npv"]->Fill(ntuple->vLV[0].npv,weight);
 
       if(UserFunctions::fillNonStandard) {
+         plots[leptonCat]["SigmaIetaIeta"]->Fill(ntuple->lLV[0].eSigmaIetaIeta,weight);
+         plots[leptonCat]["MVATrig"]->Fill(ntuple->lLV[0].emvaTrig,weight);
+         plots[leptonCat]["MVANonTrig"]->Fill(ntuple->lLV[0].emvaNonTrig,weight);
          plots[leptonCat]["DeltaRLepMET"]->Fill(sqrt(pow(ntuple->lLV[0].Eta()-ntuple->METLV[0].Eta(),2)+
                                                      pow(ntuple->lLV[0].Phi()-ntuple->METLV[0].Phi(),2) ),weight);
-         plots[leptonCat]["DeltaPhi_LJ1"]->Fill(ntuple->lLV[0].DeltaPhi(ntuple->jLV[0]),weight);
-         plots[leptonCat]["DeltaPhi_METJ1"]->Fill(ntuple->jLV[0].DeltaPhi(ntuple->METLV[0]),weight);
-         plots[leptonCat]["DeltaPhi_LMET"]->Fill(ntuple->lLV[0].DeltaPhi(ntuple->METLV[0]),weight);
          for (unsigned int j=0; j<ntuple->jLV.size() && j<32; j++) {
-            //cout << "sfsg2.1\t" << string(Form("JetEta_%luJets",ntuple->jLV.size())) << endl;
             plots[leptonCat][string(Form("JetEta_%luJets",ntuple->jLV.size()))]->Fill(ntuple->jLV[j].Eta(),weight);
             plots[leptonCat]["nJets_JetEta"]->Fill(ntuple->jLV[j].Eta(),ntuple->jLV.size(),weight);
          }
          plots[leptonCat]["WmT_Positive"]->Fill(WmT, weight);
          plots[leptonCat]["WmT_Negative"]->Fill(WmT, weight);
          plots[leptonCat]["WmT_Subtracted"]->Fill(WmT, (ntuple->lLV[0].lQ)*weight);
+         if(processName.Contains("TTbar"))
+            plots[leptonCat]["TTbarWeights"]->Fill(ttbarweight->getWeight(ntuple,0),1.0);
+            //plots[leptonCat]["TTbarWeights"]->Fill(ttbarWeight(ntuple,0),1.0);
       }
 
       if(UserFunctions::fill2D) {
+         plots[leptonCat]["MET_vs_LeptEta"]->Fill(ntuple->lLV[0].Eta(),
+                                                  ntuple->METLV[0].Pt(),
+                                                  weight);
+         plots[leptonCat]["MET_vs_LeptPt"]->Fill(ntuple->lLV[0].Pt(),
+                                                 ntuple->METLV[0].Pt(),
+                                                 weight); 
+         plots[leptonCat]["MET_vs_AbsLeptEta"]->Fill(fabs(ntuple->lLV[0].Eta()),
+                                                     ntuple->METLV[0].Pt(),
+                                                     weight);
          plots[leptonCat]["IsolationEnergyVsPt"]->Fill(ntuple->lLV[0].Pt(),ntuple->lLV[0].lpfIso*ntuple->lLV[0].Pt());
          plots[leptonCat]["IsolationEnergyVsPtCoshEta"]->Fill(ntuple->lLV[0].Pt()*TMath::CosH(ntuple->lLV[0].Eta()),ntuple->lLV[0].lpfIso*ntuple->lLV[0].Pt());
-         pair<double,double> leptVsHadWMass = onVsOffShellInclusive(ntuple);
+         pair<double,double> leptVsHadWMass = ntuple->onVsOffShellInclusive(verbose);
          plots[leptonCat]["MWjjVsMWlv"]->Fill(leptVsHadWMass.first,leptVsHadWMass.second,weight);
          if (ntuple->lLV[0].lQ == 1 && ntuple->jLV.size()>1){
             plots[leptonCat]["DeltaPhi_LJ1_vs_J1J2_Positive"]->Fill(ntuple->lLV[0].DeltaPhi(ntuple->jLV[0]), 
@@ -239,10 +257,6 @@ void UserFunctions::fillPlots(MapOfPlots &  plots, TString processName, EventNtu
                                                                     ntuple->jLV[0].Eta()-ntuple->jLV[1].Eta(),weight);
          }
       }
-
-      if(processName.Contains("TTbar"))
-         plots[leptonCat]["TTbarWeights"]->Fill(ttbarweight->getWeight(ntuple,0),1.0);
-         //plots[leptonCat]["TTbarWeights"]->Fill(ttbarWeight(ntuple,0),1.0);
 
       if (UserFunctions::fillTMDF){
          vector<Double_t> coord;
@@ -271,101 +285,131 @@ void UserFunctions::fillPlots(MapOfPlots &  plots, TString processName, EventNtu
          plots[leptonCat]["Mjj_Mjj_Mt_MET_DeltaR_DeltaR"]->Fill(coord,1.0,weight);
       }
 
-   }
-
-   if (metree) {
-      //double norms[9] = {0.781996e-6,76.4008e-9,0.1939e-3,42.31735e-6,0.12688e-3,5.85109e-6,0.592615,0.66255e-9,0.208542e-9};
-      //TString normNames[9] = {"WW","WZ","WLg","WLgsub","Wgg","WLL","QCD","ggH125","WH125"};
-      for (int tep=0; tep<metree->getNProbStat(); tep++) {
-         string name = UserFunctions::concatString("tEventProb",tep);
-         //cout << name << " = " << metree->getProbStat(tep)->tEventProb << " (" << (Float_t*)(&metree->getProbStat(tep)->tEventProb)<< ")"<<endl;
-         //cout << "sfsg1 tep=" << tep << endl;
-         if((int)maxEventProbs.size()!=metree->getNProbStat()) {
-            maxEventProbs[tep] = DefaultValues::getMaxEventProbAndError(tep);
+      if (UserFunctions::fillGen && !processName.Contains("Data") && !processName.Contains("QCD")) {
+         TLorentzVector lepton;
+         TLorentzVector boson;
+         if(processName.Contains("ZJets") && !processName.Contains("ZJetsToLL")) {
+            //lepton = ntuple->getGenVorDaughter(EventNtuple::LEPTON, 23, 0, false);
+            //boson = ntuple->getGenVorDaughter(EventNtuple::BOSON, 23, 0, false);
          }
-
-         if(metree->getProbStat(tep)->tEventProb == 0) {
-            cout << "ERROR::plotter_x tEventProb" << tep << " == 0" << endl
-                 << "This will cause issues down the line" << endl
-                 << "Please fix this and try again" << endl;
-            //assert(metree->getProbStat(tep)->tEventProb!=0);
-            continue;
-         }
-
-         if(maxEventProbs[tep].first>0) {
-            plots[leptonCat][name]->Fill(TMath::Log10(metree->getProbStat(tep)->tEventProb)-
-                                         TMath::Log10(maxEventProbs[tep].first),weight);
+         else if(processName.Contains("WJets") || processName.Contains("ZJetsToLL") || processName.Contains("TTbar") ||
+                 processName.Contains("STop") || processName.Contains("WW") || processName.Contains("WZ")) {
+            lepton = ntuple->getGenVorDaughter(EventNtuple::LEPTON, 24, 0, false);
+            boson = ntuple->getGenVorDaughter(EventNtuple::BOSON, 24, 0, false);
          }
          else {
-            plots[leptonCat][name]->Fill(TMath::Log10(metree->getProbStat(tep)->tEventProb),weight);
+            lepton = ntuple->getGenVorDaughter(EventNtuple::LEPTON, 25, 0, false);
+            boson = ntuple->getGenVorDaughter(EventNtuple::BOSON, 25, 0, false);
          }
+         plots[leptonCat]["GenLeptPt"]->Fill(lepton.Pt());
+         plots[leptonCat]["GenLeptEta"]->Fill(lepton.Eta());
+         plots[leptonCat]["GenLeptPhi"]->Fill(lepton.Phi());
+         plots[leptonCat]["GenWmT"]->Fill(boson.Mt());
+         plots[leptonCat]["GenVPt"]->Fill(boson.Pt());
+         plots[leptonCat]["GenVEta"]->Fill(boson.Eta());
+         plots[leptonCat]["GenVPhi"]->Fill(boson.Phi());
       }
 
-      if (metree->getNProbStat()>=3) {
-         double tEventProb0 = metree->getProbStat(0)->tEventProb;
-         double tEventProb1 = metree->getProbStat(1)->tEventProb;
-         double tEventProb3 = metree->getProbStat(3)->tEventProb;
+   }
+   else if (ntuple && UserFunctions::fillLimitTemplatesOnly) {
+      plots[leptonCat]["MET"]->Fill(ntuple->METLV[0].Pt(),weight);
+   }
 
-         double signal = (tEventProb0 / 0.8e-06) + (tEventProb1 / 0.1e-06);
-         double back   = tEventProb3 / 0.75e-03;
-         double epd    = signal /(signal+back);
-         plots[leptonCat]["epdPretagWWandWZ_RE"]->Fill(epd,weight);
+   if (metree && !UserFunctions::fillLimitTemplatesOnly) {
+      if(!UserFunctions::fillLimitTemplatesOnly) {
+         //double norms[9] = {0.781996e-6,76.4008e-9,0.1939e-3,42.31735e-6,0.12688e-3,5.85109e-6,0.592615,0.66255e-9,0.208542e-9};
+         //TString normNames[9] = {"WW","WZ","WLg","WLgsub","Wgg","WLL","QCD","ggH125","WH125"};
+         for (int tep=0; tep<metree->getNProbStat(); tep++) {
+            string name = UserFunctions::concatString("tEventProb",tep);
+            if((int)maxEventProbs.size()!=metree->getNProbStat()) {
+               maxEventProbs[tep] = DefaultValues::getMaxEventProbAndError(tep);
+            }
+   
+            if(metree->getProbStat(tep)->tEventProb == 0) {
+               cout << "ERROR::plotter_x tEventProb" << tep << " == 0" << endl
+                    << "This will cause issues down the line" << endl
+                    << "Please fix this and try again" << endl;
+               //assert(metree->getProbStat(tep)->tEventProb!=0);
+               continue;
+            }
+   
+            if(maxEventProbs[tep].first>0) {
+               plots[leptonCat][name]->Fill(TMath::Log10(metree->getProbStat(tep)->tEventProb)-
+                                            TMath::Log10(maxEventProbs[tep].first),weight);
+            }
+            else {
+               plots[leptonCat][name]->Fill(TMath::Log10(metree->getProbStat(tep)->tEventProb),weight);
+            }
+         }
+      }
+      if(UserFunctions::fillEPD) {
+         if (metree->getNProbStat()>=3) {
+            double tEventProb0 = metree->getProbStat(0)->tEventProb;
+            double tEventProb1 = metree->getProbStat(1)->tEventProb;
+            double tEventProb3 = metree->getProbStat(3)->tEventProb;
+   
+            double signal = (tEventProb0 / 0.8e-06) + (tEventProb1 / 0.1e-06);
+            double back   = tEventProb3 / 0.75e-03;
+            double epd    = signal /(signal+back);
+            plots[leptonCat]["epdPretagWWandWZ_RE"]->Fill(epd,weight);
+         }
       }
    }
 
    if (mnt) {
+      if(UserFunctions::fillEPD && !UserFunctions::fillLimitTemplatesOnly) {
+         plots[leptonCat]["epdPretagWWandWZ"]->Fill(-TMath::Log10(mnt->epdPretagWWandWZ),weight);
+         plots[leptonCat]["epdPretagHiggs125"]->Fill(-TMath::Log10(mnt->epdPretagHiggs[6]),weight);
+      }
       plots[leptonCat]["MEBDT"]->Fill(mnt->MEBDT,weight);
       plots[leptonCat]["KinBDT"]->Fill(mnt->KinBDT,weight);
-      plots[leptonCat]["epdPretagWWandWZ"]->Fill(-TMath::Log10(mnt->epdPretagWWandWZ),weight);
-      //plots[leptonCat]["epdPretagHiggs125"]->Fill(-TMath::Log10(mnt->epdPretagHiggs.At(6)),weight);
-      plots[leptonCat]["epdPretagHiggs125"]->Fill(-TMath::Log10(mnt->epdPretagHiggs[6]),weight);
+      plots[leptonCat]["KinMEBDT"]->Fill(mnt->KinMEBDT,weight);
+      if(processName.Contains("WJets") && UserFunctions::fillWJetsFlavor) {
+         double minpt = 25.0;
+         plots[leptonCat]["KinMEBDT_WpInclusive"]->Fill(mnt->KinMEBDT,weight);
+         if(!ntuple->containsParticle(4,true,minpt) && !ntuple->containsParticle(5,true,minpt))
+            plots[leptonCat]["KinMEBDT_WpLight"]->Fill(mnt->KinMEBDT,weight);
+         else if(ntuple->containsParticle(4,true,minpt) && !ntuple->containsParticle(5,true,minpt))
+            plots[leptonCat]["KinMEBDT_WpC"]->Fill(mnt->KinMEBDT,weight);
+         else if(ntuple->containsParticle(5,true,minpt))
+            plots[leptonCat]["KinMEBDT_WpB"]->Fill(mnt->KinMEBDT,weight);
+         else {
+            plots[leptonCat]["KinMEBDT_WpOther"]->Fill(mnt->KinMEBDT,weight);
+         }
+      }
+      if(!UserFunctions::fillLimitTemplatesOnly && ntuple) {
+         computeCombinedBDT(ntuple,mnt,evMap,MVAMethods,"response");
+         plots[leptonCat]["jet1dRLep"]->Fill(evMap["jet1dRLep"].value,weight);
+         plots[leptonCat]["jet2dRLep"]->Fill(evMap["jet2dRLep"].value,weight);
+         plots[leptonCat]["jet3dRLep"]->Fill(evMap["jet3dRLep"].value,weight);
+         plots[leptonCat]["leptonEtaCharge"]->Fill(evMap["leptonEtaCharge"].value,weight);
+         plots[leptonCat]["ht"]->Fill(evMap["ht"].value,weight);
+         plots[leptonCat]["Ptlnujj"]->Fill(evMap["Ptlnujj"].value,weight);
+         plots[leptonCat]["dPhiMETJet"]->Fill(evMap["dPhiMETJet"].value,weight);
+         plots[leptonCat]["dPhiMETLep"]->Fill(evMap["dPhiMETLep"].value,weight);
+         plots[leptonCat]["dRlepjj"]->Fill(evMap["dRlepjj"].value,weight);
+         plots[leptonCat]["minDPhiLepJet"]->Fill(evMap["minDPhiLepJet"].value,weight);
+         plots[leptonCat]["CosTheta_l"]->Fill(evMap["CosTheta_l"].value,weight);
+         plots[leptonCat]["CosTheta_j"]->Fill(evMap["CosTheta_j"].value,weight);
+         plots[leptonCat]["CosTheta_WH"]->Fill(evMap["CosTheta_WH"].value,weight);
+      }
+      if(UserFunctions::fillBumpCrossCheck) {
+         plots[leptonCat]["MEBDT_vs_KinBDT"]->Fill(mnt->KinBDT,mnt->MEBDT,weight);
+      }
 
       if (!MVAMethods.empty() && ntuple) {
-         //Alexx's BDT Spectators
-         evMap["event"].value = ntuple->event;
-         evMap["lumi"].value = ntuple->lumi;
-         evMap["run"].value = ntuple->run;
-
-         //Joey's BDT Spectators
-         //evMap["csvWeight_lep"].value = csvweight->getWeight(ntuple);
-         //evMap["ttbarWeight"].value = ttbarweight->getWeight(ntuple,0);
-         //evMap["puWeight_lep"].value = puweight->getWeight(ntuple->vLV[0].tnpus[1]);
-
-         //Joey's BDT Variables
-         evMap["leptonPt"].value = ntuple->lLV[0].Pt();
-         evMap["lepMT"].value = TMath::Sign(TMath::Sqrt(TMath::Abs(TMath::Power(ntuple->lLV[0].Pt()+ntuple->METLV[0].Pt(),2)-(TMath::Power(ntuple->lLV[0].Px()+ntuple->METLV[0].Px(),2)+TMath::Power(ntuple->lLV[0].Py()+ntuple->METLV[0].Py(),2)+TMath::Power(0,2)))),TMath::Power(ntuple->lLV[0].Pt()+ntuple->METLV[0].Pt(),2)-(TMath::Power(ntuple->lLV[0].Px()+ntuple->METLV[0].Px(),2)+TMath::Power(ntuple->lLV[0].Py()+ntuple->METLV[0].Py(),2)+TMath::Power(0,2)));
-         evMap["jet1dRLep"].value = ntuple->jLV[0].DRlj;
-         evMap["jet2dRLep"].value = ntuple->jLV[1].DRlj;
-         double tmpHT = 0.0;
-         for(unsigned int i=0; i<ntuple->jLV.size(); i++) {
-            tmpHT+=ntuple->jLV[i].Et();
+         plots[leptonCat]["MVADiscriminator"]->Fill(computeCombinedBDT(ntuple,mnt,evMap,MVAMethods,"response"),weight);
+         if(!UserFunctions::fillLimitTemplatesOnly) {
+            plots[leptonCat]["MVAProbability"]->Fill(computeCombinedBDT(ntuple,mnt,evMap,MVAMethods,"probability"),weight);
          }
-         tmpHT+=ntuple->lLV[0].Pt();
-         evMap["ht"].value = tmpHT;
-         evMap["Ptlnujj"].value = TMath::Sqrt(TMath::Power(ntuple->jLV[0].Px()+ntuple->jLV[1].Px()+ntuple->lLV[0].Px()+ntuple->METLV[0].Px(),2)+TMath::Power(ntuple->jLV[0].Py()+ntuple->jLV[1].Py()+ntuple->lLV[0].Py()+ntuple->METLV[0].Py(),2));
-         evMap["dRlepjj"].value = mnt->dRlepjj;
-         evMap["dPhiMETJet"].value = mnt->dPhiMETJet;
-         evMap["dPhiJetJet"].value = mnt->dPhiJetJet;
-         evMap["CosTheta_l"].value = mnt->CosTheta_l;
-         evMap["CosTheta_WH"].value = mnt->CosTheta_WH;
-         evMap["MEBDT"].value = mnt->MEBDT;
-         //cout << "nJets => " << ntuple->jLV.size() << endl;
-         //cout << "nBTag => " << ntuple->getNBTags() << endl;
-         //cout << "jet1 => pt=" << ntuple->jLV[0].Pt() << " eta=" << ntuple->jLV[0].Eta() << " phi=" << ntuple->jLV[0].Phi() << " et=" << ntuple->jLV[0].Et() << endl;
-         //cout << "jet2 => pt=" << ntuple->jLV[1].Pt() << " eta=" << ntuple->jLV[1].Eta() << " phi=" << ntuple->jLV[1].Phi() << " et=" << ntuple->jLV[1].Et() << endl;
-         //for (std::map<TString,MVAVar>::iterator it=evMap.begin(); it!=evMap.end(); ++it)
-         //   if(it->second.use)
-         //      std::cout << it->first << " => " << it->second.value << '\n';
-         //ME Extra BDT Variables
-
-         //mnt->setExtraVarMVA(evMap);
-         assert(!TMath::IsNaN(mnt->getMVAOutput(MVAMethods).front()["response"]));
-         plots[leptonCat]["MVADiscriminator"]->Fill(mnt->getMVAOutput(MVAMethods).front()["response"],weight);
-         //cout << "BDT Reader value = " << mnt->getMVAOutput(MVAMethods).front()["response"] << ", event number = " << mnt->event << endl;
-         plots[leptonCat]["MVAProbability"]->Fill(mnt->getMVAOutput(MVAMethods).front()["probability"],weight);
-         //cout << "MVADiscriminator_electron = " << mnt->getMVAOutput(MVAMethods).front()["response"] << endl;
-         //cout << "MVAProbability_electron = " << mnt->getMVAOutput(MVAMethods).front()["probability"] << endl;
-         //cout << "weight = " << weight << endl;
+         if(UserFunctions::fillBumpCrossCheck) {
+            plots[leptonCat]["MVADiscriminator_fineBinning"]->Fill(computeCombinedBDT(ntuple,mnt,evMap,MVAMethods,"response"),weight);
+         }
+         if(UserFunctions::fillBumpCrossCheck && UserFunctions::limitBranches == 0) {
+            //plots[leptonCat]["MVADiscriminator_fineBinning_0GenMatch"]->Fill(,weight);
+            //plots[leptonCat]["MVADiscriminator_fineBinning_1GenMatch"]->Fill(,weight);
+            //plots[leptonCat]["MVADiscriminator_fineBinning_2GenMatch"]->Fill(,weight);
+         }
       }
    }
    if(UserFunctions::doBenchmarks) {
@@ -383,15 +427,86 @@ void UserFunctions::fillPlots(MapOfPlots &  plots, TString processName, EventNtu
 }//fillPlots
 
 //______________________________________________________________________________
+// compute the combined BDT
+double UserFunctions::computeCombinedBDT(EventNtuple * ntuple, MicroNtuple * mnt, map<TString,
+                                         MVAVar>& evMap, vector<TString> MVAMethods, TString valueType) {
+   //Alexx's BDT Spectators
+   evMap["event"].value = ntuple->event;
+   evMap["lumi"].value = ntuple->lumi;
+   evMap["run"].value = ntuple->run;
+
+   //Joey's BDT Spectators
+   //evMap["csvWeight_lep"].value = csvweight->getWeight(ntuple);
+   //evMap["ttbarWeight"].value = ttbarweight->getWeight(ntuple,0);
+   //evMap["puWeight_lep"].value = puweight->getWeight(ntuple->vLV[0].tnpus[1]);
+
+   //Joey's BDT Variables
+   evMap["leptonEtaCharge"].value = ntuple->lLV[0].Eta()*ntuple->lLV[0].lQ;
+   evMap["leptonPt"].value = ntuple->lLV[0].Pt();
+   evMap["lepMT"].value = TMath::Sign(TMath::Sqrt(TMath::Abs(TMath::Power(ntuple->lLV[0].Pt()+ntuple->METLV[0].Pt(),2)-
+                                      (TMath::Power(ntuple->lLV[0].Px()+ntuple->METLV[0].Px(),2)+TMath::Power(ntuple->lLV[0].Py()+
+                                       ntuple->METLV[0].Py(),2)+TMath::Power(0,2)))),TMath::Power(ntuple->lLV[0].Pt()+ntuple->METLV[0].Pt(),2)-
+                                       (TMath::Power(ntuple->lLV[0].Px()+ntuple->METLV[0].Px(),2)+TMath::Power(ntuple->lLV[0].Py()+
+                                        ntuple->METLV[0].Py(),2)+TMath::Power(0,2)));
+   evMap["jet1dRLep"].value = ntuple->jLV[0].DRlj;
+   evMap["jet2dRLep"].value = ntuple->jLV[1].DRlj;
+   evMap["jet3dRLep"].value = ntuple->jLV[2].DRlj;
+   double tmpHT = 0.0;
+   for(unsigned int i=0; i<ntuple->jLV.size(); i++) {
+      tmpHT+=ntuple->jLV[i].Et();
+   }
+   tmpHT+=ntuple->lLV[0].Pt();
+   evMap["ht"].value = tmpHT;
+   evMap["Ptlnujj"].value = TMath::Sqrt(TMath::Power(ntuple->jLV[0].Px()+ntuple->jLV[1].Px()+ntuple->lLV[0].Px()+ntuple->METLV[0].Px(),2)+
+                                        TMath::Power(ntuple->jLV[0].Py()+ntuple->jLV[1].Py()+ntuple->lLV[0].Py()+ntuple->METLV[0].Py(),2));
+   evMap["Mlnujj"].value = TMath::Sign(TMath::Sqrt(TMath::Abs(TMath::Power(ntuple->jLV[0].E()+ntuple->jLV[1].E()+ntuple->lLV[0].E()+ntuple->METLV[0].E(),2)-
+                                       (TMath::Power(ntuple->jLV[0].Px()+ntuple->jLV[1].Px()+ntuple->lLV[0].Px()+ntuple->METLV[0].Px(),2)+
+                                        TMath::Power(ntuple->jLV[0].Py()+ntuple->jLV[1].Py()+ntuple->lLV[0].Py()+ntuple->METLV[0].Py(),2)+
+                                        TMath::Power(ntuple->jLV[0].Pz()+ntuple->jLV[1].Pz()+ntuple->lLV[0].Pz()+ntuple->METLV[0].Pz(),2)))),
+                                       TMath::Power(ntuple->jLV[0].E()+ntuple->jLV[1].E()+ntuple->lLV[0].E()+ntuple->METLV[0].E(),2)-
+                                       (TMath::Power(ntuple->jLV[0].Px()+ntuple->jLV[1].Px()+ntuple->lLV[0].Px()+ntuple->METLV[0].Px(),2)+
+                                        TMath::Power(ntuple->jLV[0].Py()+ntuple->jLV[1].Py()+ntuple->lLV[0].Py()+ntuple->METLV[0].Py(),2)+
+                                        TMath::Power(ntuple->jLV[0].Pz()+ntuple->jLV[1].Pz()+ntuple->lLV[0].Pz()+ntuple->METLV[0].Pz(),2)));
+   evMap["dRlepjj"].value = mnt->dRlepjj;
+   evMap["dPhiMETJet"].value = mnt->dPhiMETJet;
+   evMap["dPhiJetJet"].value = mnt->dPhiJetJet;
+   evMap["dPhiMETLep"].value = TMath::Abs(ntuple->METLV[0].Phi()-ntuple->lLV[0].Phi());
+   evMap["minDPhiLepJet"].value = mnt->minDPhiLepJet;
+   evMap["dEtaJetJet"].value = TMath::Abs(ntuple->jLV[0].Eta()-ntuple->jLV[1].Eta());
+   evMap["CosTheta_l"].value = mnt->CosTheta_l;
+   evMap["CosTheta_j"].value = mnt->CosTheta_j;
+   evMap["CosTheta_WH"].value = mnt->CosTheta_WH;
+   evMap["MEBDT"].value = mnt->MEBDT;
+   //cout << "nJets => " << ntuple->jLV.size() << endl;
+   //cout << "nBTag => " << ntuple->getNBTags() << endl;
+   //cout << "jet1 => pt=" << ntuple->jLV[0].Pt() << " eta=" << ntuple->jLV[0].Eta() << " phi=" << ntuple->jLV[0].Phi() << " et=" << ntuple->jLV[0].Et() << endl;
+   //cout << "jet2 => pt=" << ntuple->jLV[1].Pt() << " eta=" << ntuple->jLV[1].Eta() << " phi=" << ntuple->jLV[1].Phi() << " et=" << ntuple->jLV[1].Et() << endl;
+   //for (std::map<TString,MVAVar>::iterator it=evMap.begin(); it!=evMap.end(); ++it)
+   //   if(it->second.use)
+   //      std::cout << it->first << " => " << it->second.value << '\n';
+   //ME Extra BDT Variables
+
+   //mnt->setExtraVarMVA(evMap);
+   if(MVAMethods.empty()) {
+      return -9999;
+   }
+   else {
+      assert(!TMath::IsNaN(mnt->getMVAOutput(MVAMethods).front()[valueType]));
+      return mnt->getMVAOutput(MVAMethods).front()[valueType];
+   }
+}
+
+//______________________________________________________________________________
 // Return true if the event pass the cuts imposed to the given lepton category
-bool UserFunctions::eventPassCuts(EventNtuple * ntuple, const PhysicsProcess* proc){  
+bool UserFunctions::eventPassCuts(EventNtuple * ntuple, MicroNtuple * mnt, const PhysicsProcess* proc,
+                                  map<TString,MVAVar>& evMap, vector<TString> MVAMethods){  
 
    // Remove events categorized as "both" or "none", leaving only base categories of electron and muons
    if ( ntuple->lLV[0].leptonCat == DEFS::both ||  ntuple->lLV[0].leptonCat == DEFS::none)
       return false;
 
    // Remove events that have the wrong number of jets
-   if ( (ntuple->jLV.size() != 1 && jetBin == DEFS::jet1) || (ntuple->jLV.size() != 2 && jetBin == DEFS::jets2) || (ntuple->jLV.size() != 3 && jetBin == DEFS::jets3) || (ntuple->jLV.size() >= 4 && jetBin == DEFS::jets4))
+   if ( (ntuple->jLV.size() != 1 && jetBin == DEFS::jet1) || (ntuple->jLV.size() != 2 && jetBin == DEFS::jets2) || (ntuple->jLV.size() != 3 && jetBin == DEFS::jets3) || (ntuple->jLV.size() < 4 && jetBin == DEFS::jets4))
       return false;
 
    // Remove events that should not be used from this particular process.
@@ -406,7 +521,6 @@ bool UserFunctions::eventPassCuts(EventNtuple * ntuple, const PhysicsProcess* pr
 
    //MET Cut
    if ( ntuple->METLV[0].Pt() <= 25.0 )
-   //if ( ntuple->METLV[0].Pt() <= 35.0 )
       return false;
 
    // PFISO cut for QCD samples
@@ -434,13 +548,28 @@ bool UserFunctions::eventPassCuts(EventNtuple * ntuple, const PhysicsProcess* pr
    if(ntuple->lLV[0].leptonCat == DEFS::muon && ntuple->lLV[0].Pt() <= 25)
      return false;
 
-
    //X axis cuts
-   if (controlRegion == DEFS::signal || controlRegion == DEFS::MVAEleID || controlRegion == DEFS::AntiMVAEleID || controlRegion == DEFS::FlatMVAEleID) {
+   if (controlRegion == DEFS::signal || controlRegion == DEFS::BDTBump || controlRegion == DEFS::BDTAntiBump ||
+       controlRegion == DEFS::MVAEleID || controlRegion == DEFS::AntiMVAEleID || controlRegion == DEFS::FlatMVAEleID ||
+       controlRegion == DEFS::HailMary || controlRegion == DEFS::HailMaryLoose) {
+
+      //test if cutting much harder on eta of lepton will work
+      //if(ntuple->lLV[0].Eta()>=1.3)
+      //   return false;
+      //if(ntuple->lLV[0].Eta()<1.3)
+      //   return false;
 
      // leading jet with PT > 30, and second leading with at least 25 GeV
      if (ntuple->jLV[0].Pt() <= 30 || ntuple->jLV[1].Pt() <= 25)
         return false;
+
+     if (controlRegion == DEFS::BDTBump || controlRegion == DEFS::BDTAntiBump) {
+         double combinedBDT = computeCombinedBDT(ntuple,mnt,evMap,MVAMethods,"response");
+         if(controlRegion == DEFS::BDTBump && combinedBDT<0.2)
+            return false;
+         else if(controlRegion == DEFS::BDTAntiBump && combinedBDT>0.0)
+            return false;
+     }
 
      if (controlRegion == DEFS::FlatMVAEleID) {
         if (ntuple->lLV[0].emvaTrig > 0.95 || ntuple->lLV[0].emvaTrig < 0.05) {
@@ -487,6 +616,100 @@ bool UserFunctions::eventPassCuts(EventNtuple * ntuple, const PhysicsProcess* pr
         }
      }
 
+     if (controlRegion == DEFS::HailMary) {
+        double dRj1j2 = sqrt(pow(ntuple->jLV[0].Eta()-ntuple->jLV[1].Eta(),2)+pow(ntuple->jLV[0].Phi()-ntuple->jLV[1].Phi(),2));
+        double ptjj = (ntuple->jLV[0] + ntuple->jLV[1]).Pt();
+        double WmT = sqrt(pow(ntuple->lLV[0].Et()+ntuple->METLV[0].Pt(), 2) -
+                        pow(ntuple->lLV[0].Px()+ntuple->METLV[0].Px(), 2) -
+                        pow(ntuple->lLV[0].Py()+ntuple->METLV[0].Py(), 2));
+        if (ntuple->lLV[0].leptonCat == DEFS::electron){
+           if(ntuple->lLV[0].Eta() > 1.3                                   ||
+              ntuple->lLV[0].Pt() < 37                                     ||
+              ntuple->lLV[0].Pt() > 100                                    ||
+              ntuple->jLV[0].Eta() > 2.0                                   ||
+              WmT > 100                                                    ||
+              ntuple->METLV[0].Pt() > 100                                  ||
+              ntuple->vLV[0].npv > 25                                      ||
+              dRj1j2 < 1.0                                                 ||
+              ptjj < 10.0                                                  ||
+              mnt->CosTheta_l > 0.6                                        ||
+              mnt->CosTheta_j < 0.5                                        ||
+              mnt->CosTheta_WH > 0.5                                       ||
+              (ntuple->jLV.size()>=2 && ntuple->jLV[1].DRlj > TMath::Pi()) ||
+              (ntuple->jLV.size()>=3 && ntuple->jLV[2].DRlj > TMath::Pi()) ||
+              (ntuple->jLV.size()>=4 && ntuple->jLV[3].DRlj > TMath::Pi()) ||
+              TMath::Log10(mnt->eventProb[19]) < -20) {
+               return false;
+           }
+        }
+        if (ntuple->lLV[0].leptonCat == DEFS::muon) {
+            if(ntuple->lLV[0].Eta() > 1.3                                  ||
+              ntuple->jLV[0].Eta() > 2.0                                   ||
+              WmT > 100                                                    ||
+              ntuple->vLV[0].npv > 25                                      ||
+              dRj1j2 < 1.0                                                 ||
+              ptjj > 80.0                                                  ||
+              mnt->CosTheta_l > 0.6                                        ||
+              mnt->CosTheta_j < 0.5                                        ||
+              mnt->CosTheta_WH > 0.5                                       ||
+              (ntuple->jLV.size()>=1 && ntuple->jLV[0].DRlj > TMath::Pi()) ||
+              (ntuple->jLV.size()>=2 && ntuple->jLV[1].DRlj > TMath::Pi()) ||
+              (ntuple->jLV.size()>=3 && ntuple->jLV[2].DRlj > TMath::Pi()) ||
+              (ntuple->jLV.size()>=4 && ntuple->jLV[3].DRlj > TMath::Pi()) ||
+              TMath::Log10(mnt->eventProb[19]) < -20) {
+               return false;
+           }
+        }
+     }
+     if (controlRegion == DEFS::HailMaryLoose) {
+        double dRj1j2 = sqrt(pow(ntuple->jLV[0].Eta()-ntuple->jLV[1].Eta(),2)+pow(ntuple->jLV[0].Phi()-ntuple->jLV[1].Phi(),2));
+        double ptjj = (ntuple->jLV[0] + ntuple->jLV[1]).Pt();
+        double WmT = sqrt(pow(ntuple->lLV[0].Et()+ntuple->METLV[0].Pt(), 2) -
+                        pow(ntuple->lLV[0].Px()+ntuple->METLV[0].Px(), 2) -
+                        pow(ntuple->lLV[0].Py()+ntuple->METLV[0].Py(), 2));
+        if (ntuple->lLV[0].leptonCat == DEFS::electron){
+           if(ntuple->lLV[0].Eta() > 1.3                                   ||
+              ntuple->lLV[0].Pt() < 37                                     ||
+              ntuple->lLV[0].Pt() > 100                                    ||
+              ntuple->jLV[0].Eta() > 2.0                                   ||
+              //WmT > 100                                                    ||
+              //ntuple->METLV[0].Pt() > 100                                  ||
+              ntuple->vLV[0].npv > 25                                      ||
+              dRj1j2 < 1.0                                                 ||
+              ptjj < 10.0                                                  ||
+              //mnt->CosTheta_l > 0.6                                        ||
+              mnt->CosTheta_l > 0.7                                        ||
+              //mnt->CosTheta_j < 0.5                                        ||
+              mnt->CosTheta_j < 0.0                                        ||
+              //mnt->CosTheta_WH > 0.5                                       ||
+              (ntuple->jLV.size()>=2 && ntuple->jLV[1].DRlj > TMath::Pi()) ||
+              (ntuple->jLV.size()>=3 && ntuple->jLV[2].DRlj > TMath::Pi()) ||
+              (ntuple->jLV.size()>=4 && ntuple->jLV[3].DRlj > TMath::Pi()) ||
+              TMath::Log10(mnt->eventProb[19]) < -20) {
+               return false;
+           }
+        }
+        if (ntuple->lLV[0].leptonCat == DEFS::muon) {
+            if(ntuple->lLV[0].Eta() > 1.3                                  ||
+              ntuple->jLV[0].Eta() > 2.0                                   ||
+              //WmT > 100                                                    ||
+              ntuple->vLV[0].npv > 25                                      ||
+              dRj1j2 < 1.0                                                 ||
+              ptjj > 80.0                                                  ||
+              //mnt->CosTheta_l > 0.6                                        ||
+              mnt->CosTheta_l > 0.7                                        ||
+              //mnt->CosTheta_j < 0.5                                        ||
+              mnt->CosTheta_j < 0.0                                        ||
+              //mnt->CosTheta_WH > 0.5                                       ||
+              (ntuple->jLV.size()>=1 && ntuple->jLV[0].DRlj > TMath::Pi()) ||
+              (ntuple->jLV.size()>=2 && ntuple->jLV[1].DRlj > TMath::Pi()) ||
+              (ntuple->jLV.size()>=3 && ntuple->jLV[2].DRlj > TMath::Pi()) ||
+              (ntuple->jLV.size()>=4 && ntuple->jLV[3].DRlj > TMath::Pi()) ||
+              TMath::Log10(mnt->eventProb[19]) < -20) {
+               return false;
+           }
+        }
+     }
    }
    else if (controlRegion == DEFS::control1){
      
@@ -610,7 +833,7 @@ bool UserFunctions::eventPassCuts(EventNtuple * ntuple, const PhysicsProcess* pr
 
 }// eventPassCuts
 
-double UserFunctions::weightFunc(EventNtuple* ntuple, const PhysicsProcess* proc)
+double UserFunctions::weightFunc(EventNtuple* ntuple, MicroNtuple* mnt, const PhysicsProcess* proc)
 {
    if(UserFunctions::doBenchmarks)
       UserFunctions::func_benchmark->Start("weightFunc");
@@ -688,9 +911,54 @@ double UserFunctions::weightFunc(EventNtuple* ntuple, const PhysicsProcess* proc
       weight *= QCDWeightFunc->GetBinContent(QCDWeightFunc->FindBin(fabs(leptonEta)));
    }
 
+   if (CosThetaLweight && auxName.Contains("WJETS")) {
+
+      // find the CosTheta_l value and apply the weight
+      if(mnt!=0) {
+         if(CosThetaLweightSys.CompareTo("up",TString::kIgnoreCase)==0)
+            weight *= TMath::Power(CosThetaLWeightFunc->GetBinContent(CosThetaLWeightFunc->FindBin(mnt->CosTheta_l)),2);
+         else if(CosThetaLweightSys.CompareTo("down",TString::kIgnoreCase)==0)
+            weight *= 1.0;
+         else
+            weight *= CosThetaLWeightFunc->GetBinContent(CosThetaLWeightFunc->FindBin(mnt->CosTheta_l));
+      }
+      else {
+         Float_t Cos_dPhiWW = 0;
+         Float_t Cos_dPhiWH = 0;
+         Float_t CosTheta_l = 0;
+         Float_t CosTheta_j = 0;
+         Float_t CosTheta_WH = 0;
+         Float_t JacksonAngle = 0;
+         ntuple->getAngularVariables(Cos_dPhiWW,Cos_dPhiWH,CosTheta_l,
+                                     CosTheta_j,CosTheta_WH,JacksonAngle);
+         if(CosThetaLweightSys.CompareTo("up",TString::kIgnoreCase)==0)
+            weight *= TMath::Power(CosThetaLWeightFunc->GetBinContent(CosThetaLWeightFunc->FindBin(CosTheta_l)),2);
+         else if(CosThetaLweightSys.CompareTo("down",TString::kIgnoreCase)==0)
+            weight*= 1.0;
+         else
+            weight *= CosThetaLWeightFunc->GetBinContent(CosThetaLWeightFunc->FindBin(CosTheta_l));
+      }
+   }
+
+   if (WPtWeight && auxName.Contains("WJETS")) {
+      weight *= WPtWeightFunc->GetBinContent(WPtWeightFunc->FindBin((ntuple->lLV[0]+ntuple->METLV[0]).Pt()));
+   }
+
    if (PtWeight && !auxName.Contains("DATA") && auxName.Contains("QCD")) {
-      double leptonPt = ntuple->lLV[0].Pt();
-      weight *= PtWeightFunc->GetBinContent(PtWeightFunc->FindBin(leptonPt));
+      weight *= PtWeightFunc->GetBinContent(PtWeightFunc->FindBin(ntuple->lLV[0].Pt()));
+   }
+
+   if (ZllPtWeight && auxName.Contains("ZJETSTOLL")) {
+      weight *= ZllPtWeightFunc->GetBinContent(ZllPtWeightFunc->FindBin(ntuple->lLV[0].Pt()));
+   }
+
+   //if(doBCJetWeight && (auxName.Contains("WJETS") || auxName.Contains("ZJETS"))) {
+   if(doBCJetWeight && auxName.Contains("WJETS")) {
+      bool containsB = ntuple->containsParticle(5,true,25);
+      bool containsC = ntuple->containsParticle(4,true,25);
+      if(containsB || containsC) {
+         weight *= 2.0;
+      }
    }
    
    if(UserFunctions::doBenchmarks)
@@ -758,18 +1026,53 @@ void UserFunctions::processFunc(EventNtuple* ntuple, const PhysicsProcess* proc)
    }// if doMetPhiWeight
   
    if (QCDweight && auxName.Contains("QCD")){
+      // Initializes QCD Reweighting
+      cout << "Initializing QCD Weighting:" << endl;
 
       // get the filename
       TString filename = "QCDWeight_";
-      filename += DEFS::getLeptonCatString(UserFunctions::leptonCat)+".root";
+      if(QCDweightSys.CompareTo("up",TString::kIgnoreCase)==0) {
+         filename += DEFS::getLeptonCatString(UserFunctions::leptonCat)+"_up.root";
+      }
+      else if(QCDweightSys.CompareTo("down",TString::kIgnoreCase)==0) {
+         filename += DEFS::getLeptonCatString(UserFunctions::leptonCat)+"_down.root";
+      }
+      else {
+         filename += DEFS::getLeptonCatString(UserFunctions::leptonCat)+".root";
+      }
     
       // get the histogram from the inside
       TString hname = "QCDWeight_";
       hname += DEFS::getLeptonCatString(UserFunctions::leptonCat);
 
       QCDWeightFunc = (TH1D*) DefaultValues::getConfigTH1(filename,hname,"QCDweightClone");
-
+      cout << "\t" << auxName << ": Using " << hname << " from " << filename << endl;
    }// QCD weight
+
+   if (CosThetaLweight && (auxName.Contains("WJETS") || auxName.Contains("ZJETSTOLL"))) {
+      // Initializes CosThetaL Reweighting
+      cout << "Initializing CosTheta_l Weighting:" << endl;
+
+      // get the filename
+      TString filename = "CosThetaLWeight_eq1tag_TTbarSub_changedNames.root";
+
+      // get the histogram from the inside
+      TString hname = "CosThetaL_WeightHist_";
+      hname += DEFS::getJetBinString(UserFunctions::jetBin)+"_"+DEFS::getLeptonCatString(UserFunctions::leptonCat);
+
+      CosThetaLWeightFunc = (TH1D*) DefaultValues::getConfigTH1(filename,hname,"CosThetaLweightClone");
+      cout << "\t" << auxName << ": Using " << hname << " from " << filename << endl;
+   }
+
+   if (WPtWeight && auxName.Contains("WJETS")) {
+      cout << "Initializing WPt Weighting:" << endl;
+      TString filename = "WPtWeights.root";
+      string jb = DEFS::getJetBinString(UserFunctions::jetBin);
+      jb[0] = toupper(jb[0]);
+      TString hname = Form("ratioDataToWJets_%s_%s_Ptlv",jb.c_str(),DEFS::getLeptonCatString(UserFunctions::leptonCat).c_str());
+      WPtWeightFunc = (TH1D*) DefaultValues::getConfigTH1(filename,hname,"WPtweightClone");
+      cout << "\t" << auxName << ": Using " << hname << " from " << filename << endl;
+   }
 
    if (PtWeight && !auxName.Contains("DATA") && auxName.Contains("QCD")) {
       TString filename = "PtWeight_";
@@ -784,6 +1087,15 @@ void UserFunctions::processFunc(EventNtuple* ntuple, const PhysicsProcess* proc)
       }
       hname += DEFS::getLeptonCatString(UserFunctions::leptonCat);
       PtWeightFunc = (TH1D*) DefaultValues::getConfigTH1(filename,hname,hname+"_Clone");
+   }
+
+   if (ZllPtWeight && auxName.Contains("ZJETSTOLL")) {
+      cout << "Initializing ZllPt Weighting:" << endl;
+      TString filename = "ZllPtWeights.root";
+      TString hname = "ZllWeight_";
+      hname += DEFS::getJetBinString(UserFunctions::jetBin)+"_"+DEFS::getLeptonCatString(UserFunctions::leptonCat);
+      ZllPtWeightFunc = (TH1D*) DefaultValues::getConfigTH1(filename,hname,"ZllPtWeightClone");
+      cout << "\t" << auxName << ": Using " << hname << " from " << filename << endl;
    }
 
    if (WJweight){
@@ -813,11 +1125,15 @@ void UserFunctions::processFunc(EventNtuple* ntuple, const PhysicsProcess* proc)
    // Initializes PU Reweighting
    cout << "Initializing PU Reweighting:" << endl;
    //string dataname = DefaultValues::getConfigPath()+"pileup12_noTrig.root";
-   string dataname = DefaultValues::getConfigPath()+"pileup12_noTrig_minBiasXsec69400_coarseBinning_withAdditionalNPVHist.root";
+   string dataname;
+   if(pileupSystematic.CompareTo("nominal")==0)
+      dataname = DefaultValues::getConfigPath()+"pileup12_noTrig_minBiasXsec69400_coarseBinning_withAdditionalNPVHist.root";
    //PU Up
-   //string dataname = DefaultValues::getConfigPath()+"pileup12_noTrig_minBiasXsec74258_coarseBinning_withAdditionalNPVHist.root";
+   else if(pileupSystematic.CompareTo("up")==0)
+      dataname = DefaultValues::getConfigPath()+"pileup12_noTrig_minBiasXsec74258_coarseBinning_withAdditionalNPVHist.root";
    //PUDown
-   //string dataname = DefaultValues::getConfigPath()+"pileup12_noTrig_minBiasXsec64542_coarseBinning_withAdditionalNPVHist.root";
+   else if(pileupSystematic.CompareTo("down")==0)
+      dataname = DefaultValues::getConfigPath()+"pileup12_noTrig_minBiasXsec64542_coarseBinning_withAdditionalNPVHist.root";
    string MCname   = DefaultValues::getConfigPath()+"TPUDistributions.root";
    if(auxName.Contains("QCD") && (auxName.Contains("ElFULL") || auxName.Contains("ElEnriched"))) {
       cout << "\t" << auxName << ": Using pileup_SingleEl from " << dataname << " and " << TString("TPUDist_")+proc->name << " from " << MCname << endl;
@@ -832,7 +1148,21 @@ void UserFunctions::processFunc(EventNtuple* ntuple, const PhysicsProcess* proc)
                                 make_pair(1,10));
    }
    else if(auxName.Contains("WH125_HTOBB")) {
-      MCname = "/eos/uscms/store/user/aperloff/MatrixElement/Summer12ME8TeV/MEInput/WH125_HToBB.root";
+      MCname = "root://cmseos.fnal.gov//store/user/aperloff/MatrixElement/Summer12ME8TeV/MEInput/WH125_HToBB.root";
+      cout << "\t" << auxName << ": Using pileup_noTrig from " << dataname << " and " << "TPUDist" << " from " << MCname << endl;
+      puweight = new PUreweight(dataname,MCname,"pileup_noTrig",
+                                string("PS/TPUDist"),
+                                make_pair(1,10));      
+   }
+   else if(auxName.Contains("ZJETSTOLL_M10TO50")) {
+      MCname = "root://cmseos.fnal.gov//store/user/aperloff/MatrixElement/Summer12ME8TeV/MEInput/DYJetsToLL_M-10To50.root";
+      cout << "\t" << auxName << ": Using pileup_noTrig from " << dataname << " and " << "TPUDist" << " from " << MCname << endl;
+      puweight = new PUreweight(dataname,MCname,"pileup_noTrig",
+                                string("PS/TPUDist"),
+                                make_pair(1,10));      
+   }
+   else if(auxName.Contains("ZJETSTOLL_M50")) {
+      MCname = "root://cmseos.fnal.gov//store/user/aperloff/MatrixElement/Summer12ME8TeV/MEInput/DYJetsToLL_M-50.root";
       cout << "\t" << auxName << ": Using pileup_noTrig from " << dataname << " and " << "TPUDist" << " from " << MCname << endl;
       puweight = new PUreweight(dataname,MCname,"pileup_noTrig",
                                 string("PS/TPUDist"),
@@ -858,256 +1188,6 @@ void UserFunctions::processFunc(EventNtuple* ntuple, const PhysicsProcess* proc)
       UserFunctions::func_benchmark->Stop("processFunc");
 
 } // processFunc
-
-double UserFunctions::charge(int x) {
-   int absx = abs(x);
-   if (absx==2 || absx==4 || absx==6)
-      return (x > 0) ? (2./3.) : ((x < 0) ? -(2./3.) : 0);
-   else if (absx==1 || absx==3 || absx==5)
-      return (x > 0) ? (-1./3.) : ((x < 0) ? (1./3.) : 0);
-   else if (absx==11 || absx==13 || absx==15)
-      return (x > 0) ? -1 : ((x < 0) ? 1 : 0);
-   else if (absx==24)
-      return (x > 0) ? 1 : ((x < 0) ? -1 : 0);
-   else
-      return 0;
-} // charge
-
-int UserFunctions::leptonOrQuark(int x)
-{
-   int absx = abs(x);
-   if (absx>10 && absx < 17)
-      return 0;
-   else if (absx>0 && absx < 7)
-      return 1;
-   else
-      return -1;
-} // leptonOrQuark
-
-
-pair<double,double> UserFunctions::onVsOffShell(EventNtuple * ntuple) {
-   if (ntuple->genParticleCollection.size()==0) {
-      //cout << "WARNING::No genParticleCollection present." << endl;
-      return make_pair(0.0,0.0);
-   }
-
-   pair<int,int> fW = make_pair(0,0); //first = sign, second = position                                     
-   pair<int,int> sW = make_pair(0,0);
-   int sl  = 0;
-   double cj1 = 0;
-   double cj2 = 0;
-   int sjj = 0;
-
-   for (unsigned int i=0; i<ntuple->genParticleCollection.size(); i++) {
-      if (abs(ntuple->genParticleCollection[i].pdgId)==24) {
-         if (fW.first==0) {
-            fW.first = charge(ntuple->genParticleCollection[i].pdgId);
-            fW.second = i;
-         }
-         else {
-            sW.first = charge(ntuple->genParticleCollection[i].pdgId);
-            sW.second = i;
-         }
-      }
-      if (abs(ntuple->genParticleCollection[i].pdgId)==11 || abs(ntuple->genParticleCollection[i].pdgId)==13 ||
-          abs(ntuple->genParticleCollection[i].pdgId)==15) {
-         sl = charge(ntuple->genParticleCollection[i].pdgId);
-         if (sl==0)
-            cout << "sl==0 and lept pdgId = " << (ntuple->genParticleCollection[i].pdgId) << endl;
-      }
-      if (abs(ntuple->genParticleCollection[i].pdgId)>0 && abs(ntuple->genParticleCollection[i].pdgId)<9) {
-         if (cj1!=0.0 && cj2!=0.0)
-            cout << "WARNING::There were more than two jets found. Both cj1 and cj2 are non-zero." << endl;
-         /*
-           cout << "pdgId" << i << " = " << ntuple->genParticleCollection[i].pdgId << "\tmother_pdgIds = ";
-           for (int j=0; j<ntuple->genParticleCollection[i].numberOfMothers; j++) {
-           cout << ntuple->genParticleCollection[ntuple->genParticleCollection[i].motherPositions[j]].pdgId << ", ";
-           }
-           cout << endl;
-         */
-         bool Wjet = true;
-         for (int j=0; j<ntuple->genParticleCollection[i].numberOfMothers; j++) {
-            if (abs(ntuple->genParticleCollection[ntuple->genParticleCollection[i].motherPositions[j]].pdgId)!=24)
-               Wjet = false;
-         }
-
-         if (Wjet) {
-            if (cj1==0)
-               cj1 = charge(ntuple->genParticleCollection[i].pdgId);
-            else {
-               cj2 = charge(ntuple->genParticleCollection[i].pdgId);
-            }
-         }
-      }
-   }
-
-   if (cj1!=0.0 && cj2!=0.0) {
-      sjj = round_int(cj1 + cj2);
-      //cout << "sjj = " << sjj << "\tcj1 = " << cj1 << "\tcj2 = " << cj2 << "\tcj1+cj2 = " << cj1+cj2 
-      //     << "\tround_int(cj1+cj2) = " << round_int(cj1+cj2) << endl;
-   }
-
-   if (fW.first==sl && sW.first==sjj) {
-      //h->Fill(ntuple->genParticleCollection[sW.second].p4.M(),
-      //        ntuple->genParticleCollection[fW.second].p4.M());
-      return make_pair(ntuple->genParticleCollection[sW.second].p4.M(),
-                       ntuple->genParticleCollection[fW.second].p4.M());
-   }
-   else if (fW.first==sjj && sW.first==sl) {
-      //h->Fill(ntuple->genParticleCollection[fW.second].p4.M(),
-      //        ntuple->genParticleCollection[sW.second].p4.M());
-      return make_pair(ntuple->genParticleCollection[fW.second].p4.M(),
-                       ntuple->genParticleCollection[sW.second].p4.M());
-   }
-   else {
-      //cout << "WARNING::Unable to determine which W is hadronic and which W is leptonic." << endl
-      //      << "fW.first = " << fW.first << "\tsW.first = " << sW.first << "\tsl = " << sl << "\tcj1 = "
-      //      << cj1 << "\tcj2 = " << cj2 << "\tsjj = " << sjj << endl;
-      return make_pair(0.0,0.0);
-   }
-
-}//onVsOffShell
-
-pair<double,double> UserFunctions::onVsOffShellInclusive(EventNtuple * ntuple)
-{
-   if (ntuple->genParticleCollection.size()==0) {
-      //cout << "WARNING::No genParticleCollection present." << endl;
-      return make_pair(0.0,0.0);
-   }
-   
-   //0=leptonic, 1=hadronic, 2=both, 3=neither/not set/unknown
-   vector<pair<int,int> > W;  //first = category, second = position
-   int lc = 0; //lepton counter
-   int qc = 0; //quark counter
-   for (unsigned int i=0; i<ntuple->genParticleCollection.size(); i++) {
-      if (abs(ntuple->genParticleCollection[i].pdgId)!=25)
-         continue;
-      else {
-         if (verbose) 
-            cout << "H->";
-         for (unsigned int j=0; j<ntuple->genParticleCollection[i].daughterPositions.size(); j++) {
-            if (ntuple->genParticleCollection[i].daughterPositions[j]<=500 && abs(ntuple->genParticleCollection[ntuple->genParticleCollection[i].daughterPositions[j]].pdgId)==24) {
-               if (verbose) 
-                  cout << "W";
-               W.push_back(make_pair(3,ntuple->genParticleCollection[i].daughterPositions[j]));
-            }
-         } //loop through the daughters of the Higgs
-         if (verbose)
-            cout << "->";
-         if(W.size()==2) {
-            for (unsigned int j=0; j<W.size(); j++) {
-               lc = 0;
-               qc = 0;
-               for (unsigned int k=0; k<ntuple->genParticleCollection[W[j].second].daughterPositions.size(); k++) {
-                  if (W[j].first==2)
-                     continue;
-                  else if (ntuple->genParticleCollection[W[j].second].daughterPositions[k]<=500 && leptonOrQuark(ntuple->genParticleCollection[ntuple->genParticleCollection[W[j].second].daughterPositions[k]].pdgId)==0) {
-                     if (abs(ntuple->genParticleCollection[ntuple->genParticleCollection[W[j].second].daughterPositions[k]].pdgId)==11 && ntuple->genParticleCollection[ntuple->genParticleCollection[W[j].second].daughterPositions[k]].p4.Pt()<=27) {
-                        if (verbose)
-                           cout << "CUT" << endl;
-                        return make_pair(-1.0,-1.0);
-                     }
-                     if (abs(ntuple->genParticleCollection[ntuple->genParticleCollection[W[j].second].daughterPositions[k]].pdgId)==13 && ntuple->genParticleCollection[ntuple->genParticleCollection[W[j].second].daughterPositions[k]].p4.Pt()<=24) {
-                        if (verbose)
-                           cout << "CUT" << endl;
-                        return make_pair(-1.0,-1.0);
-                     }
-                     lc++;
-                  }
-                  else if (ntuple->genParticleCollection[W[j].second].daughterPositions[k]<=500 && leptonOrQuark(ntuple->genParticleCollection[ntuple->genParticleCollection[W[j].second].daughterPositions[k]].pdgId)==1) {
-                     qc++;
-                  }
-                  if (ntuple->genParticleCollection[W[j].second].daughterPositions[k]<=500 && ntuple->genParticleCollection[ntuple->genParticleCollection[W[j].second].daughterPositions[k]].pdgId!=0)
-                     if (verbose)
-                        cout << ntuple->genParticleCollection[ntuple->genParticleCollection[W[j].second].daughterPositions[k]].pdgId
-                             << ",";
-               } //loop through the daughters of the W
-               if (lc==2 && qc==0)
-                  W[j].first = 0;
-               else if (lc==0 && qc==2)
-                  W[j].first = 1;
-               else if (lc>0 && qc>0)
-                  W[j].first = 2;
-               else {
-                  cout << "Something is wonky!!!" << endl;
-                  W[j].first = 3;
-               }
-            } //loop through all of the W
-         } //if there are only 2 W
-         if (verbose)
-            cout << endl;
-      } //find the Higgs
-   } //loop through the gen particles
-   
-   if (W.size()==0) {
-      //cout << "WARNING::No W decaying from a Higgs was found." << endl;
-      return make_pair(-1.0,-1.0);
-   }
-   else if (W[0].first==0 && W[1].first==1)
-      return make_pair(ntuple->genParticleCollection[W[1].second].p4.M(),
-                       ntuple->genParticleCollection[W[0].second].p4.M());
-   else if (W[0].first==1 && W[1].first==0)
-      return make_pair(ntuple->genParticleCollection[W[0].second].p4.M(),
-                       ntuple->genParticleCollection[W[1].second].p4.M());
-   else {
-      cout << "WARNING::Unable to determine which W is hadronic and which W is leptonic." << endl
-           << "W[0].first = " << W[0].first << "\tW1[].first = " << W[1].first << endl
-           << "W[0].second = " << W[0].second << "\tW1[].second = " << W[1].second << endl;
-      return make_pair(-1.0,-1.0);
-   }
-} // UserFunctions::onVsOffShellInclusive
-
-/*
-pair<double,double> UserFunctions::ttbarPt(const EventNtuple * ntuple) {
-   if (ntuple->genParticleCollection.size()==0) {
-      cout << "WARNING::plotter_x::ttbarPt::No genParticleCollection present in this sample" << endl;
-      return make_pair(-1.0,-1.0);
-   }
-   
-   vector<int> Tpositions;
-   for (unsigned int i=0; i<ntuple->genParticleCollection.size(); i++) {
-      if (abs(ntuple->genParticleCollection[i].pdgId)==6) {
-         Tpositions.push_back(i);
-      }
-   }
-   if(Tpositions.size()!=2) {
-      cout << "WARNING::plotter_x::ttbarPt::There are " << Tpositions.size() << "top quarks in the TTbar sample, not 2" << endl;
-      return make_pair(-1.0,-1.0);
-   }
-
-   return make_pair(ntuple->genParticleCollection[Tpositions[0]].p4.Pt(),ntuple->genParticleCollection[Tpositions[1]].p4.Pt());
-
-}
-
-double UserFunctions::ttbarWeight(const EventNtuple * ntuple, const PhysicsProcess* proc) {
-   if(proc) {
-      TString auxName = proc->name;
-      auxName.ToUpper();
-      if(!auxName.Contains("TTBAR")) {
-         cout << "WARNING::plotter_x::ttbarWeight::Cannot apply TTbar reweighting to process " << proc->name << endl
-              << "\tReturning a weight of 1" << endl;
-         return 1.0;
-      }
-   }
-
-   const double topFactor_A = 0.159;
-   const double topFactor_B = -0.00141;
-   //Calculate SF and weight
-   pair<double,double> ttbarPtPair = ttbarPt(ntuple);
-   double hadronicSF = exp(topFactor_A+topFactor_B*ttbarPtPair.second);
-   double leptonicSF = exp(topFactor_A+topFactor_B*ttbarPtPair.first);
-   //Top Event Weight
-   return sqrt(hadronicSF*leptonicSF);
-}
-*/
-
-double UserFunctions::round(double r) {
-   return (r > 0.0) ? floor(r + 0.5) : ceil(r - 0.5);
-}//round
-
-int UserFunctions::round_int(double r) {
-   return (r > 0.0) ? (r + 0.5) : (r - 0.5); 
-}//round
 
 template <class T, class U>
 std::string UserFunctions::concatString(const T& obj1, const U& obj2)
@@ -1145,46 +1225,66 @@ int main(int argc,char**argv) {
    CommandLine cl;
    if (!cl.parse(argc,argv)) return 0;
 
-   string           lepCat           = cl.getValue<string>    ("lep",            "both");
-   UserFunctions::leptonCat          = DEFS::getLeptonCat     (lepCat);
-   string           ntype            = cl.getValue<string>    ("ntype",   "EventNtuple");
-   DEFS::NtupleType ntupleType       = DEFS::getNtupleType    (ntype);
-   string           jBin             = cl.getValue<string>    ("jBin",          "jets2");      
-   UserFunctions::jetBin             = DEFS::getJetBin        (jBin);
-   string           cutRegion        = cl.getValue<string>    ("cutRegion",       "all");
-   UserFunctions::controlRegion      = DEFS::getControlRegion (cutRegion);
-   string           tcat             = cl.getValue<string>    ("tcat",         "pretag");
-   UserFunctions::tagCat             = DEFS::getTagCat(tcat);
-   UserFunctions::elIsoMin           = cl.getValue<double>    ("elIsoMin",          0.3);
-   UserFunctions::elIsoMax           = cl.getValue<double>    ("elIsoMax",          0.7);
-   UserFunctions::muIsoMin           = cl.getValue<double>    ("muIsoMin",          0.3);
-   UserFunctions::muIsoMax           = cl.getValue<double>    ("muIsoMax",          2.0);
-   UserFunctions::doJER              = cl.getValue<bool>      ("doJer",           false);
-   UserFunctions::doMETPhiCorrection = cl.getValue<bool>      ("doMETPhi",        false);
-   UserFunctions::doPUreweight       = cl.getValue<bool>      ("doPUrewt",         true);
-   UserFunctions::doCSVreweight      = cl.getValue<bool>      ("doCSVrewt",        true);
-   UserFunctions::doCSVsys           = cl.getValue<TString>   ("doCSVsys",       "none");
-   UserFunctions::doTTbarreweight    = cl.getValue<bool>      ("doTTbarrewt",      true);
-   UserFunctions::doTTbarsys         = cl.getValue<TString>   ("doTTbarsys",     "none");
-   UserFunctions::doFNAL             = cl.getValue<bool>      ("doFNAL",          false);
-   UserFunctions::doMetPhiWeight     = cl.getValue<bool>      ("doMetPhiWeight",  false);
-   UserFunctions::outDir             = cl.getValue<string>    ("outDir",            ".");
-   UserFunctions::WJweight           = cl.getValue<bool>      ("WJweight",        false);
-   UserFunctions::QCDweight          = cl.getValue<bool>      ("QCDweight",       false);
-   UserFunctions::PtWeight           = cl.getValue<bool>      ("PtWeight",        false);
+   string           lepCat               = cl.getValue<string>    ("lep",                   "both");
+   UserFunctions::leptonCat              = DEFS::getLeptonCat     (lepCat);
+   string           ntype                = cl.getValue<string>    ("ntype",          "EventNtuple");
+   UserFunctions::ntupleType             = DEFS::getNtupleType    (ntype);
+   string           jBin                 = cl.getValue<string>    ("jBin",                 "jets2");      
+   UserFunctions::jetBin                 = DEFS::getJetBin        (jBin);
+   string           cutRegion            = cl.getValue<string>    ("cutRegion",              "all");
+   UserFunctions::controlRegion          = DEFS::getControlRegion (cutRegion);
+   string           tcat                 = cl.getValue<string>    ("tcat",                "pretag");
+   UserFunctions::tagCat                 = DEFS::getTagCat(tcat);
+   UserFunctions::elIsoMin               = cl.getValue<double>    ("elIsoMin",                 0.3);
+   UserFunctions::elIsoMax               = cl.getValue<double>    ("elIsoMax",                 0.7);
+   UserFunctions::muIsoMin               = cl.getValue<double>    ("muIsoMin",                 0.3);
+   UserFunctions::muIsoMax               = cl.getValue<double>    ("muIsoMax",                 2.0);
+   UserFunctions::doJER                  = cl.getValue<bool>      ("doJer",                  false);
+   UserFunctions::doMETPhiCorrection     = cl.getValue<bool>      ("doMETPhi",               false);
+   UserFunctions::doPUreweight           = cl.getValue<bool>      ("doPUrewt",                true);
+   UserFunctions::pileupSystematic       = cl.getValue<TString>   ("pileupSystematic",   "nominal");
+   UserFunctions::doCSVreweight          = cl.getValue<bool>      ("doCSVrewt",               true);
+   UserFunctions::doCSVsys               = cl.getValue<TString>   ("doCSVsys",              "none");
+   UserFunctions::doTTbarreweight        = cl.getValue<bool>      ("doTTbarrewt",             true);
+   UserFunctions::doTTbarsys             = cl.getValue<TString>   ("doTTbarsys",            "none");
+   UserFunctions::doFNAL                 = cl.getValue<bool>      ("doFNAL",                 false);
+   UserFunctions::doMetPhiWeight         = cl.getValue<bool>      ("doMetPhiWeight",         false);
+   UserFunctions::doBCJetWeight          = cl.getValue<bool>      ("doBCJetWeight",          false);
+   UserFunctions::outDir                 = cl.getValue<string>    ("outDir",                   ".");
+   UserFunctions::WJweight               = cl.getValue<bool>      ("WJweight",               false);
+   UserFunctions::QCDweight              = cl.getValue<bool>      ("QCDweight",              false);
+   UserFunctions::QCDweightSys           = cl.getValue<TString>   ("QCDweightSys",          "none");
+   UserFunctions::CosThetaLweight        = cl.getValue<bool>      ("CosThetaLweight",        false);
+   UserFunctions::CosThetaLweightSys     = cl.getValue<TString>   ("CosThetaLweightSys",    "none");
+   UserFunctions::WPtWeight              = cl.getValue<bool>      ("WPtWeight",              false);
+   UserFunctions::PtWeight               = cl.getValue<bool>      ("PtWeight",               false);
+   UserFunctions::ZllPtWeight            = cl.getValue<bool>      ("ZllPtWeight",            false);
    //UserFunctions::PtShift
-   UserFunctions::verbose            = cl.getValue<bool>      ("verbose",         false);
-   UserFunctions::fillTMDF           = cl.getValue<bool>      ("fillTMDF",        false);
-   UserFunctions::fill2D             = cl.getValue<bool>      ("fill2D",          false);
-   UserFunctions::fillNonStandard    = cl.getValue<bool>      ("fillNonStandard", false);
-   bool             norm_data        = cl.getValue<bool>      ("norm_data",       false);
-   int              maxEvts          = cl.getValue<int>       ("maxEvts",             0);
-   TString          MVAWeightDir     = cl.getValue<TString>   ("MVAWeightDir",       "");
-   vector<TString>  MVAMethods       = cl.getVector<TString>  ("MVAMethods",         "");
-   vector<TString>  MVAVars          = cl.getVector<TString>  ("MVAVars",            "");
-   vector<TString>  MVASpec          = cl.getVector<TString>  ("MVASpec",            "");
-   bool             debug            = cl.getValue<bool>      ("debug",           false);
+   UserFunctions::verbose                = cl.getValue<bool>      ("verbose",                false);
+   UserFunctions::fillTMDF               = cl.getValue<bool>      ("fillTMDF",               false);
+   UserFunctions::fill2D                 = cl.getValue<bool>      ("fill2D",                 false);
+   UserFunctions::fillNonStandard        = cl.getValue<bool>      ("fillNonStandard",        false);
+   UserFunctions::fillEPD                = cl.getValue<bool>      ("fillEPD",                false);
+   UserFunctions::fillBumpCrossCheck     = cl.getValue<bool>      ("fillBumpCrossCheck",     false);
+   UserFunctions::fillWJetsFlavor        = cl.getValue<bool>      ("fillWJetsFlavor",        false);
+   UserFunctions::fillLimitTemplatesOnly = cl.getValue<bool>      ("fillLimitTemplatesOnly", false);
+   UserFunctions::fillGen                = cl.getValue<bool>      ("fillGen",                false);
+   bool             include_data         = cl.getValue<bool>      ("include_data",            true);
+   bool             include_systematics  = cl.getValue<bool>      ("include_systematics",    false);
+   bool             norm_data            = cl.getValue<bool>      ("norm_data",              false);
+   int              maxEvts              = cl.getValue<int>       ("maxEvts",                    0);
+   TString          MVAWeightDir         = cl.getValue<TString>   ("MVAWeightDir",              "");
+   vector<TString>  MVAMethods           = cl.getVector<TString>  ("MVAMethods",                "");
+   vector<TString>  MVAVars              = cl.getVector<TString>  ("MVAVars",                   "");
+   vector<TString>  MVASpec              = cl.getVector<TString>  ("MVASpec",                   "");
+   UserFunctions::limitBranches          = cl.getValue<int>       ("limitBranches",              0);
+   bool             debug                = cl.getValue<bool>      ("debug",                  false);
+   UserFunctions::doBenchmarks           = cl.getValue<bool>      ("diBenchmarks",           false);
+   bool             bumpHunt             = cl.getValue<bool>      ("bumpHunt",               false);
+   UserFunctions::signalTitle            = cl.getValue<TString>   ("signalTitle",     "H(125)->WW");
+   bool             help                 = cl.getValue<bool>      ("help",                   false);
 
+   if (help) {cl.print(); return 0;}
    if (!cl.check()) return 0;
    cl.print();
 
@@ -1196,7 +1296,29 @@ int main(int argc,char**argv) {
       cout<<"plotter_x called with unknown lepton category "<<lepCat<<endl;
       return 1;
    }
+
+   //Print error if limitBranches and fillGen are both on
+   if(UserFunctions::limitBranches>=0 && UserFunctions::fillGen) {
+      cout << "ERROR::plotter_x Can't fill the general gen level information when limitBranches>-1" << endl;
+      return 2;
+   }
   
+   //Turn off EPD and bumpCrossCheck plots if the limitBranches flag is set
+   if(UserFunctions::limitBranches > 0) {
+      UserFunctions::fillEPD = false;
+      UserFunctions::fillBumpCrossCheck = false;
+      if(UserFunctions::limitBranches > 1)
+         UserFunctions::fillWJetsFlavor = false;
+   }
+
+   //If no MVA methods, weightdir, or variables, don't create the MVADiscriminator plot
+   if(MVAWeightDir.IsNull() || MVAMethods.size()==0 || MVAVars.size()==0) {
+      UserFunctions::createMVADiscriminatorPlot = false;
+   }
+   else {
+      UserFunctions::createMVADiscriminatorPlot = true;
+   }
+
    // Check that the leptcat is not both as we are not ready for it. 
    // Problems if combining:
    // - we have to figure out how to include two lums.
@@ -1212,8 +1334,6 @@ int main(int argc,char**argv) {
    TBenchmark* m_benchmark = new TBenchmark();
    m_benchmark->Reset();
    m_benchmark->Start("plotter_x");
-   if(debug)
-      UserFunctions::doBenchmarks = true;
    if(UserFunctions::doBenchmarks)
       UserFunctions::once_benchmark->Reset();
 
@@ -1223,33 +1343,104 @@ int main(int argc,char**argv) {
    MapOfPlots plots = getPlots(UserFunctions::leptonCat,norm_data);
    
    // The vector holding all processes.
-   vector <PhysicsProcess*> procs = DefaultValues::getProcessesHiggs(UserFunctions::jetBin, UserFunctions::tagCat,
-                                                                     true, true, 
-                                                                     ntupleType, UserFunctions::leptonCat);
+   vector <PhysicsProcess*> procs;
    if(debug) {
-      procs.erase(procs.begin(),procs.begin()+17);
+      //procs.erase(procs.begin(),procs.begin()+17);
       //procs.erase(procs.begin()+1,procs.begin()+8);
+      vector<DEFS::PhysicsProcess::Type> p;
+      p.push_back(DEFS::PhysicsProcess::ZJetsToLL_M10To50);
+      p.push_back(DEFS::PhysicsProcess::ZJetsToLL_M50);
+      p.push_back(DEFS::PhysicsProcess::WJets);
+      p.push_back(DEFS::PhysicsProcess::ZJets);
+      procs = DefaultValues::getProcesses(p, UserFunctions::jetBin, UserFunctions::tagCat, true, UserFunctions::ntupleType);
    }
-      
+   else if(bumpHunt) {
+      for(unsigned int i=0; i<procs.size(); i++) {
+         if(!DEFS::PhysicsProcess::isHiggs(DEFS::PhysicsProcess::getProcessType(string(procs[i]->name)))) {
+            cout << "Erasing process " << procs[i]->name << endl;
+            procs.erase(procs.begin()+i);
+            i--;
+         }
+      }
+   }
+   else if(UserFunctions::fillWJetsFlavor && !include_data) {
+      vector<DEFS::PhysicsProcess::Type> p;
+      p.push_back(DEFS::PhysicsProcess::WJets);
+      procs = DefaultValues::getProcesses(p, UserFunctions::jetBin, UserFunctions::tagCat, true, UserFunctions::ntupleType);
+   }
+   else {
+      procs = DefaultValues::getProcessesHiggs(UserFunctions::jetBin, UserFunctions::tagCat,
+                                               include_data, include_systematics,true,
+                                               UserFunctions::ntupleType, UserFunctions::leptonCat);
+   }
+
    // Report Scale Factors
    cout << "Process " << setw(20) << "<name>" << " will be scaled by " << setw(15) << "<cross section>" << " * " << setw(12) << "<luminosity>"
         << " * " << setw(14) << "<scale factor>" << " * " << setw(17) << "<branching ratio>" << " / " << setw(15) << "<events in PAT>" << " = " << setw(13) << "<final value>" << endl; 
-   for (unsigned p = 0; p< procs.size(); p++)
+   for (unsigned p = 0; p< procs.size(); p++) {
+      //Reset the scale factors for QCD/WJets if doing systematics
+      if (UserFunctions::QCDweight && (procs[p]->name.Contains("QCD")||procs[p]->name.CompareTo("WJets")==0) && UserFunctions::QCDweightSys.CompareTo("none",TString::kIgnoreCase)!=0) {
+         cout << "\tWARNING::Overridding the " << procs[p]->name << " scale factor." << endl
+              << "\tMake sure this is what you want (usually okay if running systematic samples)." << endl;
+         //procs[p]->scaleFactor[UserFunctions::leptonCat] = 1.0;
+         if(UserFunctions::QCDweightSys.CompareTo("down",TString::kIgnoreCase)==0) {
+            if(UserFunctions::leptonCat==DEFS::electron) {
+               if(procs[p]->name.Contains("QCD")) {
+                  procs[p]->scaleFactor[UserFunctions::leptonCat] = DefaultValues::getScaleFactor(procs[p]->name+"_QCDEtaWeightDown",UserFunctions::leptonCat);//0.508458;
+               }
+               else if(procs[p]->name.CompareTo("WJets")==0) {
+                  procs[p]->scaleFactor[UserFunctions::leptonCat] = DefaultValues::getScaleFactor(procs[p]->name+"_QCDEtaWeightDown",UserFunctions::leptonCat);//1.04437;
+               }
+            }
+            else if(UserFunctions::leptonCat==DEFS::muon) {
+               if(procs[p]->name.Contains("QCD")) {
+                  procs[p]->scaleFactor[UserFunctions::leptonCat] = DefaultValues::getScaleFactor(procs[p]->name+"_QCDEtaWeightDown",UserFunctions::leptonCat);//0.159824;
+               }
+               else if(procs[p]->name.CompareTo("WJets")==0) {
+                  procs[p]->scaleFactor[UserFunctions::leptonCat] = DefaultValues::getScaleFactor(procs[p]->name+"_QCDEtaWeightDown",UserFunctions::leptonCat);//0.969496;
+               }
+            }
+         }
+         else if(UserFunctions::QCDweightSys.CompareTo("up",TString::kIgnoreCase)==0) {
+            if(UserFunctions::leptonCat==DEFS::electron) {
+               if(procs[p]->name.Contains("QCD")) {
+                  procs[p]->scaleFactor[UserFunctions::leptonCat] = DefaultValues::getScaleFactor(procs[p]->name+"_QCDEtaWeightUp",UserFunctions::leptonCat);//0.27547;
+               }
+               else if(procs[p]->name.CompareTo("WJets")==0) {
+                  procs[p]->scaleFactor[UserFunctions::leptonCat] = DefaultValues::getScaleFactor(procs[p]->name+"_QCDEtaWeightUp",UserFunctions::leptonCat);//1.0454;
+               }
+            }
+            else if(UserFunctions::leptonCat==DEFS::muon) {
+               if(procs[p]->name.Contains("QCD")) {
+                  procs[p]->scaleFactor[UserFunctions::leptonCat] = DefaultValues::getScaleFactor(procs[p]->name+"_QCDEtaWeightUp",UserFunctions::leptonCat);//0.152692;
+               }
+               else if(procs[p]->name.CompareTo("WJets")==0) {
+                  procs[p]->scaleFactor[UserFunctions::leptonCat] = DefaultValues::getScaleFactor(procs[p]->name+"_QCDEtaWeightUp",UserFunctions::leptonCat);//0.969527;
+               }  
+            }
+         }
+      }
+      else if (!UserFunctions::QCDweight && (procs[p]->name.Contains("QCD")||procs[p]->name.CompareTo("WJets")==0) && UserFunctions::QCDweightSys.CompareTo("none",TString::kIgnoreCase)==0) {
+         cout << "\tWARNING::Overridding the " << procs[p]->name << " scale factor." << endl
+              << "\tThis is done because QCDWeight is set to false, not doing QCD weight systematics, and the process is either WJets or QCD." << endl;
+         procs[p]->scaleFactor[UserFunctions::leptonCat] = 1.0;
+      }
      cout<<"Process "<<setw(20)<<procs[p]->name<<" will be scaled by "<<setw(15)<<procs[p]->sigma[UserFunctions::leptonCat]<<" * "
          <<setw(12)<<procs[p]->intLum[UserFunctions::leptonCat]<<" * "<<setw(14)<<procs[p]->scaleFactor[UserFunctions::leptonCat]
          <<" * "<<setw(17)<<procs[p]->branching_ratio[UserFunctions::leptonCat]<<" / "<<setw(15)<<procs[p]->initial_events[UserFunctions::leptonCat]
          <<" = "<<setw(13)<<procs[p]->getScaleFactor(UserFunctions::leptonCat)<<endl;
+   }
 
    // Fill all the plots 
    doPlotter(plots, procs, UserFunctions::doJER, UserFunctions::doPUreweight, UserFunctions::doCSVreweight, UserFunctions::doTTbarreweight,
              UserFunctions::doFNAL, maxEvts, UserFunctions::WJweight, MVAWeightDir,
              MVAMethods, MVAVars, MVASpec, UserFunctions::verbose);
-   
+
    // Write output to file. The processs are passed to obtain the canvases
    if(!UserFunctions::outDir.EndsWith("/")) UserFunctions::outDir+="/";
    if(!gSystem->OpenDirectory(UserFunctions::outDir)) gSystem->mkdir(UserFunctions::outDir);
-   TString histoFileName = UserFunctions::outDir + "histos_" + lepCat + ".root";
-   TString canvasFileName = UserFunctions::outDir + "canvases_" + lepCat+".root";
+   TString histoFileName = UserFunctions::outDir + "histos_" + lepCat + "_" + jBin + ".root";
+   TString canvasFileName = UserFunctions::outDir + "canvases_" + lepCat + "_" + jBin + ".root";
    writePlotsToFile(histoFileName, canvasFileName, plots, procs);
 
    if(UserFunctions::doBenchmarks) {
@@ -1289,6 +1480,11 @@ void writePlotsToFile(TString histoFileName, TString canvasFileName,
    for ( MapOfPlots::iterator p = plots.begin(); p != plots.end() ; p++)
       for ( map<string,  Plot * >::iterator p2 = p->second.begin(); 
             p2 != p->second.end() ; p2++){
+            if(UserFunctions::fillLimitTemplatesOnly && 
+               ((TString(p2->first).CompareTo("MVADiscriminator")!=0) && (TString(p2->first).CompareTo("MEBDT")!=0) &&
+                (TString(p2->first).CompareTo("KinBDT")!=0) && !(TString(p2->first).Contains("KinMEBDT")) &&
+                (TString(p2->first).CompareTo("MET")!=0)))
+               continue;
          //try {
             TCanvas* can = ((FormattedPlot*) p2->second)->getCanvasTDR(procs);
             TString canName = UserFunctions::outDir+"/"+can->GetName();
@@ -1300,7 +1496,7 @@ void writePlotsToFile(TString histoFileName, TString canvasFileName,
             if(!class_name.Contains("TH2")) {
                can->SaveAs(canName+".pdf");
             }
-            can->SaveAs(canName+".C");
+            //can->SaveAs(canName+".C");
             cout << "DONE" << endl << flush;
          //}
          //catch (const std::bad_alloc&) {
@@ -1344,6 +1540,7 @@ void doPlotter(MapOfPlots & plots, vector<PhysicsProcess*> procs, bool doJER, bo
    pFill.setWeightFunction(&UserFunctions::weightFunc);
    pFill.setProcessFunction(&UserFunctions::processFunc);
    pFill.setInitializeEventFunction(&UserFunctions::initEventFunc);
+   pFill.setLimitBranches(UserFunctions::limitBranches);
    if (maxEvts>0)
       pFill.setMaximumEventsDEBUG(maxEvts); // TEST
    if (!MVAWeightDir.IsNull()) {
@@ -1375,11 +1572,11 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
    // The overlay of a scaled signal. For signalName pick the groupingName 
    // of one of the processes. Or just "" if you don't want a signal overlayed.
    //TString signalName = "ggH+WH+qqH(125)";
-   TString signalName = "H(125)->WW";
+   TString signalName = UserFunctions::signalTitle;
    double signalFactor = 1.0;
-   if(leptonCat == DEFS::electron) signalFactor = 10000;//1.30611383990487593e+04;
-   else if(leptonCat == DEFS::muon) signalFactor = 10000;//1.18733488512815566e+04;
-   else signalFactor = 10000;
+   if(leptonCat == DEFS::electron) signalFactor = 3900;
+   else if(leptonCat == DEFS::muon) signalFactor = 3900;
+   else signalFactor = 3900;
 
    //Double_t leptonptbinslow[9] = {20,25,30,35,40,50,70,100,1000};
    //Double_t leptonptbinshigh[10] = {20,50,55,60,65,70,80,100,120,1000};
@@ -1411,6 +1608,12 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
      +2.853, +2.964, +3.139, +3.314, +3.489, +3.664, +3.839, +4.013, +4.191, 
      +4.363, +4.538, +4.716, +4.889, +5.191};
    
+   vector<double> MET_binning;
+   for(int i=0; i<=300; i+=5) {
+      //if(i>300 && i%100!=0) continue;
+      MET_binning.push_back(i);
+   }
+   MET_binning.push_back(1000);
      
    //goes in the label and tells us what cuts we are applying
    string cut = "_MET > 35, elPt > 30";
@@ -1418,92 +1621,8 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
    TString name = "";
 
    a = new FormattedPlot;
-   name  = "Mjj";
-   a->templateHisto = new TH1D(name + lepStr, name,22,40,150);
-   a->axisTitles.push_back("M_{jj} [GeV]");
-   a->axisTitles.push_back("Number of Events / 5 GeV");
-   a->range = make_pair(40.,150.);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
-
-   a = new FormattedPlot;
-   name  = "Mlv";
-   a->templateHisto = new TH1D(name + lepStr, name,22,40,150);
-   a->axisTitles.push_back("M_{l#nu} [GeV]");
-   a->axisTitles.push_back("Number of Events / 5 GeV");
-   a->range = make_pair(40.,150.);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
-
-   a = new FormattedPlot;
-   name = "MjjmWmT";
-   a->templateHisto = new TH1D(name + lepStr, name,500,-250,250);
-   a->axisTitles.push_back("M_{jj} - WmT [GeV]");
-   a->axisTitles.push_back("Number of Events / GeV");
-   a->range = make_pair(-100.,250.);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
-   
-   a = new FormattedPlot;
-   name = "LeptPt";
-   a->templateHisto = new TH1D(name + lepStr, name , 250,0,500);
-   a->axisTitles.push_back("p_{T}^{lepton} [GeV]");
-   a->axisTitles.push_back("Number of Events / 2 GeV");
-   a->range = make_pair(20.,150.);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
- 
-   a = new FormattedPlot;
-   name = "LeptEta";
-   a->templateHisto = new TH1D(name + lepStr, name, 82, etabins);
-   a->axisTitles.push_back("#eta^{lepton}");
-   a->axisTitles.push_back("Number of Events ");
-   a->range = make_pair(-3.,3.);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
-
-   a = new FormattedPlot;
-   name = "LeptPhi";
-   a->templateHisto = new TH1D(name + lepStr, name,70,-3.5,3.5);
-   a->axisTitles.push_back("#phi^{lepton} [Radians]");
-   a->axisTitles.push_back("Number of Events / 0.1 Radians");
-   a->range = make_pair(-3.5,3.5);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
-
-   a = new FormattedPlot;
-   name = "LeptPFIso";
-   a->templateHisto = new TH1D(name + lepStr, name,100,0,10);
-   a->axisTitles.push_back("lepton PFIso ");
-   a->axisTitles.push_back("Number of Events");
-   a->range = make_pair(0,7);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
-
-   a = new FormattedPlot;
    name = "MET";
-   a->templateHisto = new TH1D(name + lepStr, name,100,0,500);
+   a->templateHisto = new TH1D(name + lepStr, name,MET_binning.size()-1,&MET_binning[0]);
    a->axisTitles.push_back("Missing E_{T} [GeV]");
    a->axisTitles.push_back("Number of Events / 5 GeV");
    a->range = make_pair(30.,150.);
@@ -1513,240 +1632,670 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
    a->overlaySignalFactor = signalFactor;
    plots[leptonCat][string(name)] = a;
 
-   a = new FormattedPlot;
-   name = "MET_vs_LeptEta";
-   a->templateHisto = new TH2D(name + lepStr, name, 82, etabins, 1000,0,500);
-   a->axisTitles.push_back("Lepton #eta");
-   a->axisTitles.push_back("MET");
-   a->axisTitles.push_back("Number of Events" );
-   a->range = make_pair(-4,4);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
+   if(!UserFunctions::fillLimitTemplatesOnly) {
+      if(UserFunctions::fillGen) {
+         a = new FormattedPlot;
+         name = "GenLeptPt";
+         a->templateHisto = new TH1D(name + lepStr, name , MET_binning.size()-1,&MET_binning[0]);
+         a->axisTitles.push_back("p_{T}^{gen lepton} [GeV]");
+         a->axisTitles.push_back("Number of Events / 2 GeV");
+         a->range = make_pair(20.,150.);
+         a->normToData = norm_data;
+         a->stacked = true; a->leptonCat = leptonCat;
+         a->overlaySignalName = signalName;
+         a->overlaySignalFactor = signalFactor;
+         plots[leptonCat][string(name)] = a;
+ 
+         a = new FormattedPlot;
+         name = "GenLeptEta";
+         a->templateHisto = new TH1D(name + lepStr, name, 82, etabins);
+         a->axisTitles.push_back("#eta^{gen lepton}");
+         a->axisTitles.push_back("Number of Events ");
+         a->range = make_pair(-3.,3.);
+         a->normToData = norm_data;
+         a->stacked = true; a->leptonCat = leptonCat;
+         a->overlaySignalName = signalName;
+         a->overlaySignalFactor = signalFactor;
+         plots[leptonCat][string(name)] = a;
 
-   a = new FormattedPlot;
-   name = "MET_vs_LeptPt";
-   a->templateHisto = new TH2D(name + lepStr, name, 1000, 0, 500, 1000,0,500);
-   a->axisTitles.push_back("p_{T}^{lepton} [GeV]");
-   a->axisTitles.push_back("MET");
-   a->axisTitles.push_back("Number of Events" );
-   a->range = make_pair(20.0,150.0);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
+         a = new FormattedPlot;
+         name = "GenLeptPhi";
+         a->templateHisto = new TH1D(name + lepStr, name,70,-3.5,3.5);
+         a->axisTitles.push_back("#phi^{gen lepton} [Radians]");
+         a->axisTitles.push_back("Number of Events / 0.1 Radians");
+         a->range = make_pair(-3.5,3.5);
+         a->normToData = norm_data;
+         a->stacked = true; a->leptonCat = leptonCat;
+         a->overlaySignalName = signalName;
+         a->overlaySignalFactor = signalFactor;
+         plots[leptonCat][string(name)] = a;
 
-   a = new FormattedPlot;
-   name = "MET_vs_AbsLeptEta";
-   a->templateHisto = new TH2D(name + lepStr, name, 41, absetabins, 1000,0,500);
-   a->axisTitles.push_back("Lepton #eta");
-   a->axisTitles.push_back("MET");
-   a->axisTitles.push_back("Number of Events" );
-   a->range = make_pair(-4,4);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
+         a = new FormattedPlot;
+         name = "GenWmT";
+         a->templateHisto = new TH1D(name + lepStr, name,200,0,1000);
+         a->axisTitles.push_back("M_{T}^{gen W} [GeV]");
+         a->axisTitles.push_back("Number of Events");
+         a->range = make_pair(0.0,150.0);
+         a->normToData = norm_data;
+         a->stacked = true; a->leptonCat = leptonCat;
+         a->overlaySignalName = signalName;
+         a->overlaySignalFactor = signalFactor;
+         plots[leptonCat][string(name)] = a;
 
-   a = new FormattedPlot;
-   name = "METPhi";
-   a->templateHisto = new TH1D(name + lepStr, name, 62, -TMath::Pi(), TMath::Pi());
-   a->axisTitles.push_back("Missing E_{T} Phi ");
-   a->axisTitles.push_back("Number of Events" );
-   a->range = make_pair(-3.5, 3.5);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
+         a = new FormattedPlot;
+         name = "GenVPt";
+         a->templateHisto = new TH1D(name + lepStr, name,200,0,1000);
+         a->axisTitles.push_back("p_{T}^{gen V} [GeV]");
+         a->axisTitles.push_back("Number of Events");
+         a->range = make_pair(0.0,150.0);
+         a->normToData = norm_data;
+         a->stacked = true; a->leptonCat = leptonCat;
+         a->overlaySignalName = signalName;
+         a->overlaySignalFactor = signalFactor;
+         plots[leptonCat][string(name)] = a;
+
+         a = new FormattedPlot;
+         name = "GenVEta";
+         a->templateHisto = new TH1D(name + lepStr, name,82,etabins);
+         a->axisTitles.push_back("#eta^{gen V}");
+         a->axisTitles.push_back("Number of Events");
+         a->range = make_pair(-3.0,3.0);
+         a->normToData = norm_data;
+         a->stacked = true; a->leptonCat = leptonCat;
+         a->overlaySignalName = signalName;
+         a->overlaySignalFactor = signalFactor;
+         plots[leptonCat][string(name)] = a;
+
+         a = new FormattedPlot;
+         name = "GenVPhi";
+         a->templateHisto = new TH1D(name + lepStr, name,70,-3.5,3.5);
+         a->axisTitles.push_back("#phi^{gen V} [Radians]");
+         a->axisTitles.push_back("Number of Events / 0.1 Radians");
+         a->range = make_pair(-3.5,3.5);
+         a->normToData = norm_data;
+         a->stacked = true; a->leptonCat = leptonCat;
+         a->overlaySignalName = signalName;
+         a->overlaySignalFactor = signalFactor;
+         plots[leptonCat][string(name)] = a;
+      }
+
+      a = new FormattedPlot;
+      name = "PUWeights";
+      a->templateHisto = new TH1D(name + lepStr, name, 60,0,60);
+      a->axisTitles.push_back("PU Weight");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(0,60);
+      a->logxy = make_pair(false,false);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
+      a = new FormattedPlot;
+      name  = "Mjj";
+      a->templateHisto = new TH1D(name + lepStr, name,200,0.0,1000.0);
+      a->axisTitles.push_back("M_{jj} [GeV]");
+      a->axisTitles.push_back("Number of Events / 5 GeV");
+      a->range = make_pair(40.,150.);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
+      a = new FormattedPlot;
+      name  = "Mlv";
+      a->templateHisto = new TH1D(name + lepStr, name,200,0.0,1000.0);
+      a->axisTitles.push_back("M_{l#nu} [GeV]");
+      a->axisTitles.push_back("Number of Events / 5 GeV");
+      a->range = make_pair(40.,150.);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
+      a = new FormattedPlot;
+      name = "MjjmWmT";
+      a->templateHisto = new TH1D(name + lepStr, name,500,-250,250);
+      a->axisTitles.push_back("M_{jj} - WmT [GeV]");
+      a->axisTitles.push_back("Number of Events / GeV");
+      a->range = make_pair(-100.,250.);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
    
-   a = new FormattedPlot;
-   name = "WmT";
-   a->templateHisto = new TH1D(name + lepStr, name,100,0,500);
-   a->axisTitles.push_back("M_{T}^{W} [GeV]");
-   a->axisTitles.push_back("Number of Events / 5 GeV");
-   a->range = make_pair(0.,150.);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
+      a = new FormattedPlot;
+      name = "LeptPt";
+      a->templateHisto = new TH1D(name + lepStr, name , MET_binning.size()-1,&MET_binning[0]);
+      a->axisTitles.push_back("p_{T}^{lepton} [GeV]");
+      a->axisTitles.push_back("Number of Events / 2 GeV");
+      a->range = make_pair(20.,150.);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+ 
+      a = new FormattedPlot;
+      name = "LeptEta";
+      a->templateHisto = new TH1D(name + lepStr, name, 82, etabins);
+      a->axisTitles.push_back("#eta^{lepton}");
+      a->axisTitles.push_back("Number of Events ");
+      a->range = make_pair(-3.,3.);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
 
-   a = new FormattedPlot;
-   name = "Jet1Pt";
-   a->templateHisto = new TH1D(name + lepStr, name,100,0,300);
-   a->axisTitles.push_back("p_{T}^{jet_{1}} [GeV]");
-   a->axisTitles.push_back("Number of Events / 5 GeV");
-   a->range = make_pair(20.,200.);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
+      a = new FormattedPlot;
+      name = "LeptPhi";
+      a->templateHisto = new TH1D(name + lepStr, name,70,-3.5,3.5);
+      a->axisTitles.push_back("#phi^{lepton} [Radians]");
+      a->axisTitles.push_back("Number of Events / 0.1 Radians");
+      a->range = make_pair(-3.5,3.5);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
 
-   a = new FormattedPlot;
-   name = "Jet1Eta";
-   a->templateHisto = new TH1D(name + lepStr, name,50,-5,5);
-   a->axisTitles.push_back("#eta^{jet_{1}} ");
-   a->axisTitles.push_back("Number of Events ");
-   a->range = make_pair(-3.,3.);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
+      a = new FormattedPlot;
+      name = "LeptPFIso";
+      a->templateHisto = new TH1D(name + lepStr, name,100,0,10);
+      a->axisTitles.push_back("lepton PFIso");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(0,7);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
 
-   a = new FormattedPlot;
-   name = "Jet1Phi";
-   a->templateHisto = new TH1D(name + lepStr, name,70,-3.5,3.5);
-   a->axisTitles.push_back("#phi^{jet_{1}} [Radians]");
-   a->axisTitles.push_back("Number of Events / 0.1 Radians");
-   a->range = make_pair(-3.5,3.5);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
+      a = new FormattedPlot;
+      name = "METPhi";
+      a->templateHisto = new TH1D(name + lepStr, name, 62, -TMath::Pi(), TMath::Pi());
+      a->axisTitles.push_back("Missing E_{T} Phi ");
+      a->axisTitles.push_back("Number of Events" );
+      a->range = make_pair(-3.5, 3.5);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
    
-   a = new FormattedPlot;
-   name = "Jet2Pt";
-   a->templateHisto = new TH1D(name + lepStr, name,200,0,300);
-   a->axisTitles.push_back("p_{T}^{jet_{2}} [GeV]");
-   a->axisTitles.push_back("Number of Events / 5 GeV");
-   a->range = make_pair(20.,100.);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
+      a = new FormattedPlot;
+      name = "Ptlv";
+      a->templateHisto = new TH1D(name + lepStr, name,100,0,500);
+      a->axisTitles.push_back("p_{T}^{W_{l#nu}} [GeV]");
+      a->axisTitles.push_back("Number of Events / 5 GeV");
+      a->range = make_pair(0.,150.);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
+      a = new FormattedPlot;
+      name = "WmT";
+      a->templateHisto = new TH1D(name + lepStr, name,100,0,500);
+      a->axisTitles.push_back("M_{T}^{W} [GeV]");
+      a->axisTitles.push_back("Number of Events / 5 GeV");
+      a->range = make_pair(0.,150.);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
+      a = new FormattedPlot;
+      name = "Jet1Pt";
+      a->templateHisto = new TH1D(name + lepStr, name,100,0,300);
+      a->axisTitles.push_back("p_{T}^{jet_{1}} [GeV]");
+      a->axisTitles.push_back("Number of Events / 5 GeV");
+      a->range = make_pair(20.,200.);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
+      a = new FormattedPlot;
+      name = "Jet1Eta";
+      a->templateHisto = new TH1D(name + lepStr, name,50,-5,5);
+      a->axisTitles.push_back("#eta^{jet_{1}} ");
+      a->axisTitles.push_back("Number of Events ");
+      a->range = make_pair(-3.,3.);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
+      a = new FormattedPlot;
+      name = "Jet1Phi";
+      a->templateHisto = new TH1D(name + lepStr, name,70,-3.5,3.5);
+      a->axisTitles.push_back("#phi^{jet_{1}} [Radians]");
+      a->axisTitles.push_back("Number of Events / 0.1 Radians");
+      a->range = make_pair(-3.5,3.5);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
    
-   a = new FormattedPlot;
-   name = "Jet2Eta";
-   a->templateHisto = new TH1D(name + lepStr, name,50,-5,5);
-   a->axisTitles.push_back("#eta^{jet_{2}}");
-   a->axisTitles.push_back("Number of Events");
-   a->range = make_pair(-3.,3.);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
-
-   a = new FormattedPlot;
-   name = "Jet2Phi";
-   a->templateHisto = new TH1D(name + lepStr, name,70,-3.5,3.5);
-   a->axisTitles.push_back("#phi^{jet_{2}} [Radians]");
-   a->axisTitles.push_back("Number of Events / 0.1 Radians");
-   a->range = make_pair(-3.5,3.5);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
+      a = new FormattedPlot;
+      name = "Jet2Pt";
+      a->templateHisto = new TH1D(name + lepStr, name,200,0,300);
+      a->axisTitles.push_back("p_{T}^{jet_{2}} [GeV]");
+      a->axisTitles.push_back("Number of Events / 5 GeV");
+      a->range = make_pair(20.,100.);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
    
-   a = new FormattedPlot;
-   name = "DeltaEtaJ1J2";
-   a->templateHisto = new TH1D(name + lepStr, name,50,0,5);
-   a->axisTitles.push_back("#eta^{jet_{1}} - #eta^{jet_{2}} ");
-   a->axisTitles.push_back("Number of Events ");
-   a->range = make_pair(0.,5.);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
+      a = new FormattedPlot;
+      name = "Jet2Eta";
+      a->templateHisto = new TH1D(name + lepStr, name,50,-5,5);
+      a->axisTitles.push_back("#eta^{jet_{2}}");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(-3.,3.);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
+      a = new FormattedPlot;
+      name = "Jet2Phi";
+      a->templateHisto = new TH1D(name + lepStr, name,70,-3.5,3.5);
+      a->axisTitles.push_back("#phi^{jet_{2}} [Radians]");
+      a->axisTitles.push_back("Number of Events / 0.1 Radians");
+      a->range = make_pair(-3.5,3.5);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
    
-   a = new FormattedPlot;
-   name = "Ptjj";
-   a->templateHisto = new TH1D(name + lepStr, name,100,0,300);
-   a->axisTitles.push_back("p_{T}^{jj} [GeV]");
-   a->axisTitles.push_back("Number of Events / 10 GeV");
-   a->range = make_pair(0.,250.);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
-
-   a = new FormattedPlot;
-   name = "j1Pt_Mjj";
-   a->templateHisto = new TH1D(name + lepStr, name,500,0,5);
-   a->axisTitles.push_back("p_{T}^{jet_{1}}/M_{jj} [GeV]");
-   a->axisTitles.push_back("Number of Events / 0.01 GeV");
-   a->range = make_pair(0.,2.);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
+      a = new FormattedPlot;
+      name = "DeltaEtaJ1J2";
+      a->templateHisto = new TH1D(name + lepStr, name,50,0,5);
+      a->axisTitles.push_back("#eta^{jet_{1}} - #eta^{jet_{2}} ");
+      a->axisTitles.push_back("Number of Events ");
+      a->range = make_pair(0.,5.);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
    
-   a = new FormattedPlot;
-   name = "j2Pt_Mjj";
-   a->templateHisto = new TH1D(name + lepStr, name,500,0,5);
-   a->axisTitles.push_back("p_{T}^{jet_{2}}/M_{jj} [GeV]");
-   a->axisTitles.push_back("Number of Events / 0.01 GeV");
-   a->range = make_pair(0.,1.5);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
+      a = new FormattedPlot;
+      name = "Ptjj";
+      a->templateHisto = new TH1D(name + lepStr, name,100,0,300);
+      a->axisTitles.push_back("p_{T}^{jj} [GeV]");
+      a->axisTitles.push_back("Number of Events / 10 GeV");
+      a->range = make_pair(0.,250.);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
 
-   a = new FormattedPlot;
-   name = "Mlvjj";
-   a->templateHisto = new TH1D(name + lepStr, name,50,0,1000);
-   a->axisTitles.push_back("M_{lvjj} [GeV]");
-   a->axisTitles.push_back("Number of Events / 4 GeV");
-   a->range = make_pair(50.,800.);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
-
-   a = new FormattedPlot;
-   name = "DeltaRJ1J2";
-   a->templateHisto = new TH1D(name + lepStr, name,50,0,10);
-   a->axisTitles.push_back("#DeltaR of J1 and J2 ");
-   a->axisTitles.push_back("Number of Events ");
-   a->range = make_pair(0.,7.);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
+      a = new FormattedPlot;
+      name = "j1Pt_Mjj";
+      a->templateHisto = new TH1D(name + lepStr, name,500,0,5);
+      a->axisTitles.push_back("p_{T}^{jet_{1}}/M_{jj} [GeV]");
+      a->axisTitles.push_back("Number of Events / 0.01 GeV");
+      a->range = make_pair(0.,2.);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
    
-   a = new FormattedPlot;
-   name = "DeltaPhi_J1J2";
-   a->templateHisto = new TH1D(name + lepStr, name,50,-10,10);
-   a->axisTitles.push_back("#Delta #phi(J1J2)");
-   a->axisTitles.push_back("Number of Events / .2 Radians");
-   a->range = make_pair(-pi,pi);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
+      a = new FormattedPlot;
+      name = "j2Pt_Mjj";
+      a->templateHisto = new TH1D(name + lepStr, name,500,0,5);
+      a->axisTitles.push_back("p_{T}^{jet_{2}}/M_{jj} [GeV]");
+      a->axisTitles.push_back("Number of Events / 0.01 GeV");
+      a->range = make_pair(0.,1.5);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
+      a = new FormattedPlot;
+      name = "Mlvjj";
+      a->templateHisto = new TH1D(name + lepStr, name,50,0,1000);
+      a->axisTitles.push_back("M_{lvjj} [GeV]");
+      a->axisTitles.push_back("Number of Events / 4 GeV");
+      a->range = make_pair(50.,800.);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
+      a = new FormattedPlot;
+      name = "DeltaRJ1J2";
+      a->templateHisto = new TH1D(name + lepStr, name,50,0,10);
+      a->axisTitles.push_back("#DeltaR of J1 and J2 ");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(0.,7.);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
    
-   a = new FormattedPlot;
-   name = "npv";
-   a->templateHisto = new TH1D(name + lepStr, name,100,0,100);
-   a->axisTitles.push_back("npv");
-   a->axisTitles.push_back("Number of Events");
-   a->range = make_pair(0,40);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
+      a = new FormattedPlot;
+      name = "DeltaPhi_J1J2";
+      a->templateHisto = new TH1D(name + lepStr, name,50,-10,10);
+      a->axisTitles.push_back("#Delta #phi(J1J2)");
+      a->axisTitles.push_back("Number of Events / .2 Radians");
+      a->range = make_pair(-pi,pi);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+   
+      a = new FormattedPlot;
+      name = "npv";
+      a->templateHisto = new TH1D(name + lepStr, name,100,0,100);
+      a->axisTitles.push_back("npv");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(0,40);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
 
+      a = new FormattedPlot;
+      name = "jet1dRLep";
+      a->templateHisto = new TH1D(name + lepStr, name,50,0,10);
+      a->axisTitles.push_back("#DeltaR(Lepton,Jet1)");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(0.,7.);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
 
+      a = new FormattedPlot;
+      name = "jet2dRLep";
+      a->templateHisto = new TH1D(name + lepStr, name,50,0,10);
+      a->axisTitles.push_back("#DeltaR(Lepton,Jet2)");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(0.,7.);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
 
-   if(UserFunctions::fillNonStandard) {   
+      a = new FormattedPlot;
+      name = "jet3dRLep";
+      a->templateHisto = new TH1D(name + lepStr, name,50,0,10);
+      a->axisTitles.push_back("#DeltaR(Lepton,Jet3)");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(0.,7.);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
+      a = new FormattedPlot;
+      name = "leptonEtaCharge";
+      a->templateHisto = new TH1D(name + lepStr, name,5,-2,2);
+      a->axisTitles.push_back("Lepton Eta Charge");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(-2,2);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;      
+
+      a = new FormattedPlot;
+      name = "ht";
+      a->templateHisto = new TH1D(name + lepStr, name,40,0,800);
+      a->axisTitles.push_back("ht");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(0,800);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a; 
+
+      a = new FormattedPlot;
+      name = "Ptlnujj";
+      a->templateHisto = new TH1D(name + lepStr, name,25,0,150);
+      a->axisTitles.push_back("p_{T}^{l#nujj}");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(0,150);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a; 
+
+      a = new FormattedPlot;
+      name = "dPhiMETJet";
+      a->templateHisto = new TH1D(name + lepStr, name,62,-TMath::Pi(),TMath::Pi());
+      a->axisTitles.push_back("#Delta#Phi(MET,Jet1)");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(-TMath::Pi(),TMath::Pi());
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a; 
+
+      a = new FormattedPlot;
+      name = "dPhiMETLep";
+      a->templateHisto = new TH1D(name + lepStr, name,62,-TMath::Pi(),TMath::Pi());
+      a->axisTitles.push_back("#Delta#Phi(MET,Lepton)");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(-TMath::Pi(),TMath::Pi());
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a; 
+
+      a = new FormattedPlot;
+      name = "dRlepjj";
+      a->templateHisto = new TH1D(name + lepStr, name,50,0,10);
+      a->axisTitles.push_back("#DeltaR(Lepton,Jet1Jet2)");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(0.,7.);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
+      a = new FormattedPlot;
+      name = "DeltaPhi_LJ1";
+      a->templateHisto = new TH1D(name + lepStr, name,50,-10,10);
+      a->axisTitles.push_back("#Delta #phi(LJ1)");
+      a->axisTitles.push_back("Number of Events / .2 Radians");
+      a->range = make_pair(-pi,pi);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
+      a = new FormattedPlot;
+      name = "DeltaPhi_METJ1";
+      a->templateHisto = new TH1D(name + lepStr, name, 50,-10,10);
+      a->axisTitles.push_back("#Delta #phi(MET,J1)");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(-pi,pi);
+      a->logxy = make_pair(false,false);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
+      a = new FormattedPlot;
+      name = "DeltaPhi_LMET";
+      a->templateHisto = new TH1D(name + lepStr, name,50,-10,10);
+      a->axisTitles.push_back("#Delta #phi(Lepton,MET)");
+      a->axisTitles.push_back("Number of Events / .2 Radians");
+      a->range = make_pair(-pi,pi);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
+      a = new FormattedPlot;
+      name = "minDPhiLepJet";
+      a->templateHisto = new TH1D(name + lepStr, name,62,-TMath::Pi(),TMath::Pi());
+      a->axisTitles.push_back("min(#Delta#Phi(Lepton,Jet1))");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(-TMath::Pi(),TMath::Pi());
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a; 
+
+      a = new FormattedPlot;
+      name = "CosTheta_l";
+      a->templateHisto = new TH1D(name + lepStr, name,50,-1,1);
+      a->axisTitles.push_back("Cos(#theta)_{l}");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(-TMath::Pi(),TMath::Pi());
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a; 
+
+      a = new FormattedPlot;
+      name = "CosTheta_j";
+      a->templateHisto = new TH1D(name + lepStr, name,50,-1,1);
+      a->axisTitles.push_back("Cos(#theta)_{j}");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(-TMath::Pi(),TMath::Pi());
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a; 
+
+      a = new FormattedPlot;
+      name = "CosTheta_WH";
+      a->templateHisto = new TH1D(name + lepStr, name,50,-1,1);
+      a->axisTitles.push_back("Cos(#theta)_{WH}");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(-TMath::Pi(),TMath::Pi());
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
+      if(UserFunctions::ntupleType==DEFS::MicroNtuple || UserFunctions::ntupleType==DEFS::METree) {
+         for (unsigned int tep=0; tep<MicroNtuple::nEventProb; tep++) {
+            a = new FormattedPlot;
+            name = TString(UserFunctions::concatString("tEventProb",tep));
+            string xaxis = UserFunctions::concatString("log10(tEventProb[",tep) + "])";
+            a->templateHisto = new TH1D(name + lepStr, name,180,-45,0);
+            a->axisTitles.push_back(xaxis);
+            a->axisTitles.push_back("Number of Events");
+            if(UserFunctions::maxEventProbs[tep].first>0)
+               a->range = make_pair(-13,0);
+            else
+               a->range = make_pair(-25,0);
+            a->normToData = norm_data;
+            a->stacked = true; a->leptonCat = leptonCat;
+            a->overlaySignalName = signalName;
+            a->overlaySignalFactor = signalFactor;
+            plots[leptonCat][string(name)] = a;
+         }
+
+         a = new FormattedPlot;
+         name = "MVAProbability";
+         a->templateHisto = new TH1D(name + lepStr, name, 100,0,1);
+         a->axisTitles.push_back("Probability");
+         a->axisTitles.push_back("Number of Events");
+         a->range = make_pair(0,1);
+         a->normToData = norm_data;
+         a->stacked = true; a->leptonCat = leptonCat;
+         a->overlaySignalName = signalName;
+         a->overlaySignalFactor = signalFactor;
+         plots[leptonCat][string(name)] = a;
+      }
+   }
+
+   if(UserFunctions::fillNonStandard) {
+      a = new FormattedPlot;
+      name = "SigmaIetaIeta";
+      a->templateHisto = new TH1D(name + lepStr, name,200,0,0.1);
+      a->axisTitles.push_back("lepton SigmaIetaIeta");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(0,0.05);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
+      a = new FormattedPlot;
+      name = "MVATrig";
+      a->templateHisto = new TH1D(name + lepStr, name,2000,0,1.0);
+      a->axisTitles.push_back("lepton mvaTrig");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(0.95,1.0);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
+      a = new FormattedPlot;
+      name = "MVANonTrig";
+      a->templateHisto = new TH1D(name + lepStr, name,2000,0,1.0);
+      a->axisTitles.push_back("lepton mvaNonTrig");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(0.8,1.0);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+      
+      a = new FormattedPlot;
+      name = "TTbarWeights";
+      a->templateHisto = new TH1D(name + lepStr, name, 400,-2,2);
+      a->axisTitles.push_back("TTbar Weight");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(0,1.3);
+      a->logxy = make_pair(false,false);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
       a = new FormattedPlot;
       name = "EJ1EJ2";
       a->templateHisto = new TH1D(name + lepStr, name,500,700,5000);
@@ -1802,43 +2351,6 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("#DeltaR of lep and MET ");
       a->axisTitles.push_back("Number of Events");
       a->range = make_pair(0.,7.);
-      a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
-      a->overlaySignalName = signalName;
-      a->overlaySignalFactor = signalFactor;
-      plots[leptonCat][string(name)] = a;
-
-      a = new FormattedPlot;
-      name = "DeltaPhi_LJ1";
-      a->templateHisto = new TH1D(name + lepStr, name,50,-10,10);
-      a->axisTitles.push_back("#Delta #phi(LJ1)");
-      a->axisTitles.push_back("Number of Events / .2 Radians");
-      a->range = make_pair(-pi,pi);
-      a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
-      a->overlaySignalName = signalName;
-      a->overlaySignalFactor = signalFactor;
-      plots[leptonCat][string(name)] = a;
-
-      a = new FormattedPlot;
-      name = "DeltaPhi_METJ1";
-      a->templateHisto = new TH1D(name + lepStr, name, 50,-10,10);
-      a->axisTitles.push_back("#Delta #phi(MET,J1)");
-      a->axisTitles.push_back("Number of Events");
-      a->range = make_pair(-pi,pi);
-      a->logxy = make_pair(false,false);
-      a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
-      a->overlaySignalName = signalName;
-      a->overlaySignalFactor = signalFactor;
-      plots[leptonCat][string(name)] = a;
-
-      a = new FormattedPlot;
-      name = "DeltaPhi_LMET";
-      a->templateHisto = new TH1D(name + lepStr, name,50,-10,10);
-      a->axisTitles.push_back("#Delta #phi(Lepton,MET)");
-      a->axisTitles.push_back("Number of Events / .2 Radians");
-      a->range = make_pair(-pi,pi);
       a->normToData = norm_data;
       a->stacked = true; a->leptonCat = leptonCat;
       a->overlaySignalName = signalName;
@@ -1909,6 +2421,45 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
    }
    
    if(UserFunctions::fill2D) {
+      a = new FormattedPlot;
+      name = "MET_vs_LeptEta";
+      a->templateHisto = new TH2D(name + lepStr, name, 82, etabins, 1000,0,500);
+      a->axisTitles.push_back("Lepton #eta");
+      a->axisTitles.push_back("MET");
+      a->axisTitles.push_back("Number of Events" );
+      a->range = make_pair(-4,4);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
+      a = new FormattedPlot;
+      name = "MET_vs_LeptPt";
+      a->templateHisto = new TH2D(name + lepStr, name, 1000, 0, 500, 1000,0,500);
+      a->axisTitles.push_back("p_{T}^{lepton} [GeV]");
+      a->axisTitles.push_back("MET");
+      a->axisTitles.push_back("Number of Events" );
+      a->range = make_pair(20.0,150.0);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
+      a = new FormattedPlot;
+      name = "MET_vs_AbsLeptEta";
+      a->templateHisto = new TH2D(name + lepStr, name, 41, absetabins, 1000,0,500);
+      a->axisTitles.push_back("Lepton #eta");
+      a->axisTitles.push_back("MET");
+      a->axisTitles.push_back("Number of Events" );
+      a->range = make_pair(-4,4);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
       a = new FormattedPlot;
       name = "MWjjVsMWlv";
       a->templateHisto = new TH2D(name + lepStr, name ,200,0,200,200,0,200);
@@ -2031,17 +2582,118 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       plots[leptonCat][string(name)] = a;
    }
 
-   for (unsigned int tep=0; tep<MicroNtuple::nEventProb; tep++) {
+   if(UserFunctions::ntupleType==DEFS::MicroNtuple || UserFunctions::ntupleType==DEFS::METree) {
+      if(UserFunctions::fillWJetsFlavor) {
+         a = new FormattedPlot;
+         name = "KinMEBDT_WpLight";
+         a->templateHisto = new TH1D(name + lepStr, name,
+                                     DEFS::getNBinsX(UserFunctions::jetBin,leptonCat,string("KinMEBDT")),
+                                     &DEFS::getBinsX(UserFunctions::jetBin,leptonCat,string("KinMEBDT"))[0]);
+         a->axisTitles.push_back("KinMEBDT");
+         a->axisTitles.push_back("Number of Events");
+         a->range = make_pair(-1.0,1.0);
+         a->normToData = norm_data;
+         a->stacked = true; a->leptonCat = leptonCat;
+         a->overlaySignalName = signalName;
+         a->overlaySignalFactor = signalFactor;
+         plots[leptonCat][string(name)] = a;
+
+         a = new FormattedPlot;
+         name = "KinMEBDT_WpC";
+         a->templateHisto = new TH1D(name + lepStr, name,
+                                     DEFS::getNBinsX(UserFunctions::jetBin,leptonCat,string("KinMEBDT")),
+                                     &DEFS::getBinsX(UserFunctions::jetBin,leptonCat,string("KinMEBDT"))[0]);
+         a->axisTitles.push_back("KinMEBDT");
+         a->axisTitles.push_back("Number of Events");
+         a->range = make_pair(-1.0,1.0);
+         a->normToData = norm_data;
+         a->stacked = true; a->leptonCat = leptonCat;
+         a->overlaySignalName = signalName;
+         a->overlaySignalFactor = signalFactor;
+         plots[leptonCat][string(name)] = a;
+
+         a = new FormattedPlot;
+         name = "KinMEBDT_WpB";
+         a->templateHisto = new TH1D(name + lepStr, name,
+                                     DEFS::getNBinsX(UserFunctions::jetBin,leptonCat,string("KinMEBDT")),
+                                     &DEFS::getBinsX(UserFunctions::jetBin,leptonCat,string("KinMEBDT"))[0]);
+         a->axisTitles.push_back("KinMEBDT");
+         a->axisTitles.push_back("Number of Events");
+         a->range = make_pair(-1.0,1.0);
+         a->normToData = norm_data;
+         a->stacked = true; a->leptonCat = leptonCat;
+         a->overlaySignalName = signalName;
+         a->overlaySignalFactor = signalFactor;
+         plots[leptonCat][string(name)] = a;
+
+         a = new FormattedPlot;
+         name = "KinMEBDT_WpOther";
+         a->templateHisto = new TH1D(name + lepStr, name,
+                                     DEFS::getNBinsX(UserFunctions::jetBin,leptonCat,string("KinMEBDT")),
+                                     &DEFS::getBinsX(UserFunctions::jetBin,leptonCat,string("KinMEBDT"))[0]);
+         a->axisTitles.push_back("KinMEBDT");
+         a->axisTitles.push_back("Number of Events");
+         a->range = make_pair(-1.0,1.0);
+         a->normToData = norm_data;
+         a->stacked = true; a->leptonCat = leptonCat;
+         a->overlaySignalName = signalName;
+         a->overlaySignalFactor = signalFactor;
+         plots[leptonCat][string(name)] = a;
+
+         a = new FormattedPlot;
+         name = "KinMEBDT_WpInclusive";
+         a->templateHisto = new TH1D(name + lepStr, name,
+                                     DEFS::getNBinsX(UserFunctions::jetBin,leptonCat,string("KinMEBDT")),
+                                     &DEFS::getBinsX(UserFunctions::jetBin,leptonCat,string("KinMEBDT"))[0]);
+         a->axisTitles.push_back("KinMEBDT");
+         a->axisTitles.push_back("Number of Events");
+         a->range = make_pair(-1.0,1.0);
+         a->normToData = norm_data;
+         a->stacked = true; a->leptonCat = leptonCat;
+         a->overlaySignalName = signalName;
+         a->overlaySignalFactor = signalFactor;
+         plots[leptonCat][string(name)] = a;
+      }
+
       a = new FormattedPlot;
-      name = TString(UserFunctions::concatString("tEventProb",tep));
-      string xaxis = UserFunctions::concatString("log10(tEventProb[",tep) + "])";
-      a->templateHisto = new TH1D(name + lepStr, name,180,-45,0);
-      a->axisTitles.push_back(xaxis);
+      name = "KinBDT";
+      a->templateHisto = new TH1D(name + lepStr, name,
+                                  //100,-1,1);
+                                  DEFS::getNBinsX(UserFunctions::jetBin,leptonCat,string(name)),
+                                  &DEFS::getBinsX(UserFunctions::jetBin,leptonCat,string(name))[0]);
+      a->axisTitles.push_back("KinBDT");
       a->axisTitles.push_back("Number of Events");
-      if(UserFunctions::maxEventProbs[tep].first>0)
-         a->range = make_pair(-13,0);
-      else
-         a->range = make_pair(-25,0);
+      a->range = make_pair(-1.0,1.0);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
+      a = new FormattedPlot;
+      name = "MEBDT";
+      a->templateHisto = new TH1D(name + lepStr, name,
+                                  //100,-1,1);
+                                  DEFS::getNBinsX(UserFunctions::jetBin,leptonCat,string(name)),
+                                  &DEFS::getBinsX(UserFunctions::jetBin,leptonCat,string(name))[0]);
+      a->axisTitles.push_back("MEBDT");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(-1.0,1.0);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
+      a = new FormattedPlot;
+      name = "KinMEBDT";
+      a->templateHisto = new TH1D(name + lepStr, name,
+                                  //100,-1,1);
+                                  DEFS::getNBinsX(UserFunctions::jetBin,leptonCat,string(name)),
+                                  &DEFS::getBinsX(UserFunctions::jetBin,leptonCat,string(name))[0]);
+      a->axisTitles.push_back("KinMEBDT");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(-1.0,1.0);
       a->normToData = norm_data;
       a->stacked = true; a->leptonCat = leptonCat;
       a->overlaySignalName = signalName;
@@ -2049,129 +2701,132 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       plots[leptonCat][string(name)] = a;
    }
 
-   a = new FormattedPlot;
-   name = "MEBDT";
-   //a->templateHisto = new TH1D(name + lepStr, name,100,-1.0,1.0);
-   a->templateHisto = new TH1D(name + lepStr, name,
-                               DEFS::getNBinsX(UserFunctions::jetBin),
-                               &DEFS::getBinsX(UserFunctions::jetBin)[0]);
-   a->axisTitles.push_back("MEBDT");
-   a->axisTitles.push_back("Number of Events");
-   a->range = make_pair(-0.6,0.6);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
+   if(UserFunctions::createMVADiscriminatorPlot) {
+      a = new FormattedPlot;
+      name = "MVADiscriminator";
+      a->templateHisto = new TH1D(name + lepStr, name,
+                                  DEFS::getNBinsX(UserFunctions::jetBin,leptonCat,string(name)),
+                                  &DEFS::getBinsX(UserFunctions::jetBin,leptonCat,string(name))[0]);
+      a->axisTitles.push_back("MVADiscriminator");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(-1.0,1.0);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+   }
 
-   a = new FormattedPlot;
-   name = "KinBDT";
-   //a->templateHisto = new TH1D(name + lepStr, name,100,-1.0,1.0);
-   a->templateHisto = new TH1D(name + lepStr, name,
-                               DEFS::getNBinsX(UserFunctions::jetBin),
-                               &DEFS::getBinsX(UserFunctions::jetBin)[0]);
-   a->axisTitles.push_back("KinBDT");
-   a->axisTitles.push_back("Number of Events");
-   a->range = make_pair(-0.6,0.6);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
+   if(UserFunctions::fillBumpCrossCheck) {
+      a = new FormattedPlot;
+      name = "MVADiscriminator_fineBinning";
+      a->templateHisto = new TH1D(name + lepStr, name, 100, -1.0, 1.0);
+      a->axisTitles.push_back("MVADiscriminator");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(-1.0,1.0);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+/*
+      a = new FormattedPlot;
+      name = "MVADiscriminator_fineBinning_0GenMatch";
+      a->templateHisto = new TH1D(name + lepStr, name, 100, -1.0, 1.0);
+      a->axisTitles.push_back("MVADiscriminator");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(-1.0,1.0);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
 
-   a = new FormattedPlot;
-   name = "MVADiscriminator";
-   //a->templateHisto = new TH1D(name + lepStr, name,100,-1.0,1.0);
-   a->templateHisto = new TH1D(name + lepStr, name,
-                               DEFS::getNBinsX(UserFunctions::jetBin),
-                               &DEFS::getBinsX(UserFunctions::jetBin)[0]);
-   a->axisTitles.push_back("MVADiscriminator");
-   a->axisTitles.push_back("Number of Events");
-   a->range = make_pair(-0.6,0.6);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
-      
-   a = new FormattedPlot;
-   name = "MVAProbability";
-   a->templateHisto = new TH1D(name + lepStr, name, 100,0,1);
-   a->axisTitles.push_back("Probability");
-   a->axisTitles.push_back("Number of Events");
-   a->range = make_pair(0,1);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
+      a = new FormattedPlot;
+      name = "MVADiscriminator_fineBinning_1GenMatch";
+      a->templateHisto = new TH1D(name + lepStr, name, 100, -1.0, 1.0);
+      a->axisTitles.push_back("MVADiscriminator");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(-1.0,1.0);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
 
-   a = new FormattedPlot;
-   name = "epdPretagWWandWZ";
-   a->templateHisto = new TH1D(name + lepStr, name, 400,-10.0,10.0);
-   a->axisTitles.push_back("-log10(epdPretagWWandWZ)");
-   a->axisTitles.push_back("Number of Events");
-   //a->range = make_pair(-7.0,0.0);
-   a->range = make_pair(0.0,7.0);
-   a->logxy = make_pair(false,false);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
+      a = new FormattedPlot;
+      name = "MVADiscriminator_fineBinning_2GenMatch";
+      a->templateHisto = new TH1D(name + lepStr, name, 100, -1.0, 1.0);
+      a->axisTitles.push_back("MVADiscriminator");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(-1.0,1.0);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+*/
+      a = new FormattedPlot;
+      name = "MEBDT_vs_KinBDT";
+      a->templateHisto = new TH2D(name + lepStr, name,
+                                  DEFS::getNBinsX(UserFunctions::jetBin,leptonCat,string("KinBDT")),
+                                  &DEFS::getBinsX(UserFunctions::jetBin,leptonCat,string("KinBDT"))[0],
+                                  DEFS::getNBinsX(UserFunctions::jetBin,leptonCat,string("MEBDT")),
+                                  &DEFS::getBinsX(UserFunctions::jetBin,leptonCat,string("MEBDT"))[0]);
+      a->axisTitles.push_back("KinBDT");
+      a->axisTitles.push_back("MEBDT");
+      a->axisTitles.push_back("Number of Events");
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
 
-   a = new FormattedPlot;
-   name = "epdPretagHiggs125";
-   a->templateHisto = new TH1D(name + lepStr, name, 400,-10.0,10.0);
-   a->axisTitles.push_back("-log10(epdPretagHiggs125)");
-   a->axisTitles.push_back("Number of Events");
-   //a->range = make_pair(-7.0,0.0);
-   a->range = make_pair(0.0,7.0);
-   a->logxy = make_pair(false,false);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
 
-   a = new FormattedPlot;
-   name = "epdPretagWWandWZ_RE";
-   a->templateHisto = new TH1D(name + lepStr, name, 22,0,1);
-   a->axisTitles.push_back("EPD(WW,WZ)");
-   a->axisTitles.push_back("Number of Events");
-   a->range = make_pair(0,1);
-   a->logxy = make_pair(false,false);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
+   }
 
-   a = new FormattedPlot;
-   name = "TTbarWeights";
-   a->templateHisto = new TH1D(name + lepStr, name, 400,-2,2);
-   a->axisTitles.push_back("TTbar Weight");
-   a->axisTitles.push_back("Number of Events");
-   a->range = make_pair(0,1.3);
-   a->logxy = make_pair(false,false);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
+   if(UserFunctions::fillEPD) {
+      a = new FormattedPlot;
+      name = "epdPretagWWandWZ";
+      a->templateHisto = new TH1D(name + lepStr, name, 400,-10.0,10.0);
+      a->axisTitles.push_back("-log10(epdPretagWWandWZ)");
+      a->axisTitles.push_back("Number of Events");
+      //a->range = make_pair(-7.0,0.0);
+      a->range = make_pair(0.0,7.0);
+      a->logxy = make_pair(false,false);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
 
-   a = new FormattedPlot;
-   name = "PUWeights";
-   a->templateHisto = new TH1D(name + lepStr, name, 60,0,60);
-   a->axisTitles.push_back("PU Weight");
-   a->axisTitles.push_back("Number of Events");
-   a->range = make_pair(0,60);
-   a->logxy = make_pair(false,false);
-   a->normToData = norm_data;
-   a->stacked = true; a->leptonCat = leptonCat;
-   a->overlaySignalName = signalName;
-   a->overlaySignalFactor = signalFactor;
-   plots[leptonCat][string(name)] = a;
+      a = new FormattedPlot;
+      name = "epdPretagHiggs125";
+      a->templateHisto = new TH1D(name + lepStr, name, 400,-10.0,10.0);
+      a->axisTitles.push_back("-log10(epdPretagHiggs125)");
+      a->axisTitles.push_back("Number of Events");
+      //a->range = make_pair(-7.0,0.0);
+      a->range = make_pair(0.0,7.0);
+      a->logxy = make_pair(false,false);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+
+      a = new FormattedPlot;
+      name = "epdPretagWWandWZ_RE";
+      a->templateHisto = new TH1D(name + lepStr, name, 22,0,1);
+      a->axisTitles.push_back("EPD(WW,WZ)");
+      a->axisTitles.push_back("Number of Events");
+      a->range = make_pair(0,1);
+      a->logxy = make_pair(false,false);
+      a->normToData = norm_data;
+      a->stacked = true; a->leptonCat = leptonCat;
+      a->overlaySignalName = signalName;
+      a->overlaySignalFactor = signalFactor;
+      plots[leptonCat][string(name)] = a;
+   }
 
    if (UserFunctions::fillTMDF){
 /*

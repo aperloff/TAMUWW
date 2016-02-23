@@ -43,12 +43,12 @@ PlotFiller::~PlotFiller()
    delete func_benchmark;
 }
 
-void PlotFiller::setWeightFunction(double (*userWeightFuncTemp) (EventNtuple*, const PhysicsProcess*))
+void PlotFiller::setWeightFunction(double (*userWeightFuncTemp) (EventNtuple*, MicroNtuple*, const PhysicsProcess*))
 {
    userWeightFunc = userWeightFuncTemp;
 }
 
-void PlotFiller::setCutFunction(bool (*userCutFuncTemp) (EventNtuple*, const PhysicsProcess*))
+void PlotFiller::setCutFunction(bool (*userCutFuncTemp) (EventNtuple*, MicroNtuple*, const PhysicsProcess*, map<TString,MVAVar>&, vector<TString>))
 {
    userCutFunc = userCutFuncTemp;
 }
@@ -89,6 +89,11 @@ void PlotFiller::setMVASpec(vector<TString> mvas)
    MVAS = mvas;
 }
 
+void PlotFiller::setLimitBranches(int lb)
+{
+   limitBranches = lb;
+}
+
 void PlotFiller::run()
 {
    cout << "\nPlotFiller::run Begin filling plots" << endl;
@@ -103,15 +108,53 @@ void PlotFiller::run()
             p2->second->prepareToFillProcess(suffix, processes[i]->groupName);
       }//for 
       
-      // Create the eventntuple and set the branch address
+      // Create the eventNtuple, METree, and MicroNtuple
       EventNtuple * ntuple = 0;
       METree * metree = 0;
       MicroNtuple * mnt = 0;
       TChain * c = processes[i]->chain;
-      //Trying to speed up processing
+      // Try to speed up processing
       //c->SetCacheSize(10000000);
       //c->AddBranchToCache("*");
+      
+      if(limitBranches == 0) {
+         if(!processes[i]->name.Contains("TTbar",TString::kIgnoreCase) && !processes[i]->name.Contains("WJets",TString::kIgnoreCase)) {
+            cout << "\tPlotFiller::Turning off the genParticlecollection* branch(es) ... ";
+            c->SetBranchStatus("genParticleCollection*",0);
+            cout << "DONE" << endl;
+         }
+      }
+      else if(limitBranches > 0) {
+         cout << "\tPlotFiller::Turning off the epd* and m_tProbStat* branch(es) ... ";
+         c->SetBranchStatus("epd*",0);
+         c->SetBranchStatus("m_tProbStat*",0);
+         cout << "DONE" << endl;
+         cout << "\tPlotFiller::Turning off the triggerMap, m_tSize, m_run, m_event, and indexMap branch(es) ... ";
+         c->SetBranchStatus("triggerMap",0);
+         c->SetBranchStatus("m_tSize",0);
+         c->SetBranchStatus("m_run",0);
+         c->SetBranchStatus("m_event",0);
+         c->SetBranchStatus("indexMap",0);
+         cout << "DONE" << endl;
+         cout << "\tPlotFiller::Turning off the genParticlecollection* branch(es) ... ";
+         c->SetBranchStatus("genParticleCollection*",0);
+         cout << "DONE" << endl;
 
+         if(processes[i]->name.Contains("TTbar",TString::kIgnoreCase)) {
+            cout << "\tPlotFiller::Turning on the genParticlecollection.{p4,pdgId}* branch(es) ... ";
+            c->SetBranchStatus("genParticleCollection.p4*",1);
+            c->SetBranchStatus("genParticleCollection.pdgId*",1);
+            cout << "DONE" << endl;
+         }
+         if(limitBranches == 1 && processes[i]->name.Contains("WJets",TString::kIgnoreCase)) {
+            cout << "\tPlotFiller::Turning on the genParticlecollection.{p4,pdgId}* branch(es) ... ";
+            c->SetBranchStatus("genParticleCollection.p4*",1);
+            c->SetBranchStatus("genParticleCollection.pdgId*",1);
+            cout << "DONE" << endl;  
+         }
+      }
+
+      // Set the branch address
       if (c->GetBranch("EvtTree")) {
          ntuple = new EventNtuple();
          c->SetBranchAddress("EvtTree",&ntuple);
@@ -121,15 +164,15 @@ void PlotFiller::run()
          c->SetBranchAddress("EvtNtuple",&ntuple);
       }
       else {
-	cout << "\tPlotFiller::run EvtTree and EvtNtuple branches not found." << endl
-	     << "\tSetting EventNtuple pointer to 0x0." << endl;
+	      cout << "\tPlotFiller::run EvtTree and EvtNtuple branches not found." << endl
+	           << "\tSetting EventNtuple pointer to 0x0." << endl;
       }
       if (c->GetBranch("METree")) {
          metree = new METree();
          c->SetBranchAddress("METree",&metree);
       }
       else {
-	cout << "\tPlotFiller::run METree branch not found." << endl
+	      cout << "\tPlotFiller::run METree branch not found." << endl
               << "\tSetting METree pointer to 0x0." << endl;
       }
       if (c->GetBranch("mnt")) {
@@ -189,8 +232,9 @@ void PlotFiller::run()
          }
 
          // Report every now and then
-         if ((ev % 10000) == 0)
-            cout<<"\t\tevent "<<ev<<endl;
+         ProgressBar::loadbar2(ev+1,numberOfEvents);
+         //if ((ev % 10000) == 0)
+         //   cout<<"\t\tevent "<<ev<<endl;
          
          // Get the given entry
          c->GetEntry(ev);
@@ -202,12 +246,12 @@ void PlotFiller::run()
          userInitEventFunc(ntuple, processes[i]);
          
          // Cut events here
-         if(!userCutFunc(ntuple, processes[i]))
+         if(!userCutFunc(ntuple, mnt, processes[i], MVAVars, MVAMethods))
             continue;
          
          // reset the weight for each event, so the default will be 1.0
          weight = 1.0;
-         weight *= userWeightFunc(ntuple, processes[i]);
+         weight *= userWeightFunc(ntuple, mnt, processes[i]);
          
          // Fill plots
          //cout << "Entry = " << ev << endl; 
@@ -232,7 +276,7 @@ void PlotFiller::run()
          }
       }
       
-      cout << "Number of " << processes[i]->name << " events passing the cuts: " << numProcEvts << " with weights: " << sumW << endl;
+      cout << endl << "Number of " << processes[i]->name << " events passing the cuts: " << numProcEvts << " with weights: " << sumW << endl;
    }
    cout << "\nPlotFiller::run DONE" << endl;
 }

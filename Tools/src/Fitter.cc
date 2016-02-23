@@ -20,6 +20,7 @@ minFit(0), funcFit(0)
    // Set default debug options
    rebinSizeDEBUG = 1;
    debug = false;
+   minimizationTechnique = "chi2";
 
    leptonName = lepton;
    objectName = object;
@@ -27,7 +28,7 @@ minFit(0), funcFit(0)
    initializeHistNames();
 
    // The default values (before fitting) of Chi2 and parameters
-   scaleParameters = vector<double> (2,1.0);
+   scaleParameters = vector<double> (fproc.size(),1.0);
    reducedChiSquared = 0.0;
 
    //resultStack = new THStack((objectName + "_MonteCarlo").c_str(), (objectName + "_MonteCarlo").c_str());
@@ -115,7 +116,11 @@ void Fitter::readHistograms()
 
 void Fitter::fitHistograms()
 {
-   vector<double> parameters = fitAndReturnParameters();
+   vector<double> parameters;
+   if(minimizationTechnique == "TFractionFitter")
+      parameters = fitTFractionFitter();
+   else
+      parameters = fitMinimization();
    
    for (unsigned int i=0; i<fProcessNames.size(); i++) {
       monteCarloHistograms[fProcessNames[i]]->Scale(parameters[i]);
@@ -338,21 +343,36 @@ void Fitter::initializeHistNames()
    histNames.push_back("WJets");
    histNames.push_back("ZJets");
    histNames.push_back("TTbar");
-   //histNames.push_back("QCD_ElEnriched");
-   //histNames.push_back("QCD_ElFULL");
-   histNames.push_back("QCD_MuFULL");
+   if(TString(leptonName).CompareTo("electron",TString::kIgnoreCase)==0 ||
+      TString(leptonName).CompareTo("both",TString::kIgnoreCase)==0) {
+      //histNames.push_back("QCD_ElEnriched");
+      histNames.push_back("QCD_ElFULL");
+   }
+   else if(TString(leptonName).CompareTo("muon",TString::kIgnoreCase)==0 ||
+           TString(leptonName).CompareTo("both",TString::kIgnoreCase)==0) {
+      histNames.push_back("QCD_MuFULL");
+   }
    histNames.push_back("ggH125");
    histNames.push_back("qqH125");
-   histNames.push_back("WH125");
+   histNames.push_back("WH125_HToBB");
 }
 
-vector<double> Fitter::fitAndReturnParameters()
+vector<double> Fitter::fitMinimization()
 {
-   funcFit = new ROOT::Math::Functor(this,&Fitter::fitFunc,2);
+   if(minimizationTechnique == "chi2") {
+      funcFit = new ROOT::Math::Functor(this,&Fitter::fitFunc,2);
+   }
+   else if(minimizationTechnique == "KS") {
+      funcFit = new ROOT::Math::Functor(this,&Fitter::fitKSFunc,2);
+   }
    minFit = new ROOT::Minuit2::Minuit2Minimizer( ROOT::Minuit2::kMigrad );
    
    // Tolerance and printouts
    minFit->SetPrintLevel(3);
+   //strategy = (0,1,2)
+   //0 - Don't wast any function calls to determine where you are. When there are a lot of variables and precision is not as important.
+   //1 - Intermediate (default)
+   //2 - When the function is evaluated quickly and precision is important.
    minFit->SetStrategy(2);
    minFit->SetMaxFunctionCalls(100000);
    minFit->SetMaxIterations(100000);
@@ -361,53 +381,141 @@ vector<double> Fitter::fitAndReturnParameters()
    //1.0 for chi-square fit and 1 stdev errors
    //4.0 for chi-square fit and 2 stdev errors
    //0.5 for negative-log-likelihood function
-   minFit->SetErrorDef(1.0);
+   //Value in the minimization function used to compute the parameter errors. The default is to get the uncertainties
+   //at the 68% CL is a value of 1 for a chi-squared function minimization and 0.5 for a log-likelihood function.
+   if(minimizationTechnique == "chi2") {
+      minFit->SetErrorDef(1.0);
+   }
+   else if(minimizationTechnique == "LL") {
+      minFit->SetErrorDef(0.5);
+   }
    minFit->SetValidError(true);
    
    // Fitting
    minFit->SetFunction(*funcFit);
    
-   double parameter[2];
-   if(DV.vfind(fProcessNames,"QCD")<0) {
-      parameter[0] = 1.0;
-      parameter[1] = 1.0;
+   int iproc = 0;
+   for(map<string, TH1D*>::iterator it = monteCarloHistograms.begin(); it != monteCarloHistograms.end(); it++) {
+      if(DefaultValues::vfind(fProcessNames,it->first)>-1 && (it->first=="QCD_ElFULL" || it->first=="QCD_MuFULL")) {
+         minFit->SetLowerLimitedVariable(iproc, it->first.c_str(), 0.364, 0.000001, 0.0);
+         iproc++;
+      }
+      else if(DefaultValues::vfind(fProcessNames,it->first)>-1){
+         minFit->SetLowerLimitedVariable(iproc, it->first.c_str(), 1.0, 0.000001, 0.0);
+         iproc++;
+      }
+      else {
+         continue;
+      }
    }
-   else {
-      parameter[0] = 1.0;
-      parameter[1] =  0.0001;
-   }
-   double step[2] = {0.0001, 0.0001};
-   double lower[2] = {0.0, 0.0};
+   //double parameter[2];
+   //if(DefaultValues::vfind(fProcessNames,"QCD")<0) {
+   //   parameter[0] = 1.0;
+   //   parameter[1] = 1.0;
+   //}
+   //else {
+   //   parameter[0] = 1.0;
+   //   parameter[1] =  0.0001;
+   //}
+   //double step[2] = {0.0001, 0.0001};
+   //double lower[2] = {0.0, 0.0};
    
    //minFit->SetVariable(0, "Par0", parameter[0], step[0]);
    //minFit->SetVariable(1, "Par1", parameter[1], step[1]);
-   minFit->SetLowerLimitedVariable(0, "Par0", parameter[0], step[0], lower[0]);
-   minFit->SetLowerLimitedVariable(1, "Par1", parameter[1], step[1], lower[1]);
+   //minFit->SetLowerLimitedVariable(0, "Par0", parameter[0], step[0], lower[0]);
+   //minFit->SetLowerLimitedVariable(1, "Par1", parameter[1], step[1], lower[1]);
    
    cout << endl << "Beginning Fit..." << endl;
-   if(minFit->Minimize())
+   if(minFit->Minimize()) {
       cout << endl << "Fit Successful!" << endl;
+      //minFit->PrintResults();
+      reducedChiSquared = minFit->MinValue() / (dataHistogram->GetNbinsX() - 2);
+      cout << "Chi2\t  = " << minFit->MinValue() << endl;
+      cout << "NDF\t  = " << dataHistogram->GetNbinsX() - 2 << endl;
+      cout << "Chi2/NDF\t  = " << reducedChiSquared << endl;
+
+      for(unsigned int i=0; i<minFit->NDim(); i++) {
+         scaleParameters[i] = minFit->X()[i];
+      }
+   }
+   else {
+      cout << endl << "Fit Failed." << endl;
+      for(unsigned int i=0; i<minFit->NDim(); i++) {
+         scaleParameters[i] = 1.0;
+      }
+   }
+
+   return scaleParameters;
+}
+
+vector<double> Fitter::fitTFractionFitter()
+{
+   TObjArray *mc = new TObjArray(monteCarloHistograms.size());
+   for(map<string, TH1D*>::iterator it = monteCarloHistograms.begin(); it != monteCarloHistograms.end(); it++) {
+      mc->Add(it->second);
+   }
+   TFractionFitter* fit = new TFractionFitter(dataHistogram, mc,"V");
+   TVirtualFitter* vFit = fit->GetFitter();
+   Foption_t fopt;
+   fopt.StoreResult = 1;
+   fopt.Like = 1;
+   vFit->SetFitOption(fopt);
+
+   int iproc = 0;
+   for(map<string, TH1D*>::iterator it = monteCarloHistograms.begin(); it != monteCarloHistograms.end(); it++) {
+      bool notFProc = true;
+      for (unsigned int nproc=0; nproc<fProcessNames.size(); nproc++) {
+         if (it->first == fProcessNames[nproc])
+            notFProc = false;
+      }
+      if(notFProc) {
+         vFit->SetParameter(iproc,it->first.c_str(),it->second->Integral()/dataHistogram->Integral(),0.0,0.0,1.0);
+         vFit->FixParameter(iproc);
+      }
+      else if(!notFProc && (it->first=="QCD_ElFULL" || it->first=="QCD_MuFULL")) {
+         vFit->SetParameter(iproc,it->first.c_str(),0.0001,0.0001,0.0,2.0);
+      }
+      else if(!notFProc && it->first=="WJets") {
+         vFit->SetParameter(iproc,it->first.c_str(),1.0,0.0001,0.0,2.0);
+      }
+      iproc++;
+   }
+
+   cout << endl << "Beginning Fit..." << endl;
+   TFitResultPtr status = fit->Fit();
+   if((int)status == 0) {
+      cout << endl << "Fit Successful!" << endl;
+      TH1F* result = (TH1F*) fit->GetPlot();
+      //dataHistogram->Draw("Ep");
+      //result->Draw("same");
+      //cin.get();
+      result->Write();
+   }
    else
       cout << endl << "Fit Failed." << endl;
    
    cout << endl << "##### FIT RESULTS #####" << endl;
-   minFit->PrintResults();
+   //vFit->PrintResults();
+   status->Print();
    
-   reducedChiSquared = minFit->MinValue() / (dataHistogram->GetNbinsX() - 2);
-   
-   cout << "Chi2\t  = " << minFit->MinValue() << endl;
-   cout << "NDF\t  = " << dataHistogram->GetNbinsX() - 2 << endl;
-   cout << "Chi2/NDF\t  = " << reducedChiSquared << endl;
-   
-   scaleParameters[0] = minFit->X()[0];
-   scaleParameters[1] = minFit->X()[1];
-   
-   vector<double> ret;
-   for(unsigned int i=0; i<minFit->NDim(); i++) {
-      ret.push_back(minFit->X()[i]);
+   for (unsigned int nproc=0; nproc<fProcessNames.size(); nproc++) {
+      if(fProcessNames[nproc]=="QCD_ElFULL" || fProcessNames[nproc]=="QCD_MuFULL")
+         cout << "Scale factor (" << fProcessNames[nproc] << "): " << fit->GetMCPrediction(1)->Integral()/monteCarloHistograms[fProcessNames[nproc]]->Integral() << endl;
+      else
+         cout << "Scale factor (" << fProcessNames[nproc] << "): " << fit->GetMCPrediction(0)->Integral()/monteCarloHistograms[fProcessNames[nproc]]->Integral() << endl;
    }
 
-   return ret;
+   reducedChiSquared = fit->GetChisquare() / fit->GetNDF();
+   cout << "Chi2\t  = " << fit->GetChisquare() << endl;
+   cout << "NDF\t  = " << fit->GetNDF() << endl;
+   cout << "Chi2/NDF\t  = " << reducedChiSquared << endl << endl;
+
+   double error = 0;
+   for(unsigned int i = 0; i<scaleParameters.size(); i++) {
+      fit->GetResult(i, scaleParameters[i], error);
+   }
+   
+   return scaleParameters;
 }
 
 vector<string> Fitter::getPlotNames()
@@ -577,15 +685,34 @@ double Fitter::fitFunc(const double *par)
       }
    }
 
-   // cout << endl << "Par0:" << par[0] << " Par1:" << par[1] << " Chi2:" << chiSquare << endl << endl;
    //Add Gaussian Constraints
    for(unsigned int nproc=0; nproc<fProcessNames.size(); nproc++) {
       if(fProcessXsec[nproc]!=0 && fProcessXsecError[nproc]!=0) {
-         //cout << "\tchiSquare=" << chiSquare << "\tfProcessXsec[nproc]=" << fProcessXsec[nproc] << "\tfProcessXsecError[nproc]=" << fProcessXsecError[nproc] << endl; 
-         //chiSquare*=TMath::Gaus(par[nproc],1,fProcessXsecError[nproc]/fProcessXsec[nproc]);
          chiSquare+=TMath::Power((par[nproc]-1.0)/(fProcessXsecError[nproc]/fProcessXsec[nproc]),2);
       }
    }
 
    return chiSquare;
+}
+
+double Fitter::fitKSFunc(const double *par) {
+   TH1D* mc = (TH1D*)dataHistogram->Clone("mc");
+   mc->Reset();
+   int iproc = 0;
+   for(map<string, TH1D*>::iterator it = monteCarloHistograms.begin(); it != monteCarloHistograms.end(); it++) {
+      if(DefaultValues::vfind(fProcessNames,it->first)>-1) {
+         //cout << it->first << "\tint_before=";
+         TH1D* tmp = (TH1D*)it->second->Clone((it->first+"_clone").c_str());
+         //cout << tmp->Integral() << "\tscale_factor=" << par[iproc] << "\tint_after=";
+         tmp->Scale(par[iproc]);
+         //cout << tmp->Integral() << endl;
+         mc->Add(tmp);
+         iproc++;
+      }
+      else {
+         mc->Add(it->second);
+      }
+   }
+   //cout << "Data=" << dataHistogram->Integral() << "\tmc=" << mc->Integral() << endl;
+   return -dataHistogram->KolmogorovTest(mc);
 }
