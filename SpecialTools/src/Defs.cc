@@ -104,8 +104,6 @@ namespace DEFS {
       else if(str == "qqH115")	return  DEFS::PhysicsProcess::qqH115;
       else if(str == "qqH120")	return  DEFS::PhysicsProcess::qqH120;
       else if(str == "qqH125")	return  DEFS::PhysicsProcess::qqH125;
-      else if(str == "qqH125_JESUp")	return  DEFS::PhysicsProcess::qqH125_JESUp;
-      else if(str == "qqH125_JESDown")	return  DEFS::PhysicsProcess::qqH125_JESDown;
       else if(str == "qqH130")	return  DEFS::PhysicsProcess::qqH130;
       else if(str == "qqH135")	return  DEFS::PhysicsProcess::qqH135;
       else if(str == "qqH140")	return  DEFS::PhysicsProcess::qqH140;
@@ -130,11 +128,7 @@ namespace DEFS {
       else if(str == "qqH1000")	return  DEFS::PhysicsProcess::qqH1000;
 
       else if(str == "WH_ZH_TTH_HToZZ_M125") return DEFS::PhysicsProcess::WH_ZH_TTH_HToZZ_M125;
-      else if(str == "WH_ZH_TTH_HToZZ_M125_JESUp") return DEFS::PhysicsProcess::WH_ZH_TTH_HToZZ_M125_JESUp;
-      else if(str == "WH_ZH_TTH_HToZZ_M125_JESDown") return DEFS::PhysicsProcess::WH_ZH_TTH_HToZZ_M125_JESDown;
       else if(str == "WH_ZH_TTH_HToWW_M125") return DEFS::PhysicsProcess::WH_ZH_TTH_HToWW_M125;
-      else if(str == "WH_ZH_TTH_HToWW_M125_JESUp") return DEFS::PhysicsProcess::WH_ZH_TTH_HToWW_M125_JESUp;
-      else if(str == "WH_ZH_TTH_HToWW_M125_JESDown") return DEFS::PhysicsProcess::WH_ZH_TTH_HToWW_M125_JESDown;
       else if(str == "WH_HToZZ_M125")        return DEFS::PhysicsProcess::WH_HToZZ_M125;
       else if(str == "ZH_HToZZ_M125")        return DEFS::PhysicsProcess::ZH_HToZZ_M125;
       else if(str == "TTH_HToZZ_M125")       return DEFS::PhysicsProcess::TTH_HToZZ_M125;
@@ -142,58 +136,105 @@ namespace DEFS {
       else if(str == "ZH_HToWW_M125")        return DEFS::PhysicsProcess::ZH_HToWW_M125;
       else if(str == "TTH_HToWW_M125")       return DEFS::PhysicsProcess::TTH_HToWW_M125;
       else if(str == "WH125_HToBB")          return DEFS::PhysicsProcess::WH125_HToBB;
-      else if(str == "WH_HToBB_M125_JESUp")  return DEFS::PhysicsProcess::WH_HToBB_M125_JESUp;
-      else if(str == "WH_HToBB_M125_JESDown")return DEFS::PhysicsProcess::WH_HToBB_M125_JESDown;
       else if(str == "WH125_HToZG")          return DEFS::PhysicsProcess::WH125_HToZG;
       else if(str == "TTH_Inclusive_M125")   return DEFS::PhysicsProcess::TTH_Inclusive_M125;
       else if(str == "TTH_HToBB_M125")       return DEFS::PhysicsProcess::TTH_HToBB_M125;
 
-      else if(str == "STopS_T")	           return  DEFS::PhysicsProcess::STopS_T;
-      else if(str == "STopS_Tbar")	       return  DEFS::PhysicsProcess::STopS_Tbar;
-      else if(str == "STopT_T")	           return  DEFS::PhysicsProcess::STopT_T;
-      else if(str == "STopT_Tbar")	       return  DEFS::PhysicsProcess::STopT_Tbar;
-      else if(str == "STopTW_T")	       return  DEFS::PhysicsProcess::STopTW_T;
-      else if(str == "STopTW_Tbar")	       return  DEFS::PhysicsProcess::STopTW_Tbar;
-      else if(str == "Wcc")	               return  DEFS::PhysicsProcess::Wcc;
-      else if(str == "WJets")            return  DEFS::PhysicsProcess::WJets;
-      else if(str == "WJets_matchingup") return  DEFS::PhysicsProcess::WJets_matchingup;
-      else if(str == "WJets_matchingdown") return  DEFS::PhysicsProcess::WJets_matchingdown;
-      else if(str == "WJets_scaleup") return  DEFS::PhysicsProcess::WJets_scaleup;
-      else if(str == "WJets_scaledown") return  DEFS::PhysicsProcess::WJets_scaledown;
-      else if(str == "WJets_JESUp")      return  DEFS::PhysicsProcess::WJets_JESUp;
-      else if(str == "WJets_JESDown")    return  DEFS::PhysicsProcess::WJets_JESDown;
-      else if(str == "W1Jets")            return  DEFS::PhysicsProcess::W1Jets;
-      else if(str == "W2Jets")            return  DEFS::PhysicsProcess::W2Jets;
-      else if(str == "W3Jets")            return  DEFS::PhysicsProcess::W3Jets;
-      else if(str == "W4Jets")            return  DEFS::PhysicsProcess::W4Jets;
-      else if(str == "WLg")	               return  DEFS::PhysicsProcess::WLg;
-      else if(str == "Wgg")	               return  DEFS::PhysicsProcess::Wgg;
-      else if(str == "WLL")	               return  DEFS::PhysicsProcess::WLL;
-      else if(str == "Wbb")	               return  DEFS::PhysicsProcess::WLb;
-      else if(str == "WLb")	               return  DEFS::PhysicsProcess::Wbb;
+      else if(str == "ggH125_JESUp")                 return  DEFS::PhysicsProcess::ggH125_JESUp;
+      else if(str == "ggH125_JESDown")               return  DEFS::PhysicsProcess::ggH125_JESDown;
+      else if(str == "qqH125_JESUp")                 return  DEFS::PhysicsProcess::qqH125_JESUp;
+      else if(str == "qqH125_JESDown")               return  DEFS::PhysicsProcess::qqH125_JESDown;
+      else if(str == "WH_ZH_TTH_HToZZ_M125_JESUp")   return DEFS::PhysicsProcess::WH_ZH_TTH_HToZZ_M125_JESUp;
+      else if(str == "WH_ZH_TTH_HToZZ_M125_JESDown") return DEFS::PhysicsProcess::WH_ZH_TTH_HToZZ_M125_JESDown;
+      else if(str == "WH_ZH_TTH_HToWW_M125_JESUp")   return DEFS::PhysicsProcess::WH_ZH_TTH_HToWW_M125_JESUp;
+      else if(str == "WH_ZH_TTH_HToWW_M125_JESDown") return DEFS::PhysicsProcess::WH_ZH_TTH_HToWW_M125_JESDown;
+      else if(str == "WH_HToZZ_M125_JESUp")          return DEFS::PhysicsProcess::WH_HToZZ_M125_JESUp;
+      else if(str == "WH_HToZZ_M125_JESDown")        return DEFS::PhysicsProcess::WH_HToZZ_M125_JESDown;
+      else if(str == "WH_HToWW_M125_JESUp")          return DEFS::PhysicsProcess::WH_HToWW_M125_JESUp;
+      else if(str == "WH_HToWW_M125_JESDown")        return DEFS::PhysicsProcess::WH_HToWW_M125_JESDown;
+      else if(str == "ZH_HToZZ_M125_JESUp")          return DEFS::PhysicsProcess::ZH_HToZZ_M125_JESUp;
+      else if(str == "ZH_HToZZ_M125_JESDown")        return DEFS::PhysicsProcess::ZH_HToZZ_M125_JESDown;
+      else if(str == "ZH_HToWW_M125_JESUp")          return DEFS::PhysicsProcess::ZH_HToWW_M125_JESUp;
+      else if(str == "ZH_HToWW_M125_JESDown")        return DEFS::PhysicsProcess::ZH_HToWW_M125_JESDown;
+      else if(str == "TTH_HToZZ_M125_JESUp")         return DEFS::PhysicsProcess::TTH_HToZZ_M125_JESUp;
+      else if(str == "TTH_HToZZ_M125_JESDown")       return DEFS::PhysicsProcess::TTH_HToZZ_M125_JESDown;
+      else if(str == "TTH_HToWW_M125_JESUp")         return DEFS::PhysicsProcess::TTH_HToWW_M125_JESUp;
+      else if(str == "TTH_HToWW_M125_JESDown")       return DEFS::PhysicsProcess::TTH_HToWW_M125_JESDown;
+      else if(str == "WH_HToBB_M125_JESUp")          return DEFS::PhysicsProcess::WH_HToBB_M125_JESUp;
+      else if(str == "WH_HToBB_M125_JESDown")        return DEFS::PhysicsProcess::WH_HToBB_M125_JESDown;
+      else if(str == "TTH_HToBB_M125_JESUp")         return DEFS::PhysicsProcess::TTH_HToBB_M125_JESUp;
+      else if(str == "TTH_HToBB_M125_JESDown")       return DEFS::PhysicsProcess::TTH_HToBB_M125_JESDown;
+
+      else if(str == "STopS_T")	                  return  DEFS::PhysicsProcess::STopS_T;
+      else if(str == "STopS_Tbar")	              return  DEFS::PhysicsProcess::STopS_Tbar;
+      else if(str == "STopT_T")	                  return  DEFS::PhysicsProcess::STopT_T;
+      else if(str == "STopT_Tbar")	              return  DEFS::PhysicsProcess::STopT_Tbar;
+      else if(str == "STopTW_T")	                return  DEFS::PhysicsProcess::STopTW_T;
+      else if(str == "STopTW_Tbar")	              return  DEFS::PhysicsProcess::STopTW_Tbar;
+      else if(str == "Wcc")	                      return  DEFS::PhysicsProcess::Wcc;
+      else if(str == "WJets")                     return  DEFS::PhysicsProcess::WJets;
+      else if(str == "W1Jets")                    return  DEFS::PhysicsProcess::W1Jets;
+      else if(str == "W2Jets")                    return  DEFS::PhysicsProcess::W2Jets;
+      else if(str == "W3Jets")                    return  DEFS::PhysicsProcess::W3Jets;
+      else if(str == "W4Jets")                    return  DEFS::PhysicsProcess::W4Jets;
+      else if(str == "WLg")	                      return  DEFS::PhysicsProcess::WLg;
+      else if(str == "Wgg")	                      return  DEFS::PhysicsProcess::Wgg;
+      else if(str == "WLL")	                      return  DEFS::PhysicsProcess::WLL;
+      else if(str == "Wbb")	                      return  DEFS::PhysicsProcess::WLb;
+      else if(str == "WLb")	                      return  DEFS::PhysicsProcess::Wbb;
       else if(str == "QCD_ElEnriched")	          return  DEFS::PhysicsProcess::QCD_ElEnriched;
-      else if(str == "QCD_ElFULL")            return  DEFS::PhysicsProcess::QCD_ElFULL;
+      else if(str == "QCD_ElFULL")                return  DEFS::PhysicsProcess::QCD_ElFULL;
       else if(str == "QCD_MuEnriched")	          return  DEFS::PhysicsProcess::QCD_MuEnriched;
-      else if(str == "QCD_MuFULL")            return  DEFS::PhysicsProcess::QCD_MuFULL;
+      else if(str == "QCD_MuFULL")                return  DEFS::PhysicsProcess::QCD_MuFULL;
       else if(str == "QCD_Pt20to30_EMEnriched")   return  DEFS::PhysicsProcess::QCD_Pt20to30_EMEnriched;
       else if(str == "QCD_Pt30to80_EMEnriched")   return  DEFS::PhysicsProcess::QCD_Pt30to80_EMEnriched;
       else if(str == "QCD_Pt80to170_EMEnriched")  return  DEFS::PhysicsProcess::QCD_Pt80to170_EMEnriched;
       else if(str == "QCD_Pt170to250_EMEnriched") return  DEFS::PhysicsProcess::QCD_Pt170to250_EMEnriched;
       else if(str == "QCD_Pt250to350_EMEnriched") return  DEFS::PhysicsProcess::QCD_Pt250to350_EMEnriched;
       else if(str == "QCD_Pt350_EMEnriched")      return  DEFS::PhysicsProcess::QCD_Pt350_EMEnriched;
-      else if(str == "WW")	                return  DEFS::PhysicsProcess::WW;
-      else if(str == "WZ")	                return  DEFS::PhysicsProcess::WZ;
-      else if(str == "WZbb")	                return  DEFS::PhysicsProcess::WZbb;
-      else if(str == "ZZ")	                return  DEFS::PhysicsProcess::ZZ;
-      else if(str == "TTbar")	           return  DEFS::PhysicsProcess::TTbar;
-      else if(str == "TTbar_JESUp")        return  DEFS::PhysicsProcess::TTbar_JESUp;
-      else if(str == "TTbar_JESDown")      return  DEFS::PhysicsProcess::TTbar_JESDown;
-      else if(str == "TTbarLJ")	           return  DEFS::PhysicsProcess::TTbarLJ;
-      else if(str == "TTbarDil")           return  DEFS::PhysicsProcess::TTbarLJ;
-      else if(str == "ZJets")	           return  DEFS::PhysicsProcess::ZJets;
-      else if(str == "Ztautau")	           return  DEFS::PhysicsProcess::Ztautau;
-      else if(str == "SingleEl_Data")	   return  DEFS::PhysicsProcess::SingleEl_Data;
-      else if(str == "SingleMu_Data")	   return  DEFS::PhysicsProcess::SingleMu_Data;
+      else if(str == "WW")	                      return  DEFS::PhysicsProcess::WW;
+      else if(str == "WZ")	                      return  DEFS::PhysicsProcess::WZ;
+      else if(str == "WZbb")	                  return  DEFS::PhysicsProcess::WZbb;
+      else if(str == "ZZ")	                      return  DEFS::PhysicsProcess::ZZ;
+      else if(str == "TTbar")	                  return  DEFS::PhysicsProcess::TTbar;
+      else if(str == "TTbar_JESUp")               return  DEFS::PhysicsProcess::TTbar_JESUp;
+      else if(str == "TTbar_JESDown")             return  DEFS::PhysicsProcess::TTbar_JESDown;
+      else if(str == "TTbarLJ")	                  return  DEFS::PhysicsProcess::TTbarLJ;
+      else if(str == "TTbarDil")                  return  DEFS::PhysicsProcess::TTbarLJ;
+      else if(str == "ZJets")                     return  DEFS::PhysicsProcess::ZJets;
+      else if(str == "Ztautau")	                  return  DEFS::PhysicsProcess::Ztautau;
+      else if(str == "ZJetsToLL_M50")             return  DEFS::PhysicsProcess::ZJetsToLL_M50;
+      else if(str == "ZJetsToLL_M10To50")         return  DEFS::PhysicsProcess::ZJetsToLL_M10To50;
+      else if(str == "SingleEl_Data")	          return  DEFS::PhysicsProcess::SingleEl_Data;
+      else if(str == "SingleMu_Data")	          return  DEFS::PhysicsProcess::SingleMu_Data;
+
+      else if(str == "STopS_T_JESUp")       return  DEFS::PhysicsProcess::STopS_T_JESUp;
+      else if(str == "STopS_T_JESDown")     return  DEFS::PhysicsProcess::STopS_T_JESDown;
+      else if(str == "STopS_Tbar_JESUp")    return  DEFS::PhysicsProcess::STopS_Tbar_JESUp;
+      else if(str == "STopS_Tbar_JESDown")  return  DEFS::PhysicsProcess::STopS_Tbar_JESDown;
+      else if(str == "STopT_T_JESUp")       return  DEFS::PhysicsProcess::STopT_T_JESUp;
+      else if(str == "STopT_T_JESDown")     return  DEFS::PhysicsProcess::STopT_T_JESDown;
+      else if(str == "STopT_Tbar_JESUp")    return  DEFS::PhysicsProcess::STopT_Tbar_JESUp;
+      else if(str == "STopT_Tbar_JESDown")  return  DEFS::PhysicsProcess::STopT_Tbar_JESDown;
+      else if(str == "STopTW_T_JESUp")      return  DEFS::PhysicsProcess::STopTW_T_JESUp;
+      else if(str == "STopTW_T_JESDown")    return  DEFS::PhysicsProcess::STopTW_T_JESDown;
+      else if(str == "STopTW_Tbar_JESUp")   return  DEFS::PhysicsProcess::STopTW_Tbar_JESUp;
+      else if(str == "STopTW_Tbar_JESDown") return  DEFS::PhysicsProcess::STopTW_Tbar_JESDown;
+      else if(str == "WJets_matchingup")    return  DEFS::PhysicsProcess::WJets_matchingup;
+      else if(str == "WJets_matchingdown")  return  DEFS::PhysicsProcess::WJets_matchingdown;
+      else if(str == "WJets_scaleup")       return  DEFS::PhysicsProcess::WJets_scaleup;
+      else if(str == "WJets_scaledown")     return  DEFS::PhysicsProcess::WJets_scaledown;
+      else if(str == "WJets_JESUp")         return  DEFS::PhysicsProcess::WJets_JESUp;
+      else if(str == "WJets_JESDown")       return  DEFS::PhysicsProcess::WJets_JESDown;
+      else if(str == "WW_JESUp")            return  DEFS::PhysicsProcess::WW_JESUp;
+      else if(str == "WW_JESDown")          return  DEFS::PhysicsProcess::WW_JESDown;
+      else if(str == "WZ_JESUp")            return  DEFS::PhysicsProcess::WZ_JESUp;
+      else if(str == "WZ_JESDown")          return  DEFS::PhysicsProcess::WZ_JESDown;
+      else if(str == "TTbar_JESUp")         return  DEFS::PhysicsProcess::TTbar_JESUp;
+      else if(str == "TTbar_JESDown")       return  DEFS::PhysicsProcess::TTbar_JESDown;
+      else if(str == "ZJets_JESUp")         return  DEFS::PhysicsProcess::ZJets_JESUp;
+      else if(str == "ZJets_JESDown")       return  DEFS::PhysicsProcess::ZJets_JESDown;
+
       else if(str == "UNKNOWN")              return  DEFS::PhysicsProcess::UNKNOWN;
  
       cout<<" ERROR  DEFS::getProcessType str ="<<str<<" not found"<<endl;
@@ -266,8 +307,6 @@ namespace DEFS {
       else if (type == qqH115)	 return string("qqH115");
       else if (type == qqH120)	 return string("qqH120");
       else if (type == qqH125)	 return string("qqH125");
-      else if (type == qqH125_JESUp)	 return string("qqH125_JESUp");
-      else if (type == qqH125_JESDown)	 return string("qqH125_JESDown");
       else if (type == qqH130)	 return string("qqH130");
       else if (type == qqH135)	 return string("qqH135");
       else if (type == qqH140)	 return string("qqH140");
@@ -291,69 +330,110 @@ namespace DEFS {
       else if (type == qqH900)	 return string("qqH900");
       else if (type == qqH1000)  return string("qqH1000");
 
-      else if(type == WH_ZH_TTH_HToZZ_M125) return string("WH_ZH_TTH_HToZZ_M125");
-      else if(type == WH_ZH_TTH_HToZZ_M125_JESUp) return string("WH_ZH_TTH_HToZZ_M125_JESUp");
-      else if(type == WH_ZH_TTH_HToZZ_M125_JESDown) return string("WH_ZH_TTH_HToZZ_M125_JESDown");
-      else if(type == WH_ZH_TTH_HToWW_M125) return string("WH_ZH_TTH_HToWW_M125");
-      else if(type == WH_ZH_TTH_HToWW_M125_JESUp) return string("WH_ZH_TTH_HToWW_M125_JESUp");
-      else if(type == WH_ZH_TTH_HToWW_M125_JESDown) return string("WH_ZH_TTH_HToWW_M125_JESDown");
-      else if(type == WH_HToZZ_M125)        return string("WH_HToZZ_M125");
-      else if(type == ZH_HToZZ_M125)        return string("ZH_HToZZ_M125");
-      else if(type == TTH_HToZZ_M125)       return string("TTH_HToZZ_M125");
-      else if(type == WH_HToWW_M125)        return string("WH_HToWW_M125");
-      else if(type == ZH_HToWW_M125)        return string("ZH_HToWW_M125");
-      else if(type == TTH_HToWW_M125)       return string("TTH_HToWW_M125");
-      else if(type == WH125_HToBB)          return string("WH125_HToBB");
-      else if(type == WH_HToBB_M125_JESUp)  return string("WH_HToBB_M125_JESUp");
-      else if(type == WH_HToBB_M125_JESDown)return string("WH_HToBB_M125_JESDown");
-      else if(type == WH125_HToZG)          return string("WH125_HToZG");
-      else if(type == TTH_Inclusive_M125)   return string("TTH_Inclusive_M125");
-      else if(type == TTH_HToBB_M125)       return string("TTH_HToBB_M125");
+      else if (type == WH_ZH_TTH_HToZZ_M125) return string("WH_ZH_TTH_HToZZ_M125");
+      else if (type == WH_ZH_TTH_HToWW_M125) return string("WH_ZH_TTH_HToWW_M125");
+      else if (type == WH_HToZZ_M125)        return string("WH_HToZZ_M125");
+      else if (type == ZH_HToZZ_M125)        return string("ZH_HToZZ_M125");
+      else if (type == TTH_HToZZ_M125)       return string("TTH_HToZZ_M125");
+      else if (type == WH_HToWW_M125)        return string("WH_HToWW_M125");
+      else if (type == ZH_HToWW_M125)        return string("ZH_HToWW_M125");
+      else if (type == TTH_HToWW_M125)       return string("TTH_HToWW_M125");
+      else if (type == WH125_HToBB)          return string("WH125_HToBB");
+      else if (type == WH125_HToZG)          return string("WH125_HToZG");
+      else if (type == TTH_Inclusive_M125)   return string("TTH_Inclusive_M125");
+      else if (type == TTH_HToBB_M125)       return string("TTH_HToBB_M125");
 
-      else if (type == STopS_T)	               return string("STopS_T");
-      else if (type == STopS_Tbar)	       return string("STopS_Tbar");
-      else if (type == STopT_T)	               return string("STopT_T");
-      else if (type == STopT_Tbar)	       return string("STopT_Tbar");
-      else if (type == STopTW_T)	       return string("STopTW_T");
-      else if (type == STopTW_Tbar)	       return string("STopTW_Tbar");
-      else if (type == Wcc) 	               return string("Wcc");
-      else if (type == WJets)	               return string("WJets");
-      else if (type == WJets_matchingup)       return string("WJets_matchingup");
-      else if (type == WJets_matchingdown)     return string("WJets_matchingdown");
-      else if (type == WJets_scaleup)          return string("WJets_scaleup");
-      else if (type == WJets_scaledown)        return string("WJets_scaledown");
-      else if (type == WJets_JESUp)	           return string("WJets_JESUp");
-      else if (type == WJets_JESDown)          return string("WJets_JESDown");
-      else if (type == W1Jets)               return string("W1Jets");
-      else if (type == W2Jets)               return string("W2Jets");
-      else if (type == W3Jets)               return string("W3Jets");
-      else if (type == W4Jets)               return string("W4Jets");
-      else if (type == WLg)	               return string("WLg");
-      else if (type == Wgg)	               return string("Wgg");
-      else if (type == WLL)	               return string("WLL");
-      else if (type == Wbb)	               return string("Wbb");
+      else if (type == ggH125_JESUp)                 return string("ggH125_JESUp");
+      else if (type == ggH125_JESDown)               return string("ggH125_JESDown");
+      else if (type == qqH125_JESUp)                 return string("qqH125_JESUp");
+      else if (type == qqH125_JESDown)               return string("qqH125_JESDown");
+      else if (type == WH_ZH_TTH_HToZZ_M125_JESUp)   return string("WH_ZH_TTH_HToZZ_M125_JESUp");
+      else if (type == WH_ZH_TTH_HToZZ_M125_JESDown) return string("WH_ZH_TTH_HToZZ_M125_JESDown");
+      else if (type == WH_ZH_TTH_HToWW_M125_JESUp)   return string("WH_ZH_TTH_HToWW_M125_JESUp");
+      else if (type == WH_ZH_TTH_HToWW_M125_JESDown) return string("WH_ZH_TTH_HToWW_M125_JESDown");
+      else if (type == WH_HToZZ_M125_JESUp)          return string("WH_HToZZ_M125_JESUp");
+      else if (type == WH_HToZZ_M125_JESDown)        return string("WH_HToZZ_M125_JESDown");
+      else if (type == WH_HToWW_M125_JESUp)          return string("WH_HToWW_M125_JESUp");
+      else if (type == WH_HToWW_M125_JESDown)        return string("WH_HToWW_M125_JESDown");
+      else if (type == ZH_HToZZ_M125_JESUp)          return string("ZH_HToZZ_M125_JESUp");
+      else if (type == ZH_HToZZ_M125_JESDown)        return string("ZH_HToZZ_M125_JESDown");
+      else if (type == ZH_HToWW_M125_JESUp)          return string("ZH_HToWW_M125_JESUp");
+      else if (type == ZH_HToWW_M125_JESDown)        return string("ZH_HToWW_M125_JESDown");
+      else if (type == TTH_HToZZ_M125_JESUp)         return string("TTH_HToZZ_M125_JESUp");
+      else if (type == TTH_HToZZ_M125_JESDown)       return string("TTH_HToZZ_M125_JESDown");
+      else if (type == TTH_HToWW_M125_JESUp)         return string("TTH_HToWW_M125_JESUp");
+      else if (type == TTH_HToWW_M125_JESDown)       return string("TTH_HToWW_M125_JESDown");
+      else if (type == WH_HToBB_M125_JESDown)        return string("WH_HToBB_M125_JESDown");
+      else if (type == WH_HToBB_M125_JESUp)          return string("WH_HToBB_M125_JESUp");
+      else if (type == TTH_HToBB_M125_JESUp)         return string("TTH_HToBB_M125_JESUp");
+      else if (type == TTH_HToBB_M125_JESDown)       return string("TTH_HToBB_M125_JESDown");
+
+      else if (type == STopS_T)	                   return string("STopS_T");
+      else if (type == STopS_Tbar)	               return string("STopS_Tbar");
+      else if (type == STopT_T)	                   return string("STopT_T");
+      else if (type == STopT_Tbar)	               return string("STopT_Tbar");
+      else if (type == STopTW_T)	                 return string("STopTW_T");
+      else if (type == STopTW_Tbar)	               return string("STopTW_Tbar");
+      else if (type == Wcc) 	                     return string("Wcc");
+      else if (type == WJets)	                     return string("WJets");
+      else if (type == W1Jets)                     return string("W1Jets");
+      else if (type == W2Jets)                     return string("W2Jets");
+      else if (type == W3Jets)                     return string("W3Jets");
+      else if (type == W4Jets)                     return string("W4Jets");
+      else if (type == WLg)	                       return string("WLg");
+      else if (type == Wgg)	                       return string("Wgg");
+      else if (type == WLL)	                       return string("WLL");
+      else if (type == Wbb)	                       return string("Wbb");
       else if (type == QCD_ElEnriched)	           return string("QCD_ElEnriched");
-      else if (type == QCD_ElFULL)             return string("QCD_ElFULL");
+      else if (type == QCD_ElFULL)                 return string("QCD_ElFULL");
       else if (type == QCD_MuEnriched)	           return string("QCD_MuEnriched");
-      else if (type == QCD_MuFULL)             return string("QCD_MuFULL");
+      else if (type == QCD_MuFULL)                 return string("QCD_MuFULL");
       else if (type == QCD_Pt20to30_EMEnriched )   return string ("QCD_Pt20to30_EMEnriched");
       else if (type == QCD_Pt30to80_EMEnriched )   return string ("QCD_Pt30to80_EMEnriched");
       else if (type == QCD_Pt80to170_EMEnriched )  return string ("QCD_Pt80to170_EMEnriched");
       else if (type == QCD_Pt170to250_EMEnriched ) return string ("QCD_Pt170to250_EMEnriched");
       else if (type == QCD_Pt250to350_EMEnriched ) return string ("QCD_Pt250to350_EMEnriched");
       else if (type == QCD_Pt350_EMEnriched )      return string ("QCD_Pt350_EMEnriched");
-      else if (type == WW)	               return string("WW");
-      else if (type == WZ)	               return string("WZ");
-      else if (type == ZZ)	               return string("ZZ");
-      else if (type == TTbar)	           return string("TTbar");
-      else if (type == TTbar_JESUp)	       return string("TTbar_JESUp");
-      else if (type == TTbar_JESDown)      return string("TTbar_JESDown");
-      else if (type == TTbarLJ)	           return string("TTbarLJ");
-      else if (type == TTbarDil)           return string("TTbarDil");
-      else if (type == ZJets)	           return string("ZJets");
-      else if (type == Ztautau)	           return string("Ztautau");
-      else if (type == SingleEl_Data)      return string("SingleEl_Data");
-      else if (type == SingleMu_Data)	   return string("SingleMu_Data");
+      else if (type == WW)	                       return string("WW");
+      else if (type == WZ)	                       return string("WZ");
+      else if (type == ZZ)	                       return string("ZZ");
+      else if (type == TTbar)	                   return string("TTbar");
+      else if (type == TTbarLJ)	                   return string("TTbarLJ");
+      else if (type == TTbarDil)                   return string("TTbarDil");
+      else if (type == ZJets)	                   return string("ZJets");
+      else if (type == Ztautau)	                   return string("Ztautau");
+      else if (type == ZJetsToLL_M50)              return string("ZJetsToLL_M50");
+      else if (type == ZJetsToLL_M10To50)          return string("ZJetsToLL_M10To50");
+      else if (type == SingleEl_Data)              return string("SingleEl_Data");
+      else if (type == SingleMu_Data)	             return string("SingleMu_Data");
+
+      else if (type == STopTW_Tbar_JESUp)   return string("STopTW_Tbar_JESUp");
+      else if (type == STopTW_Tbar_JESDown) return string("STopTW_Tbar_JESDown");
+      else if (type == STopTW_T_JESUp)      return string("STopTW_T_JESUp");
+      else if (type == STopTW_T_JESDown)    return string("STopTW_T_JESDown");
+      else if (type == STopT_Tbar_JESUp)    return string("STopT_Tbar_JESUp");
+      else if (type == STopT_Tbar_JESDown)  return string("STopT_Tbar_JESDown");
+      else if (type == STopT_T_JESUp)       return string("STopT_T_JESUp");
+      else if (type == STopT_T_JESDown)     return string("STopT_T_JESDown");
+      else if (type == STopS_Tbar_JESUp)    return string("STopS_Tbar_JESUp");
+      else if (type == STopS_Tbar_JESDown)  return string("STopS_Tbar_JESDown");
+      else if (type == STopS_T_JESUp)       return string("STopS_T_JESUp");
+      else if (type == STopS_T_JESDown)     return string("STopS_T_JESDown");
+      else if (type == WJets_matchingup)    return string("WJets_matchingup");
+      else if (type == WJets_matchingdown)  return string("WJets_matchingdown");
+      else if (type == WJets_scaleup)       return string("WJets_scaleup");
+      else if (type == WJets_scaledown)     return string("WJets_scaledown");
+      else if (type == WJets_JESUp)         return string("WJets_JESUp");
+      else if (type == WJets_JESDown)       return string("WJets_JESDown");
+      else if (type == WZ_JESUp)            return string("WZ_JESUp");
+      else if (type == WZ_JESDown)          return string("WZ_JESDown");
+      else if (type == WW_JESUp)            return string("WW_JESUp");
+      else if (type == WW_JESDown)          return string("WW_JESDown");
+      else if (type == TTbar_JESUp)         return string("TTbar_JESUp");
+      else if (type == TTbar_JESDown)       return string("TTbar_JESDown");
+      else if (type == ZJets_JESUp)         return string("ZJets_JESUp");
+      else if (type == ZJets_JESDown)       return string("ZJets_JESDown");
+
       else if (type == UNKNOWN)              return string("UNKNOWN");
 
       else cout<<" ERROR  DEFS::getProcessTypeString type ="<<type<<" not found"<<endl;
@@ -386,12 +466,25 @@ namespace DEFS {
 	   type == qqH150 || type == qqH160 || type == qqH170 || type == qqH180 || type == qqH190 ||
 	   type == qqH200 || type == qqH250 || type == qqH300 || type == qqH350 || type == qqH400 ||
 	   type == qqH450 || type == qqH500 || type == qqH550 || type == qqH600 || type == qqH700 ||
-	   type == qqH800 || type == qqH900 || type == qqH1000 || type == qqH125_JESUp || type == qqH125_JESDown)
+	   type == qqH800 || type == qqH900 || type == qqH1000)
          return true;
 
       if ( type == WH_ZH_TTH_HToWW_M125 || type == WH_ZH_TTH_HToZZ_M125 || type == TTH_HToBB_M125 || 
           type == TTH_Inclusive_M125 || type == WH_HToWW_M125 || type == ZH_HToWW_M125 || type == TTH_HToWW_M125 || 
-          type == WH_HToZZ_M125 || type == ZH_HToZZ_M125 || type == TTH_HToZZ_M125 || type == WH_ZH_TTH_HToWW_M125_JESUp || type == WH_ZH_TTH_HToWW_M125_JESDown || type == WH_ZH_TTH_HToZZ_M125_JESUp || type == WH_ZH_TTH_HToZZ_M125_JESDown )
+          type == WH_HToZZ_M125 || type == ZH_HToZZ_M125 || type == TTH_HToZZ_M125)
+         return true;
+
+      if ( type == ggH125_JESUp || type == ggH125_JESDown || type == qqH125_JESUp || type == qqH125_JESDown ||
+          type == WH125_HToBB || type == WH_HToBB_M125_JESUp || type == WH_HToBB_M125_JESDown ||
+          type == TTH_HToBB_M125_JESUp || type == TTH_HToBB_M125_JESDown ||
+          type == WH_ZH_TTH_HToWW_M125_JESUp || type == WH_ZH_TTH_HToWW_M125_JESDown || 
+          type == WH_ZH_TTH_HToZZ_M125_JESUp || type == WH_ZH_TTH_HToZZ_M125_JESDown ||
+          type == WH_HToWW_M125_JESUp || type == WH_HToWW_M125_JESDown || 
+          type == WH_HToZZ_M125_JESUp || type == WH_HToZZ_M125_JESDown ||
+          type == ZH_HToWW_M125_JESUp || type == ZH_HToWW_M125_JESDown || 
+          type == ZH_HToZZ_M125_JESUp || type == ZH_HToZZ_M125_JESDown ||
+          type == TTH_HToWW_M125_JESUp || type == TTH_HToWW_M125_JESDown || 
+          type == TTH_HToZZ_M125_JESUp || type == TTH_HToZZ_M125_JESDown)
          return true;
 
       return false;
@@ -407,12 +500,12 @@ namespace DEFS {
                 type == STopTW_T || type == STopTW_Tbar)
           return string("Single Top");
        else if (type == ggH125 || type == qqH125 || type == WH_HToWW_M125 || type == ZH_HToWW_M125 ||
-                type == TTH_HToWW_M125 || type == WH_ZH_TTH_HToWW_M125 || type == qqH125_JESUp || type == qqH125_JESDown || type == WH_ZH_TTH_HToWW_M125_JESUp || type == WH_ZH_TTH_HToWW_M125_JESDown)
+                type == TTH_HToWW_M125 || type == WH_ZH_TTH_HToWW_M125)
             return string("H(125)->WW");
-       else if (type == WH125 || type == WH125_HToBB || type == TTH_HToBB_M125 || type == WH_HToBB_M125_JESUp || type == WH_HToBB_M125_JESDown)
+       else if (type == WH125 || type == WH125_HToBB || type == TTH_HToBB_M125)
             return string("H(125)->bb");
        else if (type == WH_HToZZ_M125 || type == ZH_HToZZ_M125 || type == TTH_HToZZ_M125 ||
-                type == WH_ZH_TTH_HToZZ_M125 || type == WH_ZH_TTH_HToZZ_M125_JESUp || type == WH_ZH_TTH_HToZZ_M125_JESDown)
+                type == WH_ZH_TTH_HToZZ_M125)
             return string("H(125)->ZZ");
        else if (type == TTH_Inclusive_M125)
             return string("TTH(125)");
@@ -421,9 +514,9 @@ namespace DEFS {
        //else if (type == WH_ZH_TTH_HToWW_M125 || type == WH_ZH_TTH_HToZZ_M125 || type == TTH_HToBB_M125 ||
        //         type == TTH_Inclusive_M125)
        //   return string("WH_ZH_TTH(125)");
-       else if (type == WJets || type == W1Jets || type == W2Jets || type == W3Jets || type == W4Jets || type == WJets_matchingup || type == WJets_matchingdown || type == WJets_scaleup || type == WJets_scaledown || type == WJets_JESUp || type == WJets_JESDown)
+       else if (type == WJets || type == W1Jets || type == W2Jets || type == W3Jets || type == W4Jets)
           return string("W+Jets");
-       else if (type == ZJets)
+       else if (type == ZJets || type == ZJetsToLL_M50 || type == ZJetsToLL_M10To50)
           return string("Z+Jets");
        else if (type == SingleEl_Data || type == SingleMu_Data)
           return string("DATA");
@@ -432,6 +525,32 @@ namespace DEFS {
 		type == QCD_Pt80to170_EMEnriched  || type == QCD_Pt170to250_EMEnriched ||
 		type == QCD_Pt250to350_EMEnriched || type == QCD_Pt350_EMEnriched )
           return string("QCD");
+       else if (type == WJets_matchingup)
+          return string("Systematic_matchingup");
+       else if (type == WJets_matchingdown)
+          return string("Systematic_matchingdown");
+       else if (type == WJets_scaleup)
+          return string("Systematic_scaleup");
+       else if (type == WJets_scaledown)
+          return string("Systematic_scaledown");
+       else if (type == STopS_T_JESUp || type == STopS_Tbar_JESUp || type == STopT_T_JESUp || type == STopT_Tbar_JESUp || type == STopTW_T_JESUp || type == STopTW_Tbar_JESUp || 
+                type == WJets_JESUp || type == WW_JESUp || type == WZ_JESUp || type == TTbar_JESUp || type == ZJets_JESUp ||
+                type == ggH125_JESUp || type == qqH125_JESUp || 
+                type == WH_ZH_TTH_HToWW_M125_JESUp || 
+                type == WH_HToWW_M125_JESUp || type == ZH_HToWW_M125_JESUp || type == TTH_HToWW_M125_JESUp || 
+                type == WH_HToBB_M125_JESUp || type == TTH_HToBB_M125_JESUp || 
+                type == WH_ZH_TTH_HToZZ_M125_JESUp || 
+                type == WH_HToZZ_M125_JESUp || type == ZH_HToZZ_M125_JESUp || type == TTH_HToZZ_M125_JESUp)
+          return string("Systematic_JESUp");
+       else if (type == STopS_T_JESDown || type == STopS_Tbar_JESDown || type == STopT_T_JESDown || type == STopT_Tbar_JESDown || type == STopTW_T_JESDown || type == STopTW_Tbar_JESDown || 
+                type == WJets_JESDown || type == WW_JESDown || type == WZ_JESDown || type == TTbar_JESDown || type == ZJets_JESDown ||
+                type == ggH125_JESDown || type == qqH125_JESDown ||
+                type == WH_ZH_TTH_HToWW_M125_JESDown ||
+                type == WH_HToWW_M125_JESDown || type == ZH_HToWW_M125_JESDown || type == TTH_HToWW_M125_JESDown ||
+                type == WH_HToBB_M125_JESDown || type == TTH_HToBB_M125_JESDown ||
+                type == WH_ZH_TTH_HToZZ_M125_JESDown ||
+                type == WH_HToZZ_M125_JESDown || type == ZH_HToZZ_M125_JESDown || type == TTH_HToZZ_M125_JESDown)
+          return string("Systematic_JESDown");
        else
           return getTypeString(type);
     }//getTypeTitle
@@ -441,7 +560,11 @@ namespace DEFS {
     Color_t getProcessColor(Type type){
        
        if (type == WW)                              return kMagenta+1;//kPink;
+       else if (type == WW_JESUp)                   return kMagenta+1;//kPink;
+       else if (type == WW_JESDown)                 return kMagenta+1;//kPink;
        else if (type == WZ)                         return kCyan+1;//kBlue;
+       else if (type == WZ_JESUp)                   return kCyan+1;//kBlue;
+       else if (type == WZ_JESDown)                 return kCyan+1;//kBlue;
        else if (type == ZZ)                         return kYellow;//kBlue-1;
        else if (type == WJets)                      return kGreen-3;//kTeal+2;
        else if (type == WJets_matchingup)           return kGreen-3;//kTeal+2;
@@ -455,6 +578,10 @@ namespace DEFS {
        else if (type == W3Jets)                     return kGreen-3;//kTeal+2;
        else if (type == W4Jets)                     return kGreen-3;//kTeal+2;
        else if (type == ZJets)                      return kBlue-3;//kPink-8;
+       else if (type == ZJets_JESUp)                return kBlue-3;//kPink-8;
+       else if (type == ZJets_JESDown)              return kBlue-3;//kPink-8;
+       else if (type == ZJetsToLL_M50)              return kBlue-3;//kPink-8;
+       else if (type == ZJetsToLL_M10To50)          return kBlue-3;//kPink-8;
        else if (type == QCD_ElEnriched)             return kRed-6;//kYellow+1;
        else if (type == QCD_ElFULL)                 return kRed-6;//kYellow+1;
        else if (type == QCD_MuEnriched)             return kRed-6;//kYellow+1;
@@ -465,16 +592,30 @@ namespace DEFS {
        else if (type == QCD_Pt170to250_EMEnriched ) return kRed-6;//kYellow+1;
        else if (type == QCD_Pt250to350_EMEnriched ) return kRed-6;//kYellow+1;
        else if (type == QCD_Pt350_EMEnriched )      return kRed-6;//kYellow+1;
-       else if (type == STopT_T)                    return kOrange+1;
-       else if (type == STopT_Tbar)                 return kOrange+1; //kCyan+3;
-       else if (type == STopS_T)                    return kOrange+1; //kBlue;
-       else if (type == STopS_Tbar)                 return kOrange+1; //kBlue+3;
-       else if (type == STopTW_T)                   return kOrange+1; //kMagenta;
        else if (type == STopTW_Tbar)                return kOrange+1; //kGreen+3;
+       else if (type == STopTW_Tbar_JESUp)          return kOrange+1; //kGreen+3;
+       else if (type == STopTW_Tbar_JESDown)        return kOrange+1; //kGreen+3;
+       else if (type == STopTW_T)                   return kOrange+1; //kMagenta;
+       else if (type == STopTW_T_JESUp)             return kOrange+1; //kMagenta;
+       else if (type == STopTW_T_JESDown)           return kOrange+1; //kMagenta;
+       else if (type == STopS_Tbar)                 return kOrange+1; //kBlue+3;
+       else if (type == STopS_Tbar_JESUp)           return kOrange+1; //kBlue+3;
+       else if (type == STopS_Tbar_JESDown)         return kOrange+1; //kBlue+3;
+       else if (type == STopS_T)                    return kOrange+1; //kBlue;
+       else if (type == STopS_T_JESUp)              return kOrange+1; //kBlue;
+       else if (type == STopS_T_JESDown)            return kOrange+1; //kBlue;
+       else if (type == STopT_Tbar)                 return kOrange+1; //kCyan+3;
+       else if (type == STopT_Tbar_JESUp)           return kOrange+1; //kCyan+3;
+       else if (type == STopT_Tbar_JESDown)         return kOrange+1; //kCyan+3;
+       else if (type == STopT_T)                    return kOrange+1;
+       else if (type == STopT_T_JESUp)              return kOrange+1;
+       else if (type == STopT_T_JESDown)            return kOrange+1;
        else if (type == TTbar)                      return kRed-3;//kAzure-2; 
        else if (type == TTbar_JESUp)                return kRed-3;//kAzure-2; 
        else if (type == TTbar_JESDown)              return kRed-3;//kAzure-2; 
        else if (type == ggH125)                     return kMagenta-3;//kRed-4;//was kRed+2; 
+       else if (type == ggH125_JESUp)               return kMagenta-3;//kRed-4;//was kRed+2; 
+       else if (type == ggH125_JESDown)             return kMagenta-3;//kRed-4;//was kRed+2; 
        else if (type == qqH125)                     return kMagenta-3;//kRed-4;
        else if (type == qqH125_JESUp)               return kMagenta-3;//kRed-4;
        else if (type == qqH125_JESDown)             return kMagenta-3;//kRed-4;
@@ -488,13 +629,27 @@ namespace DEFS {
        else if (type == WH_ZH_TTH_HToZZ_M125)       return kMagenta-3;
        else if (type == WH_ZH_TTH_HToZZ_M125_JESUp)   return kMagenta-3;
        else if (type == WH_ZH_TTH_HToZZ_M125_JESDown) return kMagenta-3;
-       else if (type == WH_HToZZ_M125)              return kMagenta-3;
-       else if (type == ZH_HToZZ_M125)              return kMagenta-3;
-       else if (type == TTH_HToZZ_M125)             return kMagenta-3;
-       else if (type == WH_HToWW_M125)              return kMagenta-3;
-       else if (type == ZH_HToWW_M125)              return kMagenta-3;
        else if (type == TTH_HToWW_M125)             return kMagenta-3;
+       else if (type == TTH_HToWW_M125_JESUp)       return kMagenta-3;
+       else if (type == TTH_HToWW_M125_JESDown)     return kMagenta-3;
+       else if (type == ZH_HToWW_M125)              return kMagenta-3;
+       else if (type == ZH_HToWW_M125_JESUp)        return kMagenta-3;
+       else if (type == ZH_HToWW_M125_JESDown)      return kMagenta-3;
+       else if (type == WH_HToWW_M125)              return kMagenta-3;
+       else if (type == WH_HToWW_M125_JESUp)        return kMagenta-3;
+       else if (type == WH_HToWW_M125_JESDown)      return kMagenta-3;
+       else if (type == TTH_HToZZ_M125)             return kMagenta-3;
+       else if (type == TTH_HToZZ_M125_JESUp)       return kMagenta-3;
+       else if (type == TTH_HToZZ_M125_JESDown)     return kMagenta-3;
+       else if (type == ZH_HToZZ_M125)              return kMagenta-3;
+       else if (type == ZH_HToZZ_M125_JESUp)        return kMagenta-3;
+       else if (type == ZH_HToZZ_M125_JESDown)      return kMagenta-3;
+       else if (type == WH_HToZZ_M125)              return kMagenta-3;
+       else if (type == WH_HToZZ_M125_JESUp)        return kMagenta-3;
+       else if (type == WH_HToZZ_M125_JESDown)      return kMagenta-3;
        else if (type == TTH_HToBB_M125)             return kMagenta-3;
+       else if (type == TTH_HToBB_M125_JESUp)       return kMagenta-3;
+       else if (type == TTH_HToBB_M125_JESDown)     return kMagenta-3;
        else if (type == TTH_Inclusive_M125)         return kMagenta-3;
        else if (type == SingleEl_Data)              return kBlack;
        else if (type == SingleMu_Data)              return kBlack;
@@ -579,38 +734,206 @@ namespace DEFS {
   }//getJetBin
 
   //---------------------------------------------------------------------------
-  int getNBinsX(JetBin jBin){
+  int getNBinsX(JetBin jBin, LeptonCat lcat, std::string variable){
 
-    if (jBin == jets2)      return int(nbinsx_jets2);
-    else if (jBin == jets3) return int(nbinsx_jets3);
-    else if (jBin == jets4) return int(nbinsx_jets4);
+    if (jBin == jets2 && lcat==electron && variable=="KinBDT")        return int(nbinsx_jets2_electron_KinBDT);
+    else if (jBin == jets2 && lcat==electron && variable=="MEBDT")    return int(nbinsx_jets2_electron_MEBDT);
+    else if (jBin == jets2 && lcat==electron && variable=="KinMEBDT") return int(nbinsx_jets2_electron_KinMEBDT);
+    else if (jBin == jets2 && lcat==muon && variable=="KinBDT")       return int(nbinsx_jets2_muon_KinBDT);
+    else if (jBin == jets2 && lcat==muon && variable=="MEBDT")        return int(nbinsx_jets2_muon_MEBDT);
+    else if (jBin == jets2 && lcat==muon && variable=="KinMEBDT")     return int(nbinsx_jets2_muon_KinMEBDT);
+    else if (jBin == jets3 && lcat==electron && variable=="KinBDT")   return int(nbinsx_jets3_electron_KinBDT);
+    else if (jBin == jets3 && lcat==electron && variable=="MEBDT")    return int(nbinsx_jets3_electron_MEBDT);
+    else if (jBin == jets3 && lcat==electron && variable=="KinMEBDT") return int(nbinsx_jets3_electron_KinMEBDT);
+    else if (jBin == jets3 && lcat==muon && variable=="KinBDT")       return int(nbinsx_jets3_muon_KinBDT);
+    else if (jBin == jets3 && lcat==muon && variable=="MEBDT")        return int(nbinsx_jets3_muon_MEBDT);
+    else if (jBin == jets3 && lcat==muon && variable=="KinMEBDT")     return int(nbinsx_jets3_muon_KinMEBDT);
+    else if (jBin == jets4 && lcat==electron && variable=="KinBDT")   return int(nbinsx_jets4_electron_KinBDT);
+    else if (jBin == jets4 && lcat==electron && variable=="MEBDT")    return int(nbinsx_jets4_electron_MEBDT);
+    else if (jBin == jets4 && lcat==electron && variable=="KinMEBDT") return int(nbinsx_jets4_electron_KinMEBDT);
+    else if (jBin == jets4 && lcat==muon && variable=="KinBDT")       return int(nbinsx_jets4_muon_KinBDT);
+    else if (jBin == jets4 && lcat==muon && variable=="MEBDT")        return int(nbinsx_jets4_muon_MEBDT);
+    else if (jBin == jets4 && lcat==muon && variable=="KinMEBDT")     return int(nbinsx_jets4_muon_KinMEBDT);
     else cout << "ERROR in DEFS::getNBinsX jBin="<<jBin<<" not found!. Returning default number of bins."<<endl;
 
     return int(nbinsx_default);
   }//getNBinsX
 
   //---------------------------------------------------------------------------
-  vector<Double_t> getBinsX(JetBin jBin) {
-
-    if (jBin == jets2) {
-      vector<Double_t> ret = {-1,-0.76,-0.74,-0.72,-0.7,-0.68,-0.66,-0.64,-0.62,-0.6,-0.58,-0.56,-0.54,-0.52,
-                              -0.5,-0.48,-0.46,-0.44,-0.42,-0.4,-0.38,-0.36,-0.34,-0.32,-0.3,-0.28,-0.26,-0.24,
-                              -0.22,-0.2,-0.18,-0.16,-0.14,-0.12,-0.1,-0.08,-0.06,-0.04,-0.02,0,0.02,0.04,0.06,
-                              0.08,0.1,0.12,0.14,0.16,0.18,0.2,0.22,0.24,0.26,0.28,0.3,0.32,0.34,0.36,0.38,1};
+  vector<Double_t> getBinsX(JetBin jBin, LeptonCat lcat, std::string variable) {
+    //With Signal cuts
+    if (jBin==jets2 && lcat==electron && variable=="KinBDT") {
+      vector<Double_t> ret = {-1,-0.64,-0.6,-0.58,-0.56,-0.54,-0.52,-0.5,-0.48,-0.46,-0.44,-0.42,-0.4,-0.38,-0.36,
+                              -0.34,-0.32,-0.3,-0.28,-0.26,-0.24,-0.22,-0.2,-0.18,-0.16,-0.14,-0.12,-0.1,-0.08,-0.06,
+                              -0.04,-0.02,0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.2,0.22,0.24,1};
       return ret;
     }
-    else if (jBin == jets3) {
-      vector<Double_t> ret = {-1,-0.54,-0.52,-0.5,-0.48,-0.46,-0.44,-0.42,-0.4,-0.38,-0.36,-0.34,-0.32,-0.3,-0.28,
-                              -0.26,-0.24,-0.22,-0.2,-0.18,-0.16,-0.14,-0.12,-0.1,-0.08,-0.06,-0.04,-0.02,0,0.02,
-                              0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.2,0.22,0.24,0.26,0.28,0.3,0.32,1};
+    else if (jBin==jets2 && lcat==electron && variable=="MEBDT") {
+      vector<Double_t> ret = {-1,-0.4,-0.38,-0.36,-0.34,-0.32,-0.3,-0.28,-0.26,-0.24,-0.22,-0.2,-0.18,-0.16,-0.14,-0.12,
+                              -0.1,-0.08,-0.06,-0.04,-0.02,0,0.02,0.04,0.06,0.08,0.1,1};
       return ret;
     }
-    else if (jBin == jets4) {
-      vector<Double_t> ret = {-1,-0.4,-0.36,-0.34,-0.32,-0.3,-0.28,-0.26,-0.24,-0.22,-0.2,-0.18,-0.16,-0.14,-0.12,
-                              -0.1,-0.08,-0.06,-0.04,-0.02,0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.2,0.22,
-                              0.24,0.26,0.28,0.3,0.32,0.34,0.36,0.38,0.4,1};
+    else if (jBin==jets2 && lcat==electron && variable=="KinMEBDT") {
+      vector<Double_t> ret = {-1,-0.46,-0.44,-0.42,-0.4,-0.38,-0.36,-0.34,-0.32,-0.3,-0.28,-0.26,-0.24,-0.22,-0.2,-0.18,-0.16,
+                              -0.14,-0.12,-0.1,-0.08,-0.06,-0.04,-0.02,0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.2,0.22,
+                              0.24,1};
       return ret;
     }
+    else if (jBin==jets2 && lcat==muon && variable=="KinBDT") {
+      vector<Double_t> ret = {-1,-0.66,-0.62,-0.6,-0.58,-0.56,-0.54,-0.52,-0.5,-0.48,-0.46,-0.44,-0.42,-0.4,-0.38,-0.36,
+                              -0.34,-0.32,-0.3,-0.28,-0.26,-0.24,-0.22,-0.2,-0.18,-0.16,-0.14,-0.12,-0.1,-0.08,-0.06,-0.04,
+                              -0.02,0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.2,0.22,0.24,0.26,1};
+      return ret;
+    }
+    else if (jBin==jets2 && lcat==muon && variable=="MEBDT") {
+      vector<Double_t> ret = {-1,-0.42,-0.4,-0.38,-0.36,-0.34,-0.32,-0.3,-0.28,-0.26,-0.24,-0.22,-0.2,-0.18,-0.16,-0.14,-0.12,
+                              -0.1,-0.08,-0.06,-0.04,-0.02,0,0.02,0.04,0.06,0.08,0.1,0.12,0.18,1};
+      return ret;
+    }
+    else if (jBin==jets2 && lcat==muon && variable=="KinMEBDT") {
+      vector<Double_t> ret = {-1,-0.46,-0.44,-0.42,-0.4,-0.38,-0.36,-0.34,-0.32,-0.3,-0.28,-0.26,-0.24,-0.22,-0.2,-0.18,-0.16,
+                              -0.14,-0.12,-0.1,-0.08,-0.06,-0.04,-0.02,0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.2,0.22,
+                              0.24,1};
+      return ret;
+    }
+    else if (jBin==jets3 && lcat==electron && variable=="KinBDT") {
+      vector<Double_t> ret = {-1,-0.46,-0.42,-0.4,-0.38,-0.36,-0.34,-0.32,-0.3,-0.28,-0.26,-0.24,-0.22,-0.2,-0.18,-0.16,
+                              -0.14,-0.12,-0.1,-0.08,-0.06,-0.04,-0.02,0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.2,1};
+      return ret;
+    }
+    else if (jBin==jets3 && lcat==electron && variable=="MEBDT") {
+      vector<Double_t> ret = {-1,-0.3,-0.28,-0.26,-0.24,-0.22,-0.2,-0.18,-0.16,-0.14,-0.12,-0.1,-0.08,-0.06,-0.04,-0.02,0,
+                              0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,1};
+      return ret;
+    }
+    else if (jBin==jets3 && lcat==electron && variable=="KinMEBDT") {
+      vector<Double_t> ret = {-1,-0.34,-0.32,-0.3,-0.28,-0.26,-0.24,-0.22,-0.2,-0.18,-0.16,-0.14,-0.12,-0.1,-0.08,-0.06,
+                              -0.04,-0.02,0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.2,1};
+      return ret;
+    }
+    else if (jBin==jets3 && lcat==muon && variable=="KinBDT") {
+      vector<Double_t> ret = {-1,-0.46,-0.42,-0.4,-0.38,-0.36,-0.34,-0.32,-0.3,-0.28,-0.26,-0.24,-0.22,-0.2,-0.18,-0.16,
+                              -0.14,-0.12,-0.1,-0.08,-0.06,-0.04,-0.02,0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.2,1};
+      return ret;
+    }
+    else if (jBin==jets3 && lcat==muon && variable=="MEBDT") {
+      vector<Double_t> ret = {-1,-0.3,-0.28,-0.26,-0.24,-0.22,-0.2,-0.18,-0.16,-0.14,-0.12,-0.1,-0.08,-0.06,-0.04,-0.02,0,
+                              0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,1};
+      return ret;
+    }
+    else if (jBin==jets3 && lcat==muon && variable=="KinMEBDT") {
+      vector<Double_t> ret = {-1,-0.34,-0.32,-0.3,-0.28,-0.26,-0.24,-0.22,-0.2,-0.18,-0.16,-0.14,-0.12,-0.1,-0.08,-0.06,
+                              -0.04,-0.02,0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,0.2,1};
+      return ret;
+    }
+    else if (jBin==jets4 && lcat==electron && variable=="KinBDT") {
+      vector<Double_t> ret = {-1,-0.28,-0.26,-0.24,-0.22,-0.2,-0.18,-0.16,-0.14,-0.12,-0.1,-0.08,-0.06,-0.04,-0.02,
+                              0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,1};
+      return ret;
+    }
+    else if (jBin==jets4 && lcat==electron && variable=="MEBDT") {
+      vector<Double_t> ret = {-1,-0.24,-0.2,-0.18,-0.16,-0.14,-0.12,-0.1,-0.08,-0.06,-0.04,-0.02,0,0.02,0.04,0.06,
+                              0.08,0.1,0.12,0.14,1};
+      return ret;
+    }
+    else if (jBin==jets4 && lcat==electron && variable=="KinMEBDT") {
+      vector<Double_t> ret = {-1,-0.22,-0.18,-0.16,-0.14,-0.12,-0.1,-0.08,-0.06,-0.04,-0.02,0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,1};
+      return ret;
+    }
+    else if (jBin==jets4 && lcat==muon && variable=="KinBDT") {
+      vector<Double_t> ret = {-1,-0.28,-0.26,-0.24,-0.22,-0.2,-0.18,-0.16,-0.14,-0.12,-0.1,-0.08,-0.06,-0.04,
+                              -0.02,0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,1};
+      return ret;
+    }
+    else if (jBin==jets4 && lcat==muon && variable=="MEBDT") {
+      vector<Double_t> ret = {-1,-0.22,-0.18,-0.16,-0.14,-0.12,-0.1,-0.08,-0.06,-0.04,-0.02,0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,1};
+      return ret;
+    }
+    else if (jBin==jets4 && lcat==muon && variable=="KinMEBDT") {
+      vector<Double_t> ret = {-1,-0.22,-0.18,-0.16,-0.14,-0.12,-0.1,-0.08,-0.06,-0.04,-0.02,0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,1};
+      return ret;
+    }
+    //With HailMary cuts
+    /*
+    if (jBin==jets2 && lcat==electron && variable=="KinBDT") {
+      vector<Double_t> ret = {-1,-0.42,-0.38,-0.36,-0.34,-0.32,-0.3,-0.28,-0.26,-0.24,-0.22,-0.2,-0.18,-0.16,-0.14,-0.12,
+                              -0.1,-0.08,-0.06,-0.04,-0.02,0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,1};
+      return ret;
+    }
+    else if (jBin==jets2 && lcat==electron && variable=="MEBDT") {
+      vector<Double_t> ret = {-1,-0.32,-0.3,-0.28,-0.26,-0.24,-0.22,-0.2,-0.18,-0.16,-0.14,-0.12,-0.1,-0.08,-0.06,-0.04,-0.02,
+                              0,0.02,0.04,1};
+      return ret;
+    }
+    else if (jBin==jets2 && lcat==electron && variable=="KinMEBDT") {
+      vector<Double_t> ret = {-1,-0.32,-0.3,-0.28,-0.26,-0.24,-0.22,-0.2,-0.18,-0.16,-0.14,-0.12,-0.1,-0.08,-0.06,-0.04,
+                              -0.02,0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.18,1};
+      return ret;
+    }
+    else if (jBin==jets2 && lcat==muon && variable=="KinBDT") {
+      vector<Double_t> ret = {-1,-0.42,-0.38,-0.34,-0.32,-0.3,-0.28,-0.26,-0.24,-0.22,-0.2,-0.18,-0.16,-0.14,-0.12,-0.1,-0.08,
+                              -0.06,-0.04,-0.02,0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,0.16,0.2,1};
+      return ret;
+    }
+    else if (jBin==jets2 && lcat==muon && variable=="MEBDT") {
+      vector<Double_t> ret = {-1,-0.26,-0.24,-0.22,-0.2,-0.18,-0.16,-0.14,-0.12,-0.1,-0.08,-0.06,-0.04,-0.02,0,0.02,0.04,0.06,1};
+      return ret;
+    }
+    else if (jBin==jets2 && lcat==muon && variable=="KinMEBDT") {
+      vector<Double_t> ret = {-1,-0.32,-0.28,-0.26,-0.24,-0.22,-0.2,-0.18,-0.16,-0.14,-0.12,-0.1,-0.08,-0.06,-0.04,-0.02,0,0.02,
+                              0.04,0.06,0.08,0.1,0.12,0.14,0.16,1};
+      return ret;
+    }
+    else if (jBin==jets3 && lcat==electron && variable=="KinBDT") {
+      vector<Double_t> ret = {-1,-0.26,-0.22,-0.2,-0.18,-0.16,-0.14,-0.12,-0.1,-0.08,-0.06,-0.04,-0.02,0,0.02,0.04,0.06,0.08,0.1,
+                              0.12,0.16,1};
+      return ret;
+    }
+    else if (jBin==jets3 && lcat==electron && variable=="MEBDT") {
+      vector<Double_t> ret = {-1,-0.14,-0.12,-0.1,-0.08,-0.06,-0.04,-0.02,0,0.02,0.04,0.06,0.08,0.1,1};
+      return ret;
+    }
+    else if (jBin==jets3 && lcat==electron && variable=="KinMEBDT") {
+      vector<Double_t> ret = {-1,-0.18,-0.14,-0.12,-0.1,-0.08,-0.06,-0.04,-0.02,0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,1};
+      return ret;
+    }
+    else if (jBin==jets3 && lcat==muon && variable=="KinBDT") {
+      vector<Double_t> ret = {-1,-0.22,-0.18,-0.14,-0.12,-0.1,-0.08,-0.06,-0.04,-0.02,0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,1};
+      return ret;
+    }
+    else if (jBin==jets3 && lcat==muon && variable=="MEBDT") {
+      vector<Double_t> ret = {-1,-0.14,-0.1,-0.08,-0.06,-0.04,-0.02,0,0.02,0.04,0.06,0.08,0.1,1};
+      return ret;
+    }
+    else if (jBin==jets3 && lcat==muon && variable=="KinMEBDT") {
+      vector<Double_t> ret = {-1,-0.16,-0.12,-0.1,-0.08,-0.06,-0.04,-0.02,0,0.02,0.04,0.06,0.08,0.1,0.12,0.14,1};
+      return ret;
+    }
+    else if (jBin==jets4 && lcat==electron && variable=="KinBDT") {
+      vector<Double_t> ret = {-1,-0.12,-0.08,-0.04,0,0.04,0.08,0.14,1};
+      return ret;
+    }
+    else if (jBin==jets4 && lcat==electron && variable=="MEBDT") {
+      vector<Double_t> ret = {-1,-0.04,0,0.02,0.04,0.06,0.08,1};
+      return ret;
+    }
+    else if (jBin==jets4 && lcat==electron && variable=="KinMEBDT") {
+      vector<Double_t> ret = {-1,-0.08,-0.04,-0.02,0.02,0.04,0.08,0.12,1};
+      return ret;
+    }
+    else if (jBin==jets4 && lcat==muon && variable=="KinBDT") {
+      vector<Double_t> ret = {-1,-0.1,-0.06,-0.02,0.02,0.06,1};
+      return ret;
+    }
+    else if (jBin==jets4 && lcat==muon && variable=="MEBDT") {
+      vector<Double_t> ret = {-1,-0.04,0,0.04,0.08,1};
+      return ret;
+    }
+    else if (jBin==jets4 && lcat==muon && variable=="KinMEBDT") {
+      vector<Double_t> ret = {-1,-0.04,0,0.04,0.08,1};
+      return ret;
+    }
+    */
     else cout << "ERROR in DEFS::getBinsX jBin="<<jBin<<" not found! Returning the default bin boundaries."<<endl;
 
     vector<Double_t> ret = {-1,-0.98,-0.96,-0.94,-0.92,-0.9,-0.88,-0.86,-0.84,-0.82,-0.8,-0.78,-0.76,-0.74,
@@ -737,24 +1060,28 @@ namespace DEFS {
    // A routine that returns a string given the type
    std::string getControlRegionString(ControlRegion type){
       
-      if (type == all)               return "all";
-      else if (type == signal)       return "signal";
-      else if (type == control1)     return "control1";
-      else if (type == control2)     return "control2";
-      else if (type == control3)     return "control3";
-      else if (type == control4)     return "control4";
-      else if (type == control5)     return "control5";
-      else if (type == control6)     return "control6";
-      else if (type == control7)     return "control7";
-      else if (type == control8)     return "control8";
-      else if (type == control9)     return "control9";
-      else if (type == UVaCuts)      return "UVaCuts";
-      else if (type == event)        return "event";
-      else if (type == Diboson)      return "Diboson";
-      else if (type == MVAEleID)     return "MVAEleID";
-      else if (type == AntiMVAEleID) return "AntiMVAEleID";
-      else if (type == FlatMVAEleID) return "FlatMVAEleID";
-      else if (type == None)         return "None";
+      if (type == all)                return "all";
+      else if (type == signal)        return "signal";
+      else if (type == control1)      return "control1";
+      else if (type == control2)      return "control2";
+      else if (type == control3)      return "control3";
+      else if (type == control4)      return "control4";
+      else if (type == control5)      return "control5";
+      else if (type == control6)      return "control6";
+      else if (type == control7)      return "control7";
+      else if (type == control8)      return "control8";
+      else if (type == control9)      return "control9";
+      else if (type == UVaCuts)       return "UVaCuts";
+      else if (type == event)         return "event";
+      else if (type == Diboson)       return "Diboson";
+      else if (type == MVAEleID)      return "MVAEleID";
+      else if (type == AntiMVAEleID)  return "AntiMVAEleID";
+      else if (type == FlatMVAEleID)  return "FlatMVAEleID";
+      else if (type == BDTBump)       return "BDTBump";
+      else if (type == BDTAntiBump)   return "BDTAntiBump";
+      else if (type == HailMary)      return "HailMary";
+      else if (type == HailMaryLoose) return "HailMaryLoose";
+      else if (type == None)          return "None";
 
       cout<<"ERROR DEFS::getControlregionString cannot find the given type"<<endl;
       return "ERROR";
@@ -764,24 +1091,28 @@ namespace DEFS {
    // A routine that returns a ControlRegion given a string
    DEFS::ControlRegion getControlRegion(std::string str){
       
-      if (str == "all")               return all;
-      else if (str == "signal")       return signal;
-      else if (str == "control1")     return control1;
-      else if (str == "control2")     return control2;
-      else if (str == "control3")     return control3;
-      else if (str == "control4")     return control4;
-      else if (str == "control5")     return control5;
-      else if (str == "control6")     return control6;
-      else if (str == "control7")     return control7;
-      else if (str == "control8")     return control8;
-      else if (str == "control9")     return control9;
-      else if (str == "UVaCuts")      return UVaCuts;
-      else if (str == "event")        return event;
-      else if (str == "Diboson")      return Diboson;
-      else if (str == "MVAEleID")     return MVAEleID;
-      else if (str == "AntiMVAEleID") return AntiMVAEleID;
-      else if (str == "FlatMVAEleID") return FlatMVAEleID;
-      else if (str == "None")         return None;
+      if (str == "all")                return all;
+      else if (str == "signal")        return signal;
+      else if (str == "control1")      return control1;
+      else if (str == "control2")      return control2;
+      else if (str == "control3")      return control3;
+      else if (str == "control4")      return control4;
+      else if (str == "control5")      return control5;
+      else if (str == "control6")      return control6;
+      else if (str == "control7")      return control7;
+      else if (str == "control8")      return control8;
+      else if (str == "control9")      return control9;
+      else if (str == "UVaCuts")       return UVaCuts;
+      else if (str == "event")         return event;
+      else if (str == "Diboson")       return Diboson;
+      else if (str == "MVAEleID")      return MVAEleID;
+      else if (str == "AntiMVAEleID")  return AntiMVAEleID;
+      else if (str == "FlatMVAEleID")  return FlatMVAEleID;
+      else if (str == "BDTBump")       return BDTBump;
+      else if (str == "BDTAntiBump")   return BDTAntiBump;
+      else if (str == "HailMary")      return HailMary;
+      else if (str == "HailMaryLoose") return HailMaryLoose;
+      else if (str == "None")          return None;
 
       cout<<"ERROR  DEFS::getControlRegion cannot find the given string"<<endl;
       return None;
@@ -837,6 +1168,7 @@ namespace DEFS {
    std::string getUniversityString(University univ) {
       if (univ == TAMU)                 return "TAMU";
       else if (univ == UVa)             return "UVa";
+      else if (univ == Combined)        return "Combined";
       else if (univ == OtherUniversity) return "OtherUniversity";
 
       cout<<"ERROR DEFS::getUniversityString cannot find the given university"<<endl;
@@ -849,11 +1181,200 @@ namespace DEFS {
 
       if (str == "TAMU")                 return TAMU;
       else if (str == "UVa")             return UVa;
+      else if (str == "Combined")        return Combined;
       else if (str == "OtherUniversity") return OtherUniversity;
 
       cout<<"ERROR  DEFS::getUniversity cannot find the given string"<<endl;
       return OtherUniversity;
 
+   }
+
+   //---------------------------------------------------------------------------
+   /// Print a PdgId as a named string
+   std::string toParticleName(PdgId p) {
+      if (p == ELECTRON)         return "ELECTRON";
+      else if (p == POSITRON)    return "POSITRON";
+      else if (p == MUON)        return "MUON";
+      else if (p == ANTIMUON)    return "ANTIMUON";
+      else if (p == TAU)         return "TAU";
+      else if (p == ANTITAU)     return "ANTITAU";
+      else if (p == NU_E)        return "NU_E";
+      else if (p == NU_EBAR)     return "NU_EBAR";
+      else if (p == NU_MU)       return "NU_MU";
+      else if (p == NU_MUBAR)    return "NU_MUBAR";
+      else if (p == NU_TAU)      return "NU_TAU";
+      else if (p == NU_TAUBAR)   return "NU_TAUBAR";
+
+      else if (p == d)           return "d";
+      else if (p == u)           return "u";
+      else if (p == s)           return "s";
+      else if (p == c)           return "c";
+      else if (p == b)           return "b";
+      else if (p == t)           return "t";
+      else if (p == dbar)        return "dbar";
+      else if (p == ubar)        return "ubar";
+      else if (p == sbar)        return "sbar";
+      else if (p == cbar)        return "cbar";
+      else if (p == bbar)        return "bbar";
+      else if (p == tbar)        return "tbar";
+
+      else if (p == DQUARK)      return "DQUARK";
+      else if (p == UQUARK)      return "UQUARK";
+      else if (p == SQUARK)      return "SQUARK";
+      else if (p == CQUARK)      return "CQUARK";
+      else if (p == BQUARK)      return "BQUARK";
+      else if (p == TQUARK)      return "TQUARK";
+      else if (p == ANTIDQUARK)  return "ANTIDQUARK";
+      else if (p == ANTIUQUARK)  return "ANTIUQUARK";
+      else if (p == ANTISQUARK)  return "ANTISQUARK";
+      else if (p == ANTICQUARK)  return "ANTICQUARK";
+      else if (p == ANTIBQUARK)  return "ANTIBQUARK";
+      else if (p == ANTITQUARK)  return "ANTITQUARK";
+
+      else if (p == PROTON)      return "PROTON";
+      else if (p == ANTIPROTON)  return "ANTIPROTON";
+      else if (p == NEUTRON)     return "NEUTRON";
+      else if (p == ANTINEUTRON) return "ANTINEUTRON";
+      else if (p == PIPLUS)      return "PIPLUS";
+      else if (p == PIMINUS)     return "PIMINUS";
+
+      else if (p == PHOTON)      return "PHOTON";
+      else if (p == WPLUSBOSON)  return "WPLUSBOSON";
+      else if (p == WMINUSBOSON) return "WMINUSBOSON";
+      else if (p == ZBOSON)      return "ZBOSON";
+      else if (p == GLUON)       return "GLUON";
+      else if (p == HIGGS)       return "HIGGS";
+      else if (p == ANY)         return "*";
+
+      cout << "ERROR DEFS::toParticleName cannot find the given PdgId" << endl;
+      return "*";
+   }
+
+
+
+   /// Print a PdgId as a named string
+   DEFS::PdgId toParticleId(const std::string& pname) {
+      if (pname == "ELECTRON")         return ELECTRON;
+      else if (pname == "POSITRON")    return POSITRON;
+      else if (pname == "MUON")        return MUON;
+      else if (pname == "ANTIMUON")    return ANTIMUON;     
+      else if (pname == "TAU")         return TAU;
+      else if (pname == "ANTITAU")     return ANTITAU;
+      else if (pname == "NU_E")        return NU_E;
+      else if (pname == "NU_EBAR")     return NU_EBAR;
+      else if (pname == "NU_MU")       return NU_MU;
+      else if (pname == "NU_MUBAR")    return NU_MUBAR;
+      else if (pname == "NU_TAU")      return NU_TAU;
+      else if (pname == "NU_TAUBAR")   return NU_TAUBAR;
+
+      else if (pname == "d")           return d;
+      else if (pname == "u")           return u;
+      else if (pname == "s")           return s;
+      else if (pname == "c")           return c;
+      else if (pname == "b")           return b;
+      else if (pname == "t")           return t;
+      else if (pname == "dbar")        return dbar;
+      else if (pname == "ubar")        return ubar;
+      else if (pname == "sbar")        return sbar;
+      else if (pname == "cbar")        return cbar;
+      else if (pname == "bbar")        return bbar;
+      else if (pname == "tbar")        return tbar;
+
+      else if (pname == "DQUARK")      return DQUARK;
+      else if (pname == "UQUARK")      return UQUARK;
+      else if (pname == "SQUARK")      return SQUARK;
+      else if (pname == "CQUARK")      return CQUARK;
+      else if (pname == "BQUARK")      return BQUARK;
+      else if (pname == "TQUARK")      return TQUARK;
+      else if (pname == "ANTIDQUARK")  return ANTIDQUARK;
+      else if (pname == "ANTIUQUARK")  return ANTIUQUARK;
+      else if (pname == "ANTISQUARK")  return ANTISQUARK;
+      else if (pname == "ANTICQUARK")  return ANTICQUARK;
+      else if (pname == "ANTIBQUARK")  return ANTIBQUARK;
+      else if (pname == "ANTITQUARK")  return ANTITQUARK;
+
+      else if (pname == "PROTON")      return PROTON;
+      else if (pname == "ANTIPROTON")  return ANTIPROTON;
+      else if (pname == "NEUTRON")     return NEUTRON;
+      else if (pname == "ANTINEUTRON") return ANTINEUTRON;
+      else if (pname == "PIPLUS")      return PIPLUS;
+      else if (pname == "PIMINUS")     return PIMINUS;
+
+      else if (pname == "PHOTON")      return PHOTON;
+      else if (pname == "WPLUSBOSON")  return WPLUSBOSON;
+      else if (pname == "WMINUSBOSON") return WMINUSBOSON;
+      else if (pname == "ZBOSON")      return ZBOSON;
+      else if (pname == "GLUON")       return GLUON;
+      else if (pname == "HIGGS")       return HIGGS;
+      else if (pname == "*")           return ANY;
+
+    cout << "ERROR DEFS::toParticleId cannot find the given string" << endl;
+    return ANY;
+
+   }
+
+   /// Return a PdgId from an int
+   DEFS::PdgId getParticleIdFromInt(int p) {
+      if (p == 11)         return ELECTRON;
+      else if (p == -11)   return POSITRON;
+      else if (p == 13)    return MUON;
+      else if (p == -13)   return ANTIMUON;     
+      else if (p == 15)    return TAU;
+      else if (p == -15)   return ANTITAU;
+      else if (p == 12)    return NU_E;
+      else if (p == -12)   return NU_EBAR;
+      else if (p == 14)    return NU_MU;
+      else if (p == -14)   return NU_MUBAR;
+      else if (p == 16)    return NU_TAU;
+      else if (p == -16)   return NU_TAUBAR;
+
+      else if (p == 1)     return d;
+      else if (p == 2)     return u;
+      else if (p == 3)     return s;
+      else if (p == 4)     return c;
+      else if (p == 5)     return b;
+      else if (p == 6)     return t;
+      else if (p == -1)    return dbar;
+      else if (p == -2)    return ubar;
+      else if (p == -3)    return sbar;
+      else if (p == -4)    return cbar;
+      else if (p == -5)    return bbar;
+      else if (p == -6)    return tbar;
+
+      else if (p == 1)     return DQUARK;
+      else if (p == 2)     return UQUARK;
+      else if (p == 3)     return SQUARK;
+      else if (p == 4)     return CQUARK;
+      else if (p == 5)     return BQUARK;
+      else if (p == 6)     return TQUARK;
+      else if (p == -1)    return ANTIDQUARK;
+      else if (p == -2)    return ANTIUQUARK;
+      else if (p == -3)    return ANTISQUARK;
+      else if (p == -4)    return ANTICQUARK;
+      else if (p == -5)    return ANTIBQUARK;
+      else if (p == -6)    return ANTITQUARK;
+
+      else if (p == 2212)  return PROTON;
+      else if (p == -2212) return ANTIPROTON;
+      else if (p == 2112)  return NEUTRON;
+      else if (p == -2112) return ANTINEUTRON;
+      else if (p == 211)   return PIPLUS;
+      else if (p == -211)  return PIMINUS;
+
+      else if (p == 22)    return PHOTON;
+      else if (p == -22)   return PHOTON;
+      else if (p == 24)    return WPLUSBOSON;
+      else if (p == -24)   return WMINUSBOSON;
+      else if (p == 23)    return ZBOSON;
+      else if (p == -23)   return ZBOSON;
+      else if (p == 21)    return GLUON;
+      else if (p == -21)   return GLUON;
+      else if (p == 25)    return HIGGS;
+      else if (p == -25)   return HIGGS;
+      else if (p == 10000) return ANY;
+
+      cout << "ERROR DEFS::getParticleIdFromInt cannot find the given PdgId" << endl;
+      return ANY;
    }
 
 }// end of namespace DEFS

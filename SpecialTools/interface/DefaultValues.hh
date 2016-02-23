@@ -95,6 +95,7 @@ public:
    static std::vector < PhysicsProcess * > getProcessesHiggs(DEFS::JetBin,
                                                              DEFS::TagCat,
                                                              bool include_data,
+                                                             bool include_systematics,
                                                              bool for_plots,
                                                              DEFS::NtupleType ntuple_type,
                                                              DEFS::LeptonCat lepton = DEFS::both);
@@ -138,6 +139,10 @@ public:
    // Returns the index of the location of b within a, or -1 if b is not found in a
    static int vfind(vector<string> a, string b);
    static int vfind(vector<TString> a, TString b);
+
+   // Remove a substring p from a given string s
+   template<typename T>
+   void removeSubstrs(std::basic_string<T>& s, const std::basic_string<T>& p);
 
    // Destroy all open canvases
    static void DestroyCanvases();

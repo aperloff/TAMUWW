@@ -49,16 +49,28 @@ namespace DEFS{
                ggH550 , ggH600 , ggH700 , ggH800 , ggH900 , ggH1000 , 
                qqH100 , qqH105 , qqH110 , qqH115 , qqH120 , qqH125 , qqH130 , qqH135 , qqH140 , qqH145 , qqH150 ,
                qqH160 , qqH170 , qqH180 , qqH190 , qqH200 , qqH250 , qqH300 , qqH350 , qqH400 , qqH450 , qqH500 ,
-               qqH550 , qqH600 , qqH700 , qqH800 , qqH900 , qqH1000 , qqH125_JESUp, qqH125_JESDown,
-               WH_ZH_TTH_HToZZ_M125, WH125_HToBB, WH125_HToZG, WH_ZH_TTH_HToWW_M125, TTH_Inclusive_M125, TTH_HToBB_M125, WH_HToBB_M125_JESUp, WH_HToBB_M125_JESDown, WH_ZH_TTH_HToWW_M125_JESUp, WH_ZH_TTH_HToWW_M125_JESDown, WH_ZH_TTH_HToZZ_M125_JESUp, WH_ZH_TTH_HToZZ_M125_JESDown, 
+               qqH550 , qqH600 , qqH700 , qqH800 , qqH900 , qqH1000 ,
+               WH_ZH_TTH_HToZZ_M125, WH125_HToBB, WH125_HToZG, WH_ZH_TTH_HToWW_M125, TTH_Inclusive_M125, TTH_HToBB_M125,
                WH_HToZZ_M125, ZH_HToZZ_M125, TTH_HToZZ_M125, WH_HToWW_M125, ZH_HToWW_M125, TTH_HToWW_M125, 
-               STopS_T , STopS_Tbar , STopT_T , STopT_Tbar , STopTW_T , STopTW_Tbar , TTbar , TTbarLJ, TTbarDil , TTbar_JESUp, TTbar_JESDown,
-               Wcc , WJets , WJets_part2 , W1Jets, W2Jets, W3Jets, W4Jets, WLg , Wgg , WLL , WLb , Wbb , WJets_JESUp, WJets_JESDown, WJets_matchingup, WJets_matchingdown, WJets_scaleup, WJets_scaledown, 
-               WW , WZbb , WZ , ZZ , ZJets , Ztautau , 
+               STopS_T , STopS_Tbar , STopT_T , STopT_Tbar , STopTW_T , STopTW_Tbar , TTbar , TTbarLJ, TTbarDil ,
+               Wcc , WJets , WJets_part2 , W1Jets, W2Jets, W3Jets, W4Jets, WLg , Wgg , WLL , WLb , Wbb ,
+               WW , WZbb , WZ , ZZ , ZJets , Ztautau , ZJetsToLL_M50 , ZJetsToLL_M10To50,
                QCD_ElEnriched , QCD_ElFULL, QCD_MuEnriched , QCD_MuFULL ,
 	             QCD_Pt20to30_EMEnriched, QCD_Pt30to80_EMEnriched, QCD_Pt80to170_EMEnriched, 
 	             QCD_Pt170to250_EMEnriched, QCD_Pt250to350_EMEnriched, QCD_Pt350_EMEnriched,
-               SingleEl_Data , SingleMu_Data, 
+               SingleEl_Data , SingleMu_Data,
+               WZ_JESUp, WZ_JESDown, WW_JESUp, WW_JESDown,
+               STopS_T_JESUp , STopS_Tbar_JESUp , STopT_T_JESUp , STopT_Tbar_JESUp , STopTW_T_JESUp , STopTW_Tbar_JESUp ,
+               STopS_T_JESDown , STopS_Tbar_JESDown , STopT_T_JESDown , STopT_Tbar_JESDown , STopTW_T_JESDown , STopTW_Tbar_JESDown ,
+               TTbar_JESUp, TTbar_JESDown,
+               ZJets_JESUp, ZJets_JESDown,
+               WJets_JESUp, WJets_JESDown, WJets_matchingup, WJets_matchingdown, WJets_scaleup, WJets_scaledown,
+               WH_ZH_TTH_HToWW_M125_JESUp, WH_ZH_TTH_HToWW_M125_JESDown, WH_ZH_TTH_HToZZ_M125_JESUp, WH_ZH_TTH_HToZZ_M125_JESDown, 
+               WH_HToWW_M125_JESUp, WH_HToWW_M125_JESDown, WH_HToZZ_M125_JESUp, WH_HToZZ_M125_JESDown,
+               ZH_HToWW_M125_JESUp, ZH_HToWW_M125_JESDown, ZH_HToZZ_M125_JESUp, ZH_HToZZ_M125_JESDown,
+               TTH_HToWW_M125_JESUp, TTH_HToWW_M125_JESDown, TTH_HToZZ_M125_JESUp, TTH_HToZZ_M125_JESDown,
+               WH_HToBB_M125_JESUp, WH_HToBB_M125_JESDown, TTH_HToBB_M125_JESUp, TTH_HToBB_M125_JESDown,
+               ggH125_JESUp, ggH125_JESDown, qqH125_JESUp, qqH125_JESDown, 
                UNKNOWN};
 
     // A routine that returns the type given a string 
@@ -111,13 +123,27 @@ namespace DEFS{
   // A routine that returns a JetBin given
   JetBin getJetBin(std::string str);
 
-  enum NBinsX {nbinsx_default=100, nbinsx_jets2=59, nbinsx_jets3=45, nbinsx_jets4=41};
-
+  //With Signal cuts
+    enum NBinsX {nbinsx_default=100, nbinsx_jets2_electron_KinBDT=45, nbinsx_jets2_electron_MEBDT=27, nbinsx_jets2_electron_KinMEBDT=37,
+               nbinsx_jets2_muon_KinBDT=47, nbinsx_jets2_muon_MEBDT=30, nbinsx_jets2_muon_KinMEBDT=37,
+               nbinsx_jets3_electron_KinBDT=34, nbinsx_jets3_electron_MEBDT=25, nbinsx_jets3_electron_KinMEBDT=29,
+               nbinsx_jets3_muon_KinBDT=34, nbinsx_jets3_muon_MEBDT=25, nbinsx_jets3_muon_KinMEBDT=29,
+               nbinsx_jets4_electron_KinBDT=25, nbinsx_jets4_electron_MEBDT=20, nbinsx_jets4_electron_KinMEBDT=20,
+               nbinsx_jets4_muon_KinBDT=25, nbinsx_jets4_muon_MEBDT=19, nbinsx_jets4_muon_KinMEBDT=20};
+  //With HailMary cuts
+  /*
+  enum NBinsX {nbinsx_default=100, nbinsx_jets2_electron_KinBDT=30, nbinsx_jets2_electron_MEBDT=20, nbinsx_jets2_electron_KinMEBDT=27,
+               nbinsx_jets2_muon_KinBDT=30, nbinsx_jets2_muon_MEBDT=18, nbinsx_jets2_muon_KinMEBDT=25,
+               nbinsx_jets3_electron_KinBDT=21, nbinsx_jets3_electron_MEBDT=14, nbinsx_jets3_electron_KinMEBDT=17,
+               nbinsx_jets3_muon_KinBDT=18, nbinsx_jets3_muon_MEBDT=13, nbinsx_jets3_muon_KinMEBDT=16,
+               nbinsx_jets4_electron_KinBDT=8, nbinsx_jets4_electron_MEBDT=7, nbinsx_jets4_electron_KinMEBDT=8,
+               nbinsx_jets4_muon_KinBDT=6, nbinsx_jets4_muon_MEBDT=5, nbinsx_jets4_muon_KinMEBDT=5};
+  */
   // A routing which returns the number of x bins based on the JetBin
-  int getNBinsX(JetBin type);
+  int getNBinsX(JetBin type, LeptonCat lcat, std::string variable);
 
   // A routine that returns an array of the bin bondaries for the 1-D BDT plots
-  std::vector<Double_t> getBinsX(JetBin type);
+  std::vector<Double_t> getBinsX(JetBin type, LeptonCat lcat, std::string variable);
 
   // ---------------------------------------------------------------
   //            ALL ABOUT THE TAGGING CATEGORIES
@@ -185,8 +211,8 @@ namespace DEFS{
   //            ALL ABOUT THE CONTROL REGIONS
   // ---------------------------------------------------------------
 
-   enum ControlRegion {all, signal, control1, control2, control3, control4, control5, control6, control7, control8, control9, UVaCuts, event, Diboson, MVAEleID, AntiMVAEleID, FlatMVAEleID, None};
-  static const unsigned int nControlRegion = 18;
+   enum ControlRegion {all, signal, control1, control2, control3, control4, control5, control6, control7, control8, control9, UVaCuts, event, Diboson, MVAEleID, AntiMVAEleID, FlatMVAEleID, BDTBump, BDTAntiBump, HailMary, HailMaryLoose, None};
+  static const unsigned int nControlRegion = 22;
 
   //A routine that returns a string given the type
   std::string getControlRegionString(ControlRegion type);
@@ -208,17 +234,60 @@ namespace DEFS{
    
    std::string getTreeName(NtupleType type, JetBin nJets = jets2);
 
-    // ---------------------------------------------------------------
-    //            ALL ABOUT THE UNIVERSITY
-    // ---------------------------------------------------------------
-     enum University {TAMU, UVa, OtherUniversity};
-     static const unsigned int nUniversity = 3;
+  // ---------------------------------------------------------------
+  //            ALL ABOUT THE UNIVERSITY
+  // ---------------------------------------------------------------
+   enum University {TAMU, UVa, Combined, OtherUniversity};
+   static const unsigned int nUniversity = 4;
 
-     // A routine that returns a string given the University
-     std::string getUniversityString(University univ);
+   // A routine that returns a string given the University
+   std::string getUniversityString(University univ);
 
-     // A routine that returns a University given a string
-     University getUniversity(std::string str);
+   // A routine that returns a University given a string
+   University getUniversity(std::string str);
+
+  // ---------------------------------------------------------------
+  //            ALL ABOUT PDG ID Codes
+  // ---------------------------------------------------------------
+   enum PdgId {
+     /// Special wildcard particle name
+     ANY = 10000, 
+     /// @name Charged leptons
+     ELECTRON = 11, POSITRON = -ELECTRON, EMINUS = ELECTRON, EPLUS = POSITRON, MUON = 13, ANTIMUON = -MUON, TAU = 15, ANTITAU = -TAU,
+     /// @name Neutrinos
+     NU_E = 12, NU_EBAR = -NU_E, NU_MU = 14, NU_MUBAR = -NU_MU, NU_TAU = 16, NU_TAUBAR = -NU_TAU, 
+     /// @name Bosons
+     PHOTON = 22, GAMMA = PHOTON, GLUON = 21, WPLUSBOSON = 24, WMINUSBOSON = -WPLUSBOSON, WPLUS = WPLUSBOSON, WMINUS = WMINUSBOSON, Z0BOSON = 23, ZBOSON = Z0BOSON, Z0 = Z0BOSON, HIGGSBOSON = 25, HIGGS = HIGGSBOSON, 
+     /// @name Quarks
+     DQUARK = 1, UQUARK = 2, SQUARK = 3, CQUARK = 4, BQUARK = 5, TQUARK = 6, ANTIDQUARK = -DQUARK, ANTIUQUARK = -UQUARK, ANTISQUARK = -SQUARK, ANTICQUARK = -CQUARK, ANTIBQUARK = -BQUARK, ANTITQUARK = -TQUARK, d = DQUARK, u = UQUARK, s = SQUARK, c = CQUARK, b = BQUARK, t = TQUARK, dbar = -d, ubar = -u, sbar = -s, cbar = -c, bbar = -b, tbar = -t, 
+     /// @name Nucleons
+     PROTON = 2212, ANTIPROTON = -PROTON, PBAR = ANTIPROTON, NEUTRON = 2112, ANTINEUTRON = -NEUTRON, 
+     /// @name Light mesons
+     PI0 = 111, PIPLUS = 211, PIMINUS = -PIPLUS, K0L = 130, K0S = 310, KPLUS = 321, KMINUS = -KPLUS, ETA = 221, ETAPRIME = 331, PHI = 333, OMEGA = 223, 
+     /// @name Charmonia
+     ETAC = 441, JPSI = 443, PSI2S = 100443, 
+     /// @name Charm mesons
+     D0 = 421, DPLUS = 411, DMINUS = -DPLUS, DSPLUS = 431, DSMINUS = -DSPLUS, 
+     /// @name Bottomonia
+     ETAB = 551, UPSILON1S = 553, UPSILON2S = 100553, UPSILON3S = 200553, UPSILON4S = 300553, 
+     /// @name b mesons
+     B0 = 511, BPLUS = 521, BMINUS = -BPLUS, B0S = 531, BCPLUS = 541, BCMINUS = -BCPLUS, 
+     /// @name Baryons
+     LAMBDA = 3122, SIGMA0 = 3212, SIGMAPLUS = 3222, SIGMAMINUS = 3112, LAMBDACPLUS = 4122, LAMBDACMINUS = 4122, LAMBDAB = 5122, XI0 = 3322, XIMINUS = 3312, XIPLUS = -XIMINUS, OMEGAMINUS = 3334, OMEGAPLUS = -OMEGAMINUS, 
+     /// @name Exotic/weird stuff
+     REGGEON = 110, POMERON = 990, ODDERON = 9990, GRAVITON = 39, NEUTRALINO1 = 1000022, GRAVITINO = 1000039, GLUINO = 1000021
+     /// @todo Add axion, black hole remnant, etc. on demand
+   };
+   static const unsigned int nPdgId = 105;
+
+   /// Return a PdgId as a named string
+   std::string toParticleName(PdgId p);
+
+   /// Return a name as a PdgId
+   PdgId toParticleId(const std::string pname);
+
+   /// Return a PdgId from an int
+   PdgId getParticleIdFromInt(int p);
 
 }
 

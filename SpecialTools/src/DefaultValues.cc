@@ -105,8 +105,8 @@ vector < PhysicsProcess * > DefaultValues::getProcesses(vector<DEFS::PhysicsProc
 
   // get the table with the expected number of 
   map<DEFS::LeptonCat, Table> normTable;
-  normTable[DEFS::muon    ] = getNormTable(DEFS::muon    ,tagcat);
-  normTable[DEFS::electron] = getNormTable(DEFS::electron,tagcat);
+  //normTable[DEFS::muon    ] = getNormTable(DEFS::muon    ,tagcat);
+  //normTable[DEFS::electron] = getNormTable(DEFS::electron,tagcat);
 
   // get the table with the files location
   Table fileTable = getFileLocationTable(tagcat);
@@ -329,67 +329,104 @@ vector < PhysicsProcess * > DefaultValues::getProcessesWW(DEFS::JetBin jetBin,
 vector < PhysicsProcess * > DefaultValues::getProcessesHiggs(DEFS::JetBin jetBin,
                                                              DEFS::TagCat tagcat, 
                                                              bool include_data,
+                                                             bool include_systematics,
                                                              bool forPlots,
                                                              DEFS::NtupleType ntupleType,
                                                              DEFS::LeptonCat lepton){
 
-   vector<DEFS::PhysicsProcess::Type> procs;
-   //procs.push_back(DEFS::PhysicsProcess::ZZ);
-   procs.push_back(DEFS::PhysicsProcess::WZ);
-   procs.push_back(DEFS::PhysicsProcess::STopS_T);
-   procs.push_back(DEFS::PhysicsProcess::STopS_Tbar);
-   procs.push_back(DEFS::PhysicsProcess::STopT_T);
-   procs.push_back(DEFS::PhysicsProcess::STopT_Tbar);
-   procs.push_back(DEFS::PhysicsProcess::STopTW_T);
-   procs.push_back(DEFS::PhysicsProcess::STopTW_Tbar);
-   procs.push_back(DEFS::PhysicsProcess::TTbar);
-   //procs.push_back(DEFS::PhysicsProcess::TTbar_JESUp);
-   //procs.push_back(DEFS::PhysicsProcess::TTbar_JESDown);
-   procs.push_back(DEFS::PhysicsProcess::WW);
-   if(lepton==DEFS::electron || lepton==DEFS::both) {
-    procs.push_back(DEFS::PhysicsProcess::QCD_ElFULL);
-   }
-   if(lepton==DEFS::muon || lepton==DEFS::both) {
-    procs.push_back(DEFS::PhysicsProcess::QCD_MuFULL);
-   }
-   procs.push_back(DEFS::PhysicsProcess::ZJets);
-   procs.push_back(DEFS::PhysicsProcess::WJets);
-   //procs.push_back(DEFS::PhysicsProcess::WJets_matchingup);
-   //procs.push_back(DEFS::PhysicsProcess::WJets_matchingdown);
-   //procs.push_back(DEFS::PhysicsProcess::WJets_scaleup);
-   //procs.push_back(DEFS::PhysicsProcess::WJets_scaledown);
-   //procs.push_back(DEFS::PhysicsProcess::WJets_JESUp);
-   //procs.push_back(DEFS::PhysicsProcess::WJets_JESDown);
-   //procs.push_back(DEFS::PhysicsProcess::WH_ZH_TTH_HToZZ_M125);
-   //procs.push_back(DEFS::PhysicsProcess::WH_ZH_TTH_HToZZ_M125_JESUp);
-   //procs.push_back(DEFS::PhysicsProcess::WH_ZH_TTH_HToZZ_M125_JESDown);
-   procs.push_back(DEFS::PhysicsProcess::WH_HToZZ_M125);
-   procs.push_back(DEFS::PhysicsProcess::ZH_HToZZ_M125);
-   procs.push_back(DEFS::PhysicsProcess::TTH_HToZZ_M125);
-   procs.push_back(DEFS::PhysicsProcess::WH125_HToBB);
-   //procs.push_back(DEFS::PhysicsProcess::WH_HToBB_M125_JESUp);
-   //procs.push_back(DEFS::PhysicsProcess::WH_HToBB_M125_JESDown);
-   procs.push_back(DEFS::PhysicsProcess::TTH_HToBB_M125);
-   //procs.push_back(DEFS::PhysicsProcess::TTH_HToBB_M125_JESUp);
-   //procs.push_back(DEFS::PhysicsProcess::TTH_HToBB_M125_JESDown);
-   procs.push_back(DEFS::PhysicsProcess::ggH125);
-   procs.push_back(DEFS::PhysicsProcess::qqH125);
-   //procs.push_back(DEFS::PhysicsProcess::qqH125_JESUp);
-   //procs.push_back(DEFS::PhysicsProcess::qqH125_JESDown);
-   //procs.push_back(DEFS::PhysicsProcess::WH_ZH_TTH_HToWW_M125);
-   //procs.push_back(DEFS::PhysicsProcess::WH_ZH_TTH_HToWW_M125_JESUp);
-   //procs.push_back(DEFS::PhysicsProcess::WH_ZH_TTH_HToWW_M125_JESDown);
-   procs.push_back(DEFS::PhysicsProcess::WH_HToWW_M125);
-   procs.push_back(DEFS::PhysicsProcess::ZH_HToWW_M125);
-   procs.push_back(DEFS::PhysicsProcess::TTH_HToWW_M125);
+  vector<DEFS::PhysicsProcess::Type> procs;
+  //procs.push_back(DEFS::PhysicsProcess::ZZ);
+  procs.push_back(DEFS::PhysicsProcess::WZ);
+  procs.push_back(DEFS::PhysicsProcess::STopS_T);
+  procs.push_back(DEFS::PhysicsProcess::STopS_Tbar);
+  procs.push_back(DEFS::PhysicsProcess::STopT_T);
+  procs.push_back(DEFS::PhysicsProcess::STopT_Tbar);
+  procs.push_back(DEFS::PhysicsProcess::STopTW_T);
+  procs.push_back(DEFS::PhysicsProcess::STopTW_Tbar);
+  procs.push_back(DEFS::PhysicsProcess::TTbar);
+  procs.push_back(DEFS::PhysicsProcess::WW);
+  if(lepton==DEFS::electron || lepton==DEFS::both) {
+   procs.push_back(DEFS::PhysicsProcess::QCD_ElFULL);
+  }
+  if(lepton==DEFS::muon || lepton==DEFS::both) {
+   procs.push_back(DEFS::PhysicsProcess::QCD_MuFULL);
+  }
+  procs.push_back(DEFS::PhysicsProcess::ZJets);
+  //procs.push_back(DEFS::PhysicsProcess::ZJetsToLL_M50);
+  //procs.push_back(DEFS::PhysicsProcess::ZJetsToLL_M10To50);
+  procs.push_back(DEFS::PhysicsProcess::WJets);
+  //procs.push_back(DEFS::PhysicsProcess::WH_ZH_TTH_HToZZ_M125);
+  procs.push_back(DEFS::PhysicsProcess::WH_HToZZ_M125);
+  procs.push_back(DEFS::PhysicsProcess::ZH_HToZZ_M125);
+  procs.push_back(DEFS::PhysicsProcess::TTH_HToZZ_M125);
+  procs.push_back(DEFS::PhysicsProcess::WH125_HToBB);
+  procs.push_back(DEFS::PhysicsProcess::TTH_HToBB_M125);
+  procs.push_back(DEFS::PhysicsProcess::ggH125);
+  procs.push_back(DEFS::PhysicsProcess::qqH125);
+  //procs.push_back(DEFS::PhysicsProcess::WH_ZH_TTH_HToWW_M125);
+  procs.push_back(DEFS::PhysicsProcess::WH_HToWW_M125);
+  procs.push_back(DEFS::PhysicsProcess::ZH_HToWW_M125);
+  procs.push_back(DEFS::PhysicsProcess::TTH_HToWW_M125);
 
-   if (include_data) {
-      if(lepton==DEFS::electron || lepton==DEFS::both)
-        procs.push_back(DEFS::PhysicsProcess::SingleEl_Data);
-      if(lepton==DEFS::muon || lepton==DEFS::both)
-        procs.push_back(DEFS::PhysicsProcess::SingleMu_Data);
-   }
+  if (include_data) {
+     if(lepton==DEFS::electron || lepton==DEFS::both)
+       procs.push_back(DEFS::PhysicsProcess::SingleEl_Data);
+     if(lepton==DEFS::muon || lepton==DEFS::both)
+       procs.push_back(DEFS::PhysicsProcess::SingleMu_Data);
+  }
    
+  if(include_systematics) {
+    procs.push_back(DEFS::PhysicsProcess::WZ_JESUp);
+    procs.push_back(DEFS::PhysicsProcess::WZ_JESDown);
+    procs.push_back(DEFS::PhysicsProcess::STopS_T_JESUp);
+    procs.push_back(DEFS::PhysicsProcess::STopS_T_JESDown);
+    procs.push_back(DEFS::PhysicsProcess::STopS_Tbar_JESUp);
+    procs.push_back(DEFS::PhysicsProcess::STopS_Tbar_JESDown);
+    procs.push_back(DEFS::PhysicsProcess::STopT_T_JESUp);
+    procs.push_back(DEFS::PhysicsProcess::STopT_T_JESDown);
+    procs.push_back(DEFS::PhysicsProcess::STopT_Tbar_JESUp);
+    procs.push_back(DEFS::PhysicsProcess::STopT_Tbar_JESDown);
+    procs.push_back(DEFS::PhysicsProcess::STopTW_Tbar_JESUp);
+    procs.push_back(DEFS::PhysicsProcess::STopTW_Tbar_JESDown);
+    procs.push_back(DEFS::PhysicsProcess::STopTW_T_JESUp);
+    procs.push_back(DEFS::PhysicsProcess::STopTW_T_JESDown);
+    procs.push_back(DEFS::PhysicsProcess::TTbar_JESUp);
+    procs.push_back(DEFS::PhysicsProcess::TTbar_JESDown);
+    procs.push_back(DEFS::PhysicsProcess::WW_JESUp);
+    procs.push_back(DEFS::PhysicsProcess::WW_JESDown);
+    procs.push_back(DEFS::PhysicsProcess::ZJets_JESUp);
+    procs.push_back(DEFS::PhysicsProcess::ZJets_JESDown);
+    procs.push_back(DEFS::PhysicsProcess::WJets_JESUp);
+    procs.push_back(DEFS::PhysicsProcess::WJets_JESDown);
+    procs.push_back(DEFS::PhysicsProcess::WJets_matchingup);
+    procs.push_back(DEFS::PhysicsProcess::WJets_matchingdown);
+    procs.push_back(DEFS::PhysicsProcess::WJets_scaleup);
+    procs.push_back(DEFS::PhysicsProcess::WJets_scaledown);
+    //procs.push_back(DEFS::PhysicsProcess::WH_ZH_TTH_HToZZ_M125_JESDown);
+    //procs.push_back(DEFS::PhysicsProcess::WH_ZH_TTH_HToZZ_M125_JESUp);
+    procs.push_back(DEFS::PhysicsProcess::WH_HToZZ_M125_JESUp);
+    procs.push_back(DEFS::PhysicsProcess::WH_HToZZ_M125_JESDown);
+    procs.push_back(DEFS::PhysicsProcess::ZH_HToZZ_M125_JESUp);
+    procs.push_back(DEFS::PhysicsProcess::ZH_HToZZ_M125_JESDown);
+    procs.push_back(DEFS::PhysicsProcess::TTH_HToZZ_M125_JESUp);
+    procs.push_back(DEFS::PhysicsProcess::TTH_HToZZ_M125_JESDown);
+    procs.push_back(DEFS::PhysicsProcess::WH_HToBB_M125_JESUp);
+    procs.push_back(DEFS::PhysicsProcess::WH_HToBB_M125_JESDown);
+    procs.push_back(DEFS::PhysicsProcess::TTH_HToBB_M125_JESUp);
+    procs.push_back(DEFS::PhysicsProcess::TTH_HToBB_M125_JESDown);
+    procs.push_back(DEFS::PhysicsProcess::ggH125_JESUp);
+    procs.push_back(DEFS::PhysicsProcess::ggH125_JESDown);
+    procs.push_back(DEFS::PhysicsProcess::qqH125_JESUp);
+    procs.push_back(DEFS::PhysicsProcess::qqH125_JESDown);
+    //procs.push_back(DEFS::PhysicsProcess::WH_ZH_TTH_HToWW_M125_JESUp);
+    //procs.push_back(DEFS::PhysicsProcess::WH_ZH_TTH_HToWW_M125_JESDown);
+    procs.push_back(DEFS::PhysicsProcess::WH_HToWW_M125_JESUp);
+    procs.push_back(DEFS::PhysicsProcess::WH_HToWW_M125_JESDown);
+    procs.push_back(DEFS::PhysicsProcess::ZH_HToWW_M125_JESUp);
+    procs.push_back(DEFS::PhysicsProcess::ZH_HToWW_M125_JESDown);
+    procs.push_back(DEFS::PhysicsProcess::TTH_HToWW_M125_JESUp);
+    procs.push_back(DEFS::PhysicsProcess::TTH_HToWW_M125_JESDown);
+  }
 
    return getProcesses(procs, jetBin, tagcat, forPlots, ntupleType);
 
@@ -747,6 +784,17 @@ int DefaultValues::vfind(vector<TString> a, TString b) {
          return i;
    }
    return -1;
+}
+
+// ----------------------------------------------------------------------------
+template<typename T>
+void removeSubstrs(std::basic_string<T>& s, const std::basic_string<T>& p) {
+   typename std::basic_string<T>::size_type n = p.length();
+
+   for (typename std::basic_string<T>::size_type i = s.find(p);
+        i != std::basic_string<T>::npos;
+        i = s.find(p))
+      s.erase(i, n);
 }
 
 // ----------------------------------------------------------------------------
