@@ -48,8 +48,11 @@ double CSVreweight::getWeight(EventNtuple * ntuple){
       else if ( jetAbsEta>=0.8 && jetAbsEta<1.6) iEta = 1;
       else if ( jetAbsEta>=1.6 && jetAbsEta<2.41) iEta = 2;
 
-      if (iPt < 0 || iEta < 0) std::cout << "Error, couldn't find Pt, Eta bins for this b-flavor jet, jetPt = " << jetPt << ", jetAbsEta = " << jetAbsEta << std::endl;
-      //cout << "flavor is " << flavor << " csv is " << csv << " jetPt is " << iPt << " eta is " << iEta <<endl;
+      if (iPt < 0 || iEta < 0){
+         std::cout << "Error, couldn't find Pt, Eta bins for this b-flavor jet, jetPt = " << jetPt << ", jetAbsEta = " << jetAbsEta << std::endl;
+         //cout << "flavor is " << flavor << " csv is " << csv << " jetPt is " << iPt << " eta is " << iEta <<endl;
+         continue;
+      }
       if (abs(flavor) == 5 ){
          int useCSVBin = (csv>=0.) ? h_csv_wgt_hf[iSysHF][iPt]->FindBin(csv) : 1;
          double iCSVWgtHF = h_csv_wgt_hf[iSysHF][iPt]->GetBinContent(useCSVBin);

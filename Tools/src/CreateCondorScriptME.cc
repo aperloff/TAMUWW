@@ -259,29 +259,48 @@ void CreateCondorScriptME::writeCondorScripts() {
 //   sprintf(NJobs_C,"%i",NJobs);
 
    /// Make the launcher
+   outlauncher << "CB = /uscms_data/d2/aperloff/YOURWORKINGAREA/MatrixElement/gitty/CMSSW_5_3_2_patch5/" << endl
+               << "SD = $(CB)/src/" << endl
+               << "TCD = $(SD)/TAMUWW/ConfigFiles" << endl
+               << "LD = $(CB)/lib/slc5_amd64_gcc462/" << endl
+               << "BD = $(CB)/bin/slc5_amd64_gcc462/" << endl << endl;
    outlauncher << "universe = vanilla" << endl;
    outlauncher << "Executable = " << tempStr << endl;
-   outlauncher << "Requirements = Memory >= 199 &&OpSys == \"LINUX\"&& (Arch != \"DUMMY\" )&& Disk > 1000000" << endl;
-   outlauncher << "Should_Transfer_Files = YES" << endl;
-   outlauncher << "WhenToTransferOutput = ON_EXIT" << endl;
-   outlauncher << "Transfer_Input_Files = " << rootInputDir << rootInputName << ", run_MatrixElement" << globalRunMESuffix 
-               << ", cteq5l.tbl, cteq6l.tbl, " << specificEventsFileLocation << "/micro" << ScriptNameSuffix << "missingEvents.txt" << endl;
-   outlauncher << "Output = log/CondorME_" << ScriptNameSuffix << "_C$(Cluster)_$(Process).stdout" << endl;
-   outlauncher << "Error = log/CondorME_" << ScriptNameSuffix << "_C$(Cluster)_$(Process).stderr" << endl;
-   outlauncher << "Log = log/CondorME_" << ScriptNameSuffix << "_C$(Cluster)_$(Process).log" << endl;
+   //outlauncher << "Transfer_Input_Files = " << rootInputDir << rootInputName << ", run_MatrixElement" << globalRunMESuffix 
+   //            << ", cteq5l.tbl, cteq6l.tbl, " << specificEventsFileLocation << "/micro" << ScriptNameSuffix << "missingEvents.txt" << endl;
+   outlauncher << "transfer_input_files = " << "$(TCD), $(BD)/run_MatrixElement" << globalRunMESuffix 
+               << ", cteq5l.tbl, cteq6l.tbl"
+               <<  ", $(LD)/libTAMUWWMatrixElement.so, $(LD)/libTAMUWWTools.so, $(LD)/libTAMUWWSpecialTools.so, $(LD)/libTAMUWWMEPATNtuple.so, $(LD)/libElectroWeakAnalysisVPlusJets.so, $(LD)/libEGammaEGammaAnalysisTools.so, $(LD)/libCondFormatsEgammaObjects.so, $(LD)/libDataFormatsPatCandidates.so, $(LD)/libJetMETAnalysisJetUtilities.so, $(LD)/libTAMUWWAuxFunctions.so, $(LD)/libTAMUWWDHELAS.so, $(LD)/libTAMUWWPDFs.so, $(LD)/libSHyFTTemplateMakers.so, $(LD)/libTAMUWWIntegrator.so, $(LD)/libCondFormatsEgammaObjects.so, $(LD)/libTAMUWWCubaCuhre.so, $(LD)/libTAMUWWCubaDivonne.so, $(LD)/libTAMUWWCubaSuave.so, $(LD)/libTAMUWWCubaVegas.so" << endl;
+   outlauncher << "Requirements = OpSys == \"LINUX\" && (Arch != \"DUMMY\" )" << endl;
+   outlauncher << "request_disk = 1000000" << endl;
+   outlauncher << "request_memory = 1945" << endl;
+   outlauncher << "+BigMemoryJob = TRUE" << endl;
+   outlauncher << "Should_Transfer_Files = ALWAYS" << endl;
+   outlauncher << "WhenToTransferOutput = ON_EXIT_OR_EVICT" << endl;
+   outlauncher << "x509userproxy = $ENV(X509_USER_PROXY)" << endl;
+
+   outlauncher << "Output = log/" << ScriptNameSuffix << "/CondorME_" << ScriptNameSuffix << "_C$(Cluster)_$(Process).stdout" << endl;
+   outlauncher << "Error = log/" << ScriptNameSuffix << "/CondorME_" << ScriptNameSuffix << "_C$(Cluster)_$(Process).stderr" << endl;
+   outlauncher << "Log = log/" << ScriptNameSuffix << "/CondorME_" << ScriptNameSuffix << "_C$(Cluster)_$(Process).log" << endl;
    outlauncher << "notify_user = none" << endl;
-   outlauncher << "Arguments = $(Process) " << nEventsPerJob << endl;
+   outlauncher << "Arguments = $(Process) " << nEventsPerJob <<  endl;
    outlauncher << "Queue " << nJobsTot << endl;
 
    /// Make the internal script
    outscript << "#! /bin/csh" << endl;
    outscript << "echo \"Starting\" " << endl;
-   outscript << "cd /uscms/home/ilyao/MATRIXELEMENT/CMSSW_5_3_2_patch4/src" << endl;//***SET DEPENDENT ON THE CMSSW RELEASE***
-   outscript << "source /uscmst1/prod/sw/cms/cshrc uaf" << endl;
-   outscript << "pwd" << endl;
-   //  outscript << "cmsenv" << endl;
-   outscript << "eval `scram runtime -csh` " << endl;
-   outscript << "cd -" << endl;
+   outscript << "setenv SCRAM_ARCH slc5_amd64_gcc462" << endl
+             << "source /cvmfs/cms.cern.ch/cmsset_default.csh" << endl
+             << "set CONDORDIR=$PWD" << endl << endl
+             << "scram p CMSSW_5_3_2_patch5" << endl
+             << "cd CMSSW_5_3_2_patch5" << endl
+             << "mkdir -p src/TAMUWW" << endl
+             << "mkdir -p lib/${SCRAM_ARCH}" << endl << endl
+             << "mv ../ConfigFiles src/TAMUWW" << endl
+             << "mv ../lib*.so lib/slc5_amd64_gcc462" << endl << endl;
+   outscript << "scram b" << endl;
+   outscript << "eval `scram runtime -csh` " << endl
+             << "cd .." << endl << endl;
    outscript << "@ JobNumber = $argv[1]" << endl;
    outscript << "echo \"JobNumber=$JobNumber\"" << endl;
    outscript << "@ NEvtsPerJob = $argv[2]" << endl;
@@ -294,10 +313,13 @@ void CreateCondorScriptME::writeCondorScripts() {
       TString nj;
       TString temp="temp";
       istrstream djstr(disjointJobsString);
-      while ( temp!="" ) {
-         djstr >> nj >> temp;
+      std::string token;
+      //while ( temp!="" ) {
+      while (std::getline(djstr, token, ',')) {
+         //djstr >> nj >> temp;
          outscript << "if ( $JobNumber == " << nJob << " ) then" << endl;
-         outscript << "   @ TheJob = " << nj << endl;
+         //outscript << "   @ TheJob = " << nj << endl;
+         outscript << "   @ TheJob = " << token << endl;
          outscript << "endif" << endl;
          nJob++;
       }
@@ -316,7 +338,7 @@ void CreateCondorScriptME::writeCondorScripts() {
 
    //  outscript << "run_MatrixElement " << rootInputName << " " << OutputName << "$StartJob.root EvtTree " << NEvtsPerJob_C << " $StartEvt 1" << endl;
 
-   outscript << "run_MatrixElement " << rootInputName << " " << OutputName << "$TheJob.root jets2p $NEvtsPerJob $StartEvt 1 1 PS "
+   outscript << "./run_MatrixElement " << rootInputDir << rootInputName << " " << OutputName << "$TheJob.root jets2p $NEvtsPerJob $StartEvt 1 1 PS "
              << useSpecificEvents << " "  << specificEventsFileLocation << "/micro" << ScriptNameSuffix << "missingEvents.txt" << endl;
    outscript << "echo \"Finished\"" << endl;
 
