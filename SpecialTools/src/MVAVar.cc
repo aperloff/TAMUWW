@@ -68,7 +68,7 @@ void MVAVar::setVarMap(map<TString,MVAVar> & varMap) {
    }
 
    varMap["leptonPt"]        = MVAVar(Form("leptonPt"),Form("lLV[0].Pt()"),"GeV");
-   varMap["leptonEtaCharge"] = MVAVar(Form("leptonEtaCharge"),Form("lLV[0].lQ"),"#etaCharge");
+   varMap["leptonEtaCharge"] = MVAVar(Form("leptonEtaCharge"),Form("lLV[0].Eta()*lLV[0].lQ"),"#etaCharge");
    varMap["lepMT"]           = MVAVar(Form("lepMT"),Form("TMath::Sign(TMath::Sqrt(TMath::Abs(TMath::Power(lLV[0].Pt()+METLV[0].Pt(),2)-(TMath::Power(lLV[0].Px()+METLV[0].Px(),2)+TMath::Power(lLV[0].Py()+METLV[0].Py(),2)+TMath::Power(0,2)))),TMath::Power(lLV[0].Pt()+METLV[0].Pt(),2)-(TMath::Power(lLV[0].Px()+METLV[0].Px(),2)+TMath::Power(lLV[0].Py()+METLV[0].Py(),2)+TMath::Power(0,2)))"),"GeV");
    varMap["lepMet"]          = MVAVar(Form("lepMet"),Form("lepMet"),"GeV");
    varMap["jet1Pt"]          = MVAVar(Form("jet1Pt"),Form("jLV[0].Pt()"),"GeV");
