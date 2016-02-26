@@ -143,7 +143,7 @@ public:
    // form a string which contains the Lorentz vector information in the form (Pt, Eta, Phi, E)
    string getLVString(const TLorentzVector &lv);
    // return the TLorentzVector associated with the lepton from a W decay
-   TLorentzVector getGenVorDaughter(particleType type, int expectedVPDGID=24, int *pdgid = 0, bool verbose = false);
+   TLorentzVector getGenVorDaughter(particleType type, int expectedVPDGID=24, int instance = 0, int *pdgid = 0, bool verbose = false);
 
    //
    // Trigger Information

@@ -772,8 +772,9 @@ string EventNtuple::getLVString(const TLorentzVector &lv) {
 }
 
 //______________________________________________________________________________
-TLorentzVector EventNtuple::getGenVorDaughter(particleType type, int expectedVPDGID, int *pdgid, bool verbose) {
+TLorentzVector EventNtuple::getGenVorDaughter(particleType type, int expectedVPDGID, int instance, int *pdgid, bool verbose) {
     TLorentzVector ret;
+    int ret_instance = -1;
     if (genParticleCollection.size()==0) {
         if(verbose) cout << "WARNING::No genParticleCollection present." << endl;
         return ret;
@@ -818,7 +819,8 @@ TLorentzVector EventNtuple::getGenVorDaughter(particleType type, int expectedVPD
                 if (verbose)
                     cout << genParticleCollection[genParticleCollection[V[j].second].daughterPositions[k]].pdgId
                          << getLVString(genParticleCollection[genParticleCollection[V[j].second].daughterPositions[k]].p4) << ",";
-                if(leptonNeutrinoOrQuark(genParticleCollection[genParticleCollection[V[j].second].daughterPositions[k]].pdgId)==type) {
+                if(leptonNeutrinoOrQuark(genParticleCollection[genParticleCollection[V[j].second].daughterPositions[k]].pdgId)==type && ret_instance!=instance) {
+                    ret_instance++;
                     ret = genParticleCollection[genParticleCollection[V[j].second].daughterPositions[k]].p4;
                     if(pdgid)
                         (*pdgid) = genParticleCollection[genParticleCollection[V[j].second].daughterPositions[k]].pdgId;
