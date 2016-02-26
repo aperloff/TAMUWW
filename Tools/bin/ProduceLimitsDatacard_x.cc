@@ -40,9 +40,9 @@ public:
 
   TString         name;
   bool            shape;
+  bool            symmetrize;
   //vector<pair<TString,TString> > values;
   map<DEFS::PhysicsProcess::Type,pair<TString,TString> > values;
-  bool            symmetrize;
 };
 
 systematic::systematic(TString name_, bool shape_, bool symmetrize_, vector<TString> processes) : name(name_), shape(shape_), symmetrize(symmetrize_) {

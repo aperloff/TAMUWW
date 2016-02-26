@@ -76,6 +76,10 @@ enum Constraint { kWMass = 1, kNeutrinoMass, kSumPt };
 //  Declare Local Functions
 ////////////////////////////////////////////////////////////////////////////////
 
+// Copy the selected lepton to the refLV of the MET and the original METLV to the rawLV position
+// This way we have access to this information later on when doing reweighting, studies, etc.
+void saveOriginalInformation(EventNtuple *ntuple, int randIndex);
+
 // Return the value of the MET resolution in the x and y directions
 pair<double,double> getMETResolution(EventNtuple *ntuple, int randIndex, double sumETMult);
 
@@ -352,6 +356,12 @@ int main(int argc,char**argv)
 }
 
 //______________________________________________________________________________
+void saveOriginalInformation(EventNtuple *ntuple, int randIndex) {
+    ntuple->METLV[0].rawLV = ntuple->METLV[0];
+    ntuple->METLV[0].refLV = ntuple->lLV[randIndex];
+}
+
+//______________________________________________________________________________
 pair<double,double> getMETResolution(EventNtuple *ntuple, int randIndex, double sumETMult) {
     //
     // The function for the MET resolution versus sumEt
@@ -360,13 +370,15 @@ pair<double,double> getMETResolution(EventNtuple *ntuple, int randIndex, double 
 
     //
     // Calculate the sumEt
-    // This is an approximation using the leptons and the jets as we don't have all of the PF particles
+    // This is an approximation using (the leptons and) the jets as we don't have all of the PF particles
     //  available in our ntuple
+    // We don't usually (ever) include the leptons from the Z as they should not be included per
+    //  CHEF2013_JMEPerformance_Chayanit_Final.pdf
     //
     double sumEt = 0;
-    for(unsigned int ilepton=0; ilepton<ntuple->lLV.size(); ilepton++){
-        sumEt += ntuple->lLV[ilepton].Et();
-    }
+    //for(unsigned int ilepton=0; ilepton<ntuple->lLV.size(); ilepton++){
+    //    sumEt += ntuple->lLV[ilepton].Et();
+    //}
     for(unsigned int ijet=0; ijet<ntuple->jLV.size(); ijet++){
         sumEt += ntuple->jLV[ijet].Et();
     }
@@ -437,6 +449,11 @@ bool moveLeptonToMET(EventNtuple *ntuple, double probIndex1, map<int,int> &lepto
     //  go no further.
     //
     if(genOnly) return randIndex;
+
+    //
+    // Copy the selected lepton to the refLV of the MET and the original METLV to the rawLV position 
+    //
+    saveOriginalInformation(ntuple, randIndex);
 
     // If METResMethod!="" then smear the selected lepton before it is added to the MET
     // We need to smear the MET because the lepton has a better resolution than the MET

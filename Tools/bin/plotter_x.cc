@@ -664,9 +664,6 @@ bool UserFunctions::eventPassCuts(EventNtuple * ntuple, MicroNtuple * mnt, const
      if (controlRegion == DEFS::HailMaryLoose) {
         double dRj1j2 = sqrt(pow(ntuple->jLV[0].Eta()-ntuple->jLV[1].Eta(),2)+pow(ntuple->jLV[0].Phi()-ntuple->jLV[1].Phi(),2));
         double ptjj = (ntuple->jLV[0] + ntuple->jLV[1]).Pt();
-        double WmT = sqrt(pow(ntuple->lLV[0].Et()+ntuple->METLV[0].Pt(), 2) -
-                        pow(ntuple->lLV[0].Px()+ntuple->METLV[0].Px(), 2) -
-                        pow(ntuple->lLV[0].Py()+ntuple->METLV[0].Py(), 2));
         if (ntuple->lLV[0].leptonCat == DEFS::electron){
            if(ntuple->lLV[0].Eta() > 1.3                                   ||
               ntuple->lLV[0].Pt() < 37                                     ||
@@ -2155,9 +2152,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
 
       a = new FormattedPlot;
       name = "DeltaPhi_LMET";
-      a->templateHisto = new TH1D(name + lepStr, name,50,-10,10);
+      a->templateHisto = new TH1D(name + lepStr, name,200,-10,10);
       a->axisTitles.push_back("#Delta #phi(Lepton,MET)");
-      a->axisTitles.push_back("Number of Events / .2 Radians");
+      a->axisTitles.push_back("Number of Events / .1 Radians");
       a->range = make_pair(-pi,pi);
       a->normToData = norm_data;
       a->stacked = true; a->leptonCat = leptonCat;
