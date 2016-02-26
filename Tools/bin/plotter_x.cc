@@ -294,12 +294,12 @@ void UserFunctions::fillPlots(MapOfPlots &  plots, TString processName, EventNtu
          }
          else if(processName.Contains("WJets") || processName.Contains("ZJetsToLL") || processName.Contains("TTbar") ||
                  processName.Contains("STop") || processName.Contains("WW") || processName.Contains("WZ")) {
-            lepton = ntuple->getGenVorDaughter(EventNtuple::LEPTON, 24, 0, false);
-            boson = ntuple->getGenVorDaughter(EventNtuple::BOSON, 24, 0, false);
+            lepton = ntuple->getGenVorDaughter(EventNtuple::LEPTON, 24, 0, 0, false);
+            boson = ntuple->getGenVorDaughter(EventNtuple::BOSON, 24, 0, 0, false);
          }
          else {
-            lepton = ntuple->getGenVorDaughter(EventNtuple::LEPTON, 25, 0, false);
-            boson = ntuple->getGenVorDaughter(EventNtuple::BOSON, 25, 0, false);
+            lepton = ntuple->getGenVorDaughter(EventNtuple::LEPTON, 25, 0, 0, false);
+            boson = ntuple->getGenVorDaughter(EventNtuple::BOSON, 25, 0, 0, false);
          }
          plots[leptonCat]["GenLeptPt"]->Fill(lepton.Pt());
          plots[leptonCat]["GenLeptEta"]->Fill(lepton.Eta());
