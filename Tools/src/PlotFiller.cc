@@ -100,7 +100,7 @@ void PlotFiller::run()
    for(unsigned int i = 0; i < processes.size(); i++)
    {
       cout << "\nDoing Process " << processes[i]->name << endl;
-      
+      cout << "\tFrom file " << processes[i]->fileName << endl;
       // Tell all plots to prepare for filling 
       for (MapOfPlots::iterator p = plots.begin() ; p != plots.end() ; p++) {
          TString suffix = "_"+processes[i]->name + "_" + DEFS::getLeptonCatString(p->first);
@@ -238,7 +238,7 @@ void PlotFiller::run()
          
          // Get the given entry
          c->GetEntry(ev);
-         
+
          if(debug && numberOfEvents<100)
             func_benchmark->Stop("GetEntry");
 

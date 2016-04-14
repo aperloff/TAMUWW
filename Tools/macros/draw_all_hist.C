@@ -23,7 +23,7 @@
 #include <vector>
 
 
-void draw_all_hist(TString objectName = "", TString scaleToHistPattern = "", bool removeSys = true,
+TCanvas* draw_all_hist(TString objectName = "", TString scaleToHistPattern = "", bool removeSys = true,
                    bool doLogX = false, bool doLogY = false, bool doGrid = true, double xmin = 20,
                    double xmax = 1000) {
 
@@ -56,8 +56,11 @@ void draw_all_hist(TString objectName = "", TString scaleToHistPattern = "", boo
     TKey* key(0);
     int count = 0;
     TLegend* leg = new TLegend(0.65,0.6,0.8,1.0);
+    leg->SetName("leg");
     TLegend* leg_ks = new TLegend(0.8,0.6,0.9,1.0);
+    leg_ks->SetName("leg_ks");
     TLegend* leg_chi2NDF = new TLegend(0.9,0.6,1.0,1.0);
+    leg_chi2NDF->SetName("leg_chi2NDF");
     leg->AddEntry((TObject*)0,"Sample Name","");
     leg_ks->AddEntry((TObject*)0,"K-S","");
     leg_chi2NDF->AddEntry((TObject*)0,"Chi2/NDF","");
@@ -111,6 +114,7 @@ void draw_all_hist(TString objectName = "", TString scaleToHistPattern = "", boo
             h->GetXaxis()->SetRangeUser(xmin,xmax);
             h->GetXaxis()->SetTitle(objectName);
             if(scaleToHistPattern.IsNull()) h->GetYaxis()->SetRangeUser(1,200000);
+            else h->GetYaxis()->SetRangeUser(1,scaleToHist->GetMaximum()*1.1);
             h->GetYaxis()->SetTitle(TString("Scaled to histogram matching ")+scaleToHistPattern);
             if(doLogX) c->SetLogx(1);
             if(doLogY) c->SetLogy(1);
@@ -149,6 +153,33 @@ void draw_all_hist(TString objectName = "", TString scaleToHistPattern = "", boo
     leg->Draw("same");
     leg_ks->Draw("same");
     leg_chi2NDF->Draw("same");
+
+    return c;
+}
+
+void draw_all_standard(bool save = false, bool batch = false) {
+    if(batch)
+        gROOT->SetBatch(kTRUE);
+    
+    draw_all_hist("LeptPt_","WJets_*",true,true,true,true);
+    draw_all_hist("MET_","WJets_*",true,true,true,true);
+    draw_all_hist("WmT_","WJets_*",true,true,true,true);
+    draw_all_hist("Ptjj_","WJets_*",true,true,true,true);
+    draw_all_hist("Jet1Pt_","WJets_*",true,true,true,true);
+    draw_all_hist("Jet2Pt_","WJets_*",true,true,true,true);
+    draw_all_hist("Ptlv_","WJets_*",true,true,true,true);
+    draw_all_hist("Mlv_","WJets_*",true,true,true,true);
+    draw_all_hist("Mlvjj_","WJets_*",true,true,true,true);
+    draw_all_hist("LeptPhi_","WJets_*",true,false,false,true,-TMath::Pi(),TMath::Pi());
+    draw_all_hist("LeptEta_","WJets_*",true,false,false,true,-TMath::Pi(),TMath::Pi());
+    draw_all_hist("Jet1Eta_","WJets_*",true,false,false,true,-TMath::Pi(),TMath::Pi());
+    draw_all_hist("Jet1Phi_","WJets_*",true,false,false,true,-TMath::Pi(),TMath::Pi());
+    draw_all_hist("DeltaPhi_LMET_","WJets_*",true,false,false,true,-TMath::Pi(),TMath::Pi());
+
+    if(save) {
+        save_all_canvases("./",".png");
+        save_all_canvases("./",".eps");
+    }
 }
 
 void save_all_canvases(string folder = "./", string format = ".eps") {
@@ -162,4 +193,11 @@ void save_all_canvases(string folder = "./", string format = ".eps") {
             name = name.substr(0,name.length()-1);
         c->SaveAs((folder+"/"+name+format).c_str());
     }
+}
+
+void DestroyCanvases() {
+    TList* loc = (TList*)gROOT->GetListOfCanvases();
+    TListIter itc(loc);
+    TObject *o(0);
+    while ((o = itc())) delete o;
 }

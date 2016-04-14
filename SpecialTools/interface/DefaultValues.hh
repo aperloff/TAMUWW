@@ -124,14 +124,14 @@ public:
    // MC sample (i.e. the WW ME in the WW MC sample).
    //This is not a unique identifier. It will mix up STopT and STopS in STopT_T/STopT_Tbar and STopS_T/STopS_Tbar respectively.
    //Takes the highest value.
-   static pair<double,double> getMaxEventProbAndError(int probStatIndex);
+   static pair<double,double> getMaxEventProbAndError(int probStatIndex, Table* inputTable = 0);
    //Not unique. Will mix up WLg and WLgSub. Takes the highest value.
-   static pair<double,double> getMaxEventProbAndError(DEFS::PhysicsProcessType ppType, string meType);
+   static pair<double,double> getMaxEventProbAndError(DEFS::PhysicsProcessType ppType, string meType, Table* inputTable = 0);
    //Alias for the previous member function so it can be used in CINT
-   static pair<double,double> getMaxEventProbAndError(string ppType, string meType);
+   static pair<double,double> getMaxEventProbAndError(string ppType, string meType, Table* inputTable = 0);
    //Not unique. Will mix up WLg/WLgSub from WJets, STopT from STopT_T and STopT_Tbar, and STopS from STopS_T and STopS_Tbar.
    //Takes the highest value.
-   static pair<double,double> getMaxEventProbAndError(string meType);
+   static pair<double,double> getMaxEventProbAndError(string meType, Table* inputTable = 0);
 
    // Sets two vectors with the variables and spectators for a given MVA training
    static void getMVAVar(TString filename, vector<TString>& MVAV, vector<TString>& MVAS);

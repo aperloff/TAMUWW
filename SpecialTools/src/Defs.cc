@@ -720,7 +720,6 @@ namespace DEFS {
   //---------------------------------------------------------------------------
   JetBin getJetBin(std::string str){
 
-
     if (str == "jets0")      return jets0;
     else if (str == "jet1")  return jet1;
     else if (str == "jets2") return jets2;
@@ -730,6 +729,23 @@ namespace DEFS {
 
     cout<<" ERROR  DEFS::getJetBin str ="<<str<<" not found"<<endl;
     return  jets0;
+
+  }//getJetBin
+
+  //---------------------------------------------------------------------------
+  JetBin getJetBin(int nJets, JetBin inclusive_bin){
+
+    if(nJets >= int(inclusive_bin)) return inclusive_bin;
+
+    if (nJets == 0)      return jets0;
+    else if (nJets == 1) return jet1;
+    else if (nJets == 2) return jets2;
+    else if (nJets == 3) return jets3;
+    else if (nJets == 4) return jets4;
+    else if (nJets == 5) return jets5;
+
+    else cout<<" ERROR  DEFS::geJetBin jet(s)"<<nJets<<" not found"<<endl;
+    return jets0;
 
   }//getJetBin
 

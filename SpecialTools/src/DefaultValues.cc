@@ -637,8 +637,15 @@ double DefaultValues::getScaleFactor(TString channelName, DEFS::LeptonCat lepton
 }//getScaleFactor
 
 // ----------------------------------------------------------------------------
-pair<double,double> DefaultValues::getMaxEventProbAndError(int probStatIndex) {
-  Table table;
+pair<double,double> DefaultValues::getMaxEventProbAndError(int probStatIndex, Table* inputTable) {
+  Table* table;
+  if(!inputTable) {
+    table = new Table();
+    table->parseFromFile(getConfigPath()+"MaxMeanMedianEventProbs.txt","TableCellMixed");
+  }
+  else {
+    table = inputTable;
+  }
   vector<double> eventProb;
   vector<double> error;
   vector<TableRow> tableRows;
@@ -647,13 +654,12 @@ pair<double,double> DefaultValues::getMaxEventProbAndError(int probStatIndex) {
   ss << probStatIndex;
   string rowName = ss.str();
 
-  table.parseFromFile(getConfigPath()+"MaxMeanMedianEventProbs.txt","TableCellMixed");
-  tableRows = table.getRows();
+  tableRows = table->getRows();
   for(unsigned int irow=0; irow< tableRows.size(); irow++) {
     if(string(tableRows[irow].GetName()).compare(rowName)==0) {
-      assert(table.getCellRowColumn(tableRows[irow].GetName(),"MaxEventProb"));
-      eventProb.push_back(((TableCellVal*)table.getCellRowColumn(tableRows[irow].GetName(),"MaxEventProb"))->val.value);
-      error.push_back(((TableCellVal*)table.getCellRowColumn(tableRows[irow].GetName(),"MaxEventProb"))->val.error);
+      assert(table->getCellRowColumn(tableRows[irow].GetName(),"MaxEventProb"));
+      eventProb.push_back(((TableCellVal*)table->getCellRowColumn(tableRows[irow].GetName(),"MaxEventProb"))->val.value);
+      error.push_back(((TableCellVal*)table->getCellRowColumn(tableRows[irow].GetName(),"MaxEventProb"))->val.error);
     }
   }
 
@@ -668,6 +674,10 @@ pair<double,double> DefaultValues::getMaxEventProbAndError(int probStatIndex) {
   for(unsigned int i=0; i<eventProb.size(); i++) {
     if(eventProb[maxIndex] < eventProb[i])
       maxIndex = i;
+  }
+
+  if(!inputTable) {
+    delete table;
   }
 
   return make_pair(eventProb[maxIndex],error[maxIndex]);
@@ -692,32 +702,38 @@ pair<double,double> DefaultValues::getMaxEventProbAndError(int probStatIndex) {
 
 // ----------------------------------------------------------------------------
 pair<double,double> DefaultValues::getMaxEventProbAndError(DEFS::PhysicsProcessType ppType,
-                                                           string meType) {
+                                                           string meType, Table* inputTable) {
 
-  Table table;
+  Table* table;
+  if(!inputTable) {
+    table = new Table();
+    table->parseFromFile(getConfigPath()+"MaxMeanMedianEventProbs.txt","TableCellMixed");
+  }
+  else {
+    table = inputTable;
+  }
   vector<double> eventProb;
   vector<double> error;
   vector<TableRow> tableRows;
   int maxIndex=0;
 
-  table.parseFromFile(getConfigPath()+"MaxMeanMedianEventProbs.txt","TableCellMixed");
-  tableRows = table.getRows();
+  tableRows = table->getRows();
   for(unsigned int irow=0; irow< tableRows.size(); irow++) {
-    assert(table.getCellRowColumn(tableRows[irow].GetName(),"MatrixElementType"));
+    assert(table->getCellRowColumn(tableRows[irow].GetName(),"MatrixElementType"));
     if(ppType!=DEFS::PhysicsProcessType::UNKNOWN)
-      assert(table.getCellRowColumn(tableRows[irow].GetName(),"PhysicsProcessType"));
-    if(((TableCellText*)table.getCellRowColumn(tableRows[irow].GetName(),"MatrixElementType"))->text.compare(meType)==0 &&
+      assert(table->getCellRowColumn(tableRows[irow].GetName(),"PhysicsProcessType"));
+    if(((TableCellText*)table->getCellRowColumn(tableRows[irow].GetName(),"MatrixElementType"))->text.compare(meType)==0 &&
        ppType!=DEFS::PhysicsProcessType::UNKNOWN &&
-       ((TableCellText*)table.getCellRowColumn(tableRows[irow].GetName(),"PhysicsProcessType"))->text.compare(DEFS::PhysicsProcess::getTypeString(ppType))==0) {
-      assert(table.getCellRowColumn(tableRows[irow].GetName(),"MaxEventProb"));
-      eventProb.push_back(((TableCellVal*)table.getCellRowColumn(tableRows[irow].GetName(),"MaxEventProb"))->val.value);
-      error.push_back(((TableCellVal*)table.getCellRowColumn(tableRows[irow].GetName(),"MaxEventProb"))->val.error);
+       ((TableCellText*)table->getCellRowColumn(tableRows[irow].GetName(),"PhysicsProcessType"))->text.compare(DEFS::PhysicsProcess::getTypeString(ppType))==0) {
+      assert(table->getCellRowColumn(tableRows[irow].GetName(),"MaxEventProb"));
+      eventProb.push_back(((TableCellVal*)table->getCellRowColumn(tableRows[irow].GetName(),"MaxEventProb"))->val.value);
+      error.push_back(((TableCellVal*)table->getCellRowColumn(tableRows[irow].GetName(),"MaxEventProb"))->val.error);
     }
-    else if(((TableCellText*)table.getCellRowColumn(tableRows[irow].GetName(),"MatrixElementType"))->text.compare(meType)==0 &&
+    else if(((TableCellText*)table->getCellRowColumn(tableRows[irow].GetName(),"MatrixElementType"))->text.compare(meType)==0 &&
        ppType==DEFS::PhysicsProcessType::UNKNOWN) {
-      assert(table.getCellRowColumn(tableRows[irow].GetName(),"MaxEventProb"));
-      eventProb.push_back(((TableCellVal*)table.getCellRowColumn(tableRows[irow].GetName(),"MaxEventProb"))->val.value);
-      error.push_back(((TableCellVal*)table.getCellRowColumn(tableRows[irow].GetName(),"MaxEventProb"))->val.error);
+      assert(table->getCellRowColumn(tableRows[irow].GetName(),"MaxEventProb"));
+      eventProb.push_back(((TableCellVal*)table->getCellRowColumn(tableRows[irow].GetName(),"MaxEventProb"))->val.value);
+      error.push_back(((TableCellVal*)table->getCellRowColumn(tableRows[irow].GetName(),"MaxEventProb"))->val.error);
     }
   }
 
@@ -734,19 +750,23 @@ pair<double,double> DefaultValues::getMaxEventProbAndError(DEFS::PhysicsProcessT
       maxIndex = i;
   }
 
+  if(!inputTable) {
+    delete table;
+  }
+
   return make_pair(eventProb[maxIndex],error[maxIndex]);
 
 }//getMaxEventProbAndError
 
 // ----------------------------------------------------------------------------
-pair<double,double> DefaultValues::getMaxEventProbAndError(string ppType, string meType) {
-  return getMaxEventProbAndError(DEFS::PhysicsProcess::getProcessType(ppType),meType);
+pair<double,double> DefaultValues::getMaxEventProbAndError(string ppType, string meType, Table* inputTable) {
+  return getMaxEventProbAndError(DEFS::PhysicsProcess::getProcessType(ppType),meType,inputTable);
 }//getMaxEventProbAndError
 
 // ----------------------------------------------------------------------------
-pair<double,double> DefaultValues::getMaxEventProbAndError(string meType) {
+pair<double,double> DefaultValues::getMaxEventProbAndError(string meType, Table* inputTable) {
 
-  return getMaxEventProbAndError(DEFS::PhysicsProcessType::UNKNOWN,meType);
+  return getMaxEventProbAndError(DEFS::PhysicsProcessType::UNKNOWN,meType,inputTable);
 }//getMaxEventProbAndError
 
 // ----------------------------------------------------------------------------

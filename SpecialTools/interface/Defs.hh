@@ -123,6 +123,9 @@ namespace DEFS{
   // A routine that returns a JetBin given
   JetBin getJetBin(std::string str);
 
+  // A routine that returns a jetBin given an integer number of jets
+  JetBin getJetBin(int nJets, JetBin inclusive_bin = jets4);
+
   //With Signal cuts
     enum NBinsX {nbinsx_default=100, nbinsx_jets2_electron_KinBDT=45, nbinsx_jets2_electron_MEBDT=27, nbinsx_jets2_electron_KinMEBDT=37,
                nbinsx_jets2_muon_KinBDT=47, nbinsx_jets2_muon_MEBDT=30, nbinsx_jets2_muon_KinMEBDT=37,

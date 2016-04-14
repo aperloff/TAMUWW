@@ -20,6 +20,19 @@ void Style::tdrDraw(TH1* h, string opt,
   h->Draw((opt+"SAME").c_str());
 }
 
+void Style::tdrDraw(TProfile* h, string opt,
+			        int marker, int mcolor,
+			        int lstyle, int lcolor,
+			        int fstyle, int fcolor) {
+  h->SetMarkerStyle(marker);
+  h->SetMarkerColor(mcolor);
+  h->SetLineStyle(lstyle);
+  h->SetLineColor(lcolor==-1 ? mcolor : lcolor);
+  h->SetFillStyle(fstyle);
+  h->SetFillColor(fcolor);
+  h->Draw((opt+"SAME").c_str());
+}
+
 void Style::tdrDraw(THStack* s, string opt) {
   s->Draw((opt+"SAME").c_str());
 }

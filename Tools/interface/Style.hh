@@ -11,6 +11,7 @@
 #include "TCanvas.h"
 #include "TH1.h"
 #include "TH1D.h"
+#include "TProfile.h"
 #include "TGraph.h"
 #include "THStack.h"
 #include "TPaveText.h"
@@ -30,6 +31,10 @@ public:
   ~Style() {;}
  
   void tdrDraw(TH1* h, string opt,
+               int marker=kFullCircle, int mcolor = kBlack,
+               int lstyle=kSolid, int lcolor=-1,
+               int fstyle=1001, int fcolor=kYellow+1);
+  void tdrDraw(TProfile* h, string opt,
                int marker=kFullCircle, int mcolor = kBlack,
                int lstyle=kSolid, int lcolor=-1,
                int fstyle=1001, int fcolor=kYellow+1);
