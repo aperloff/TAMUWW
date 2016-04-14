@@ -494,6 +494,9 @@ bool moveLeptonToMET(EventNtuple *ntuple, double probIndex1, map<int,int> &lepto
             new_px = n_distribution_px(generator);
             new_py = n_distribution_py(generator);
         }
+        else if(METResMethod.find("simulated")!=string::npos) {
+            
+        }
         else {
             cout << "ERROR::moveLeptonToMET You must choose a known method for METResMethod. The options are real, simple, and coupled." << endl;
             std::terminate();
@@ -836,16 +839,16 @@ void moveOutputFile(string oFilePath, string oProcessName, string suffix) {
 
     cout << "Check for the evironment variable MEInput ... ";
     char* MEInput;
-    MEInput = getenv ("MEInput");
+    MEInput = getenv ("SMEInput");
     if (MEInput!=NULL) cout << "Ok" << endl;
     else exit (EXIT_FAILURE);
 
-    string command = "xrdcp " + oFilePath + " " + MEInput + oProcessName + suffix + ".root";
+    string command = "xrdcp " + oFilePath + " " + MEInput + "WlnuJetsTest/" + oProcessName + suffix + ".root";
     cout << "Will use the following command to copy the output file to EOS:" << endl
          << "\t" << command << endl;
     int copyStatus = system(command.c_str());
     if(copyStatus == 0) {
-        cout << "File " << oFilePath << " successfully copied to " << MEInput << oProcessName << "!" << endl;
+        cout << "File " << oFilePath << " successfully copied to " << MEInput << "WlnuJetsTest/" << oProcessName << "!" << endl;
         string rmCommand = "rm " + oFilePath;
         cout << "Will use the following command to rm the original output file (keeping the newly copied one):" << endl
              << "\t" << rmCommand << endl;
