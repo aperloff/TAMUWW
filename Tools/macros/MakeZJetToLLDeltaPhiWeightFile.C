@@ -32,6 +32,13 @@ const double ZMASS = 91.1876; //GeV
 const double WMASS = 80.3980; //GeV
 
 ////////////////////////////////////////////////////////////////////////////////
+//  Local Functions
+////////////////////////////////////////////////////////////////////////////////
+
+// Get the values for the jetBins, leptonBins, and processes vectors
+void getBinValues(vector<string>& jetBins, vector<string>& leptonBins, vector<string>& processes);
+
+////////////////////////////////////////////////////////////////////////////////
 //  main
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -44,31 +51,24 @@ void MakeZJetsToLLDeltaPhiWeightFile() {
     st->setTDRStyle();
     //TGaxis::SetMaxDigits(3);
 
+    vector<string> jetBins;
+    vector<string> leptonBins;
+    vector<string> processes;
+    cout << "Getting the binning values ... " << flush;
+    getBinValues(jetBins,leptonBins,processes);
+    cout << "DONE" << endl;
+
     cout << "Opening output file ... " << flush;
     TFile* ofile = TFile::Open("ZllDeltaPhiWeights.root","RECREATE");
     ofile->mkdir("validation");
     cout << "DONE" << endl;
 
-    const int nJetBins = 3;
-    const int nLeptonBins = 2;
-    const int nProcesses = 2;
-    string jetBins[nJetBins] = {"jets2","jets3","jets4"};
-    string leptonBins[nLeptonBins] = {"electron","muon"};
-    string processes[nProcesses] = {"WJets","ZJetsToLL"};
-
-    TTree *jets2p(0);
-    string hname, htitle;
-    map<string, TH1D*> histograms;
-    map<string, TCanvas*> canvases;
-    TLorentzVector lepton;
-    TLorentzVector neutrino;
-    int *l_pdgid = new int(0);
-    int *nu_pdgid = new int(0);
-
     cout << "Creating the histograms ... " << flush;
-    for(int jbin=0; jbin<nJetBins; jbin++) {
-        for(int lbin=0; lbin<nLeptonBins; lbin++) {
-            for(int iprocess=0; iprocess<nProcesses; iprocess++) {
+    map<string, TH1D*> histograms;
+    string hname, htitle;
+    for(unsigned int jbin=0; jbin<jetBins.size(); jbin++) {
+        for(unsigned int lbin=0; lbin<leptonBins.size(); lbin++) {
+            for(unsigned int iprocess=0; iprocess<processes.size(); iprocess++) {
                 hname = processes[iprocess]+"_"+jetBins[jbin]+"_"+leptonBins[lbin];
                 htitle = "#Delta#phi(l,#nu) (";
                 htitle+= processes[iprocess]=="WJets"?"GEN)":"RECO)";
@@ -86,6 +86,11 @@ void MakeZJetsToLLDeltaPhiWeightFile() {
     cout << "DONE" << endl;
 
     cout << "Filling the input histograms ... " << endl;
+    TTree *jets2p(0);
+    TLorentzVector lepton;
+    TLorentzVector neutrino;
+    int *l_pdgid = new int(0);
+    int *nu_pdgid = new int(0);
     EventNtuple* ntuple = new EventNtuple();
     jets2p = (TTree*)_file0->Get("PS/jets2p");
     jets2p->SetBranchAddress("EvtNtuple", &ntuple);
@@ -158,8 +163,8 @@ void MakeZJetsToLLDeltaPhiWeightFile() {
     cout << "DONE" << endl;
 
     cout << "Scaling ZJetToLL to WJets, making the weights, and writing the weights ... " << flush;
-    for(int jbin=0; jbin<nJetBins; jbin++) {
-        for(int lbin=0; lbin<nLeptonBins; lbin++) {
+    for(unsigned int jbin=0; jbin<jetBins.size(); jbin++) {
+        for(unsigned int lbin=0; lbin<leptonBins.size(); lbin++) {
             string zll_name = "ZJetsToLL_"+jetBins[jbin]+"_"+leptonBins[lbin];
             string w_name = "WJets_"+jetBins[jbin]+"_"+leptonBins[lbin];
             histograms[zll_name]->Scale(histograms[w_name]->Integral()/histograms[zll_name]->Integral());
@@ -176,8 +181,9 @@ void MakeZJetsToLLDeltaPhiWeightFile() {
     cout << "DONE" << endl;
 
     cout << "Making and writing a validation canvas ... " << flush;
-    for(int jbin=0; jbin<nJetBins; jbin++) {
-        for(int lbin=0; lbin<nLeptonBins; lbin++) {
+    map<string, TCanvas*> canvases;
+    for(unsigned int jbin=0; jbin<jetBins.size(); jbin++) {
+        for(unsigned int lbin=0; lbin<leptonBins.size(); lbin++) {
             string zll_name = "ZJetsToLL_"+jetBins[jbin]+"_"+leptonBins[lbin];
             string w_name = "WJets_"+jetBins[jbin]+"_"+leptonBins[lbin];
             hname = "ZllWeight_"+jetBins[jbin]+"_"+leptonBins[lbin];
@@ -215,4 +221,23 @@ void MakeZJetsToLLDeltaPhiWeightFile() {
     cout << "Closing the output file ... " << flush;
     ofile->Close();
     cout << "DONE" << endl;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//  Implement Local Functions
+////////////////////////////////////////////////////////////////////////////////
+
+//______________________________________________________________________________
+void getBinValues(vector<string>& jetBins, vector<string>& leptonBins, vector<string>& processes) {
+    jetBins.push_back("jets2");
+    jetBins.push_back("jets3");
+    jetBins.push_back("jets4");
+
+    leptonBins.push_back("electron");
+    leptonBins.push_back("muon");
+
+    processes.push_back("WJets");
+    processes.push_back("ZJetsToLL");
+
+    return;
 }
