@@ -352,6 +352,7 @@ private:
    double mu_PFIso;
 
    double muPrim_ptMin;
+   double muPrim_ptMin_tmp;
    double muPrim_aetaMax;
    double muPrim_itNHits;
    double muPrim_dBMax;
@@ -395,6 +396,7 @@ private:
    double elPFIsoConeSize;
 
    double elPrim_ptMin;
+   double elPrim_ptMin_tmp;
    double elPrim_aetaMax;
    double elPrim_aetascExcludeMax;
    double elPrim_aetascExcludeMin;

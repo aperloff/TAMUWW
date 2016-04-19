@@ -1306,11 +1306,24 @@ void PerformSelection::muonSelection() {
       mu_vtxPass=false;
       if (abs(muIter->innerTrack()->dz(vtxHandle->at(0).position()))<muPrim_dzMax && muIter->dB()<muPrim_dBMax)
          mu_vtxPass=true;
+
+      //
+      // Figure out the muPrim_ptMinCut based upon the number of tight leptons requested
+      //
+      if(leptonCnt>1 && lp4.size()==0) {
+         muPrim_ptMin_tmp = muPrim_ptMin;
+      }
+      else if(leptonCnt>1 && lp4.size()>0) {
+         muPrim_ptMin_tmp = muLoose_ptMin;
+      }
+      else {
+         muPrim_ptMin_tmp = muPrim_ptMin;
+      }
        
       //
       // Apply The Primary Cuts
       //
-      if (mu_pt>muPrim_ptMin && abs(mu_eta)<muPrim_aetaMax &&
+      if (mu_pt>muPrim_ptMin_tmp && abs(mu_eta)<muPrim_aetaMax &&
           muisGmTm && muisPFm && muisTightPrompt && mu_vtxPass &&
           muPrim_itNHits>muPrim_nValidHitsMin &&
           muIter->innerTrack()->hitPattern().numberOfValidPixelHits()>muPrim_nValidPixelHitsMin &&
@@ -1424,14 +1437,27 @@ void PerformSelection::eleSelection() {
       // Tight MVA based EID
       //
       el_MVAEIDPass = MVABasedEID(elIter,true);
+
+      //
+      // Figure out the elPrim_ptMinCut based upon the number of tight leptons requested
+      //
+      if(leptonCnt>1 && lp4.size()==0) {
+         elPrim_ptMin_tmp = elPrim_ptMin;
+      }
+      else if(leptonCnt>1 && lp4.size()>0) {
+         elPrim_ptMin_tmp = elLoose_ptMin;
+      }
+      else {
+         elPrim_ptMin_tmp = elPrim_ptMin;
+      }
          
       //
       // Combine the Tight Cuts
       //
       if (doMVAeleSel)
-         el_PassTight = (el_pt>elPrim_ptMin) && el_aetaPass && el_MVAEIDPass && el_vtxPass && el_convPass;
+         el_PassTight = (el_pt>elPrim_ptMin_tmp) && el_aetaPass && el_MVAEIDPass && el_vtxPass && el_convPass;
       else
-         el_PassTight = (el_pt>elPrim_ptMin) && el_aetaPass && el_CutEIDPass && el_vtxPass && el_EinvMinusPinvPass && el_convPass && el_IsoPass;
+         el_PassTight = (el_pt>elPrim_ptMin_tmp) && el_aetaPass && el_CutEIDPass && el_vtxPass && el_EinvMinusPinvPass && el_convPass && el_IsoPass;
 
       //
       // Apply The Primary Cuts
