@@ -38,7 +38,7 @@ double CSVreweight::getWeight(EventNtuple * ntuple){
       int flavor = abs( ntuple->jLV[iJet].partonFlavour );
 
       int iPt = -1; int iEta = -1;
-      if (jetPt >=24.99 && jetPt<40) iPt = 0;    //changed jetPt >=29.99 to jetPt >=24.99 because our jet cut is lower
+      if (jetPt >=9.99 && jetPt<40) iPt = 0;    //changed jetPt >=29.99 to jetPt >=24.99 because our jet cut is lower, then changed it once again to 9.99
       else if (jetPt >=40 && jetPt<60) iPt = 1;
       else if (jetPt >=60 && jetPt<100) iPt = 2;
       else if (jetPt >=100 && jetPt<160) iPt = 3;
