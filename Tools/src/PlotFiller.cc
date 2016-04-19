@@ -118,7 +118,8 @@ void PlotFiller::run()
       //c->AddBranchToCache("*");
       
       if(limitBranches == 0) {
-         if(!processes[i]->name.Contains("TTbar",TString::kIgnoreCase) && !processes[i]->name.Contains("WJets",TString::kIgnoreCase)) {
+         if(!processes[i]->name.Contains("TTbar",TString::kIgnoreCase) && !processes[i]->name.Contains("WJets",TString::kIgnoreCase) &&
+            !processes[i]->name.Contains("ZJetsToLL_M10To50",TString::kIgnoreCase) && !processes[i]->name.Contains("ZJetsToLL_M50",TString::kIgnoreCase)) {
             cout << "\tPlotFiller::Turning off the genParticlecollection* branch(es) ... ";
             c->SetBranchStatus("genParticleCollection*",0);
             cout << "DONE" << endl;
@@ -146,7 +147,9 @@ void PlotFiller::run()
             c->SetBranchStatus("genParticleCollection.pdgId*",1);
             cout << "DONE" << endl;
          }
-         if(limitBranches == 1 && processes[i]->name.Contains("WJets",TString::kIgnoreCase)) {
+         if(limitBranches == 1 && (processes[i]->name.Contains("WJets",TString::kIgnoreCase)) ||
+            processes[i]->name.Contains("ZJetsToLL_M10To50",TString::kIgnoreCase) ||
+            processes[i]->name.Contains("ZJetsToLL_M50",TString::kIgnoreCase)) {
             cout << "\tPlotFiller::Turning on the genParticlecollection.{p4,pdgId}* branch(es) ... ";
             c->SetBranchStatus("genParticleCollection.p4*",1);
             c->SetBranchStatus("genParticleCollection.pdgId*",1);
