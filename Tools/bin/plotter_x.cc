@@ -216,7 +216,7 @@ void UserFunctions::fillPlots(MapOfPlots &  plots, TString processName, EventNtu
                plots[leptonCat]["Pt_GenNuOrRecoMETLept"]->Fill(neutrino.Pt(), weight);
          }
          else if(processName.Contains("ZJetsToLL")) {
-            plots[leptonCat]["DeltaPhi_GenLNuOrRecoLL"]->Fill(ntuple->lLV[0].DeltaPhi(ntuple->lLV[1]), weight);
+            plots[leptonCat]["DeltaPhi_GenLNuOrRecoLL"]->Fill(ntuple->lLV[0].DeltaPhi(ntuple->METLV[0].refLV), weight);
             plots[leptonCat]["Pt_GenNuOrRecoMETLept"]->Fill(ntuple->METLV[0].refLV.Pt(), weight);
          }
       }
@@ -604,11 +604,13 @@ bool UserFunctions::eventPassCuts(EventNtuple * ntuple, MicroNtuple * mnt, const
      if (ntuple->jLV[0].Pt() <= 30 || ntuple->jLV[1].Pt() <= 25)
         return false;
 
+     /*
      if((proc->name.Contains("ZJetsToLL") || proc->name.Contains("WJets")) &&
         ZllGenNeutrinoPtWeight &&
-        ntuple->getGenVorDaughter(EventNtuple::NEUTRINO, 24, 0, 0, false).Pt()<25.0) {
+        ntuple->getGenVorDaughter(EventNtuple::NEUTRINO, 24, 0, 0, false).Pt()<15.0) {
          return false;
       }
+      */
 
      if (controlRegion == DEFS::BDTBump || controlRegion == DEFS::BDTAntiBump) {
          double combinedBDT = computeCombinedBDT(ntuple,mnt,evMap,MVAMethods,"response");
@@ -998,7 +1000,14 @@ double UserFunctions::weightFunc(EventNtuple* ntuple, MicroNtuple* mnt, const Ph
 
    if (ZllGenNeutrinoPtWeight && auxName.Contains("ZJETSTOLL")) {
 
-      weight *= ZllGenNeutrinoPtWeightFunc->GetBinContent(ZllGenNeutrinoPtWeightFunc->FindBin(ntuple->getGenVorDaughter(EventNtuple::NEUTRINO, 24, 0, 0, false).Pt()));
+      //weight *= ZllGenNeutrinoPtWeightFunc->GetBinContent(ZllGenNeutrinoPtWeightFunc->FindBin(ntuple->getGenVorDaughter(EventNtuple::NEUTRINO, 24, 0, 0, false).Pt()));
+      weight *= ZllGenNeutrinoPtWeightFunc->GetBinContent(ZllGenNeutrinoPtWeightFunc->FindBin(ntuple->METLV[0].refLV.Pt()));
+      // Needed because WJets has three more bins of gen neutrino pt <15.0 GeV and ZJetsToLL does not have those bins
+      // ((WJets Integral-Sum of content of 3 bins)/WJets Integral) = scale factor
+      // From canvas: ((1.48201e+06-96741.5)/1.48201e+06)=0.9347227751
+      // From command line: ((1.48200519787897007e+06-9.67414995618765242e+04)/1.48200519787897007e+06)=9.34722563928701566e-01
+      // Measured: 9.34690809464712835e-01
+      weight *= 9.34690809464712835e-01;
    }
 
    if (ZllDeltaPhiWeight && auxName.Contains("ZJETSTOLL")) {
@@ -1160,9 +1169,10 @@ void UserFunctions::processFunc(EventNtuple* ntuple, const PhysicsProcess* proc)
 
    if (ZllGenNeutrinoPtWeight && auxName.Contains("ZJETSTOLL")) {
       cout << "Initializing ZllGenNeutrinoPt Weighting:" << endl;
-      string number = string(proc->fileName);
-      number = number.substr(number.find("HighPtLeptonKept")+16,3);
-      TString filename = "ZllGenNeutrinoPtWeightFiles/ZllGenNeutrinoPtWeightFile_HighPtLeptonKept"+TString(number)+"_WGenZRec.root";
+      //string number = string(proc->fileName);
+      //number = number.substr(number.find("HighPtLeptonKept")+16,3);
+      //TString filename = "ZllGenNeutrinoPtWeightFiles/ZllGenNeutrinoPtWeightFile_HighPtLeptonKept"+TString(number)+"_WGenZRec.root";
+      TString filename = "ZllGenNeutrinoPtWeightFiles/ZllGenNeutrinoPtWeightFile_HighPtLeptonKept050mu061el_WGenZRec.root";
       TString hname = "ZllWeight_";
       hname += DEFS::getJetBinString(UserFunctions::jetBin)+"_"+DEFS::getLeptonCatString(UserFunctions::leptonCat);
       ZllGenNeutrinoPtWeightFunc = (TH1D*) DefaultValues::getConfigTH1(filename,hname,"ZllGenNeutrinoPtWeightClone");
@@ -1412,11 +1422,12 @@ int main(int argc,char**argv) {
       return 5;
    }
    else if(UserFunctions::MakeZllWeightsStep==1 && !UserFunctions::ZllDeltaPhiWeight) {
-      cout << "WARNING::plotter_x You are trying to make the histograms necessary to make the ZllGenNeutrinoPtWeights,"
+      cout << "ERROR::plotter_x You are trying to make the histograms necessary to make the ZllGenNeutrinoPtWeights,"
            << " but the ZllDeltaPhiWeights are not being applied. Are you sure this is what you want to do? This is not"
            << " the normal order of operations." << endl;
+      return 6;
    }
-   else if(UserFunctions::MakeZllWeightsStep<2) {
+   if(UserFunctions::MakeZllWeightsStep<2) {
       UserFunctions::fillStandard = false;
       UserFunctions::fillEPD = false;
       UserFunctions::fillBumpCrossCheck = false;
