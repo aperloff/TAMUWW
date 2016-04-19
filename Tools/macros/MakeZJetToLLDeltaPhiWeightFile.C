@@ -19,9 +19,6 @@
 #include <vector>
 
 #include "TAMUWW/Tools/interface/Style.hh"
-#include "TAMUWW/SpecialTools/interface/ProgressBar.hh"
-#include "TAMUWW/SpecialTools/interface/Defs.hh"
-#include "TAMUWW/MEPATNtuple/interface/EventNtuple.hh"
 
 using namespace std;
 
@@ -43,19 +40,45 @@ void getBinValues(vector<string>& jetBins, vector<string>& leptonBins, vector<st
 ////////////////////////////////////////////////////////////////////////////////
 
 //______________________________________________________________________________
-void MakeZJetsToLLDeltaPhiWeightFile() {
+void MakeZJetsToLLDeltaPhiWeightFile(string input_file_basepath) {
     // Trying to speed up the code
     gEnv->SetValue("TFile.AsyncPrefetching", 1);
 
     Style* st = new Style();
     st->setTDRStyle();
-    //TGaxis::SetMaxDigits(3);
 
+    cout << "Getting the binning values ... " << flush;
     vector<string> jetBins;
     vector<string> leptonBins;
     vector<string> processes;
-    cout << "Getting the binning values ... " << flush;
     getBinValues(jetBins,leptonBins,processes);
+    cout << "DONE" << endl;
+
+    cout << "Opening input files, get the histograms, and closing the input files ... " << flush;
+    TFile* current_input_file;
+    map<string, TH1D*> histograms;
+    string hname, htitle, objectName = "DeltaPhi_GenLNuOrRecoLL_", current_input_file_name;
+    for(unsigned int jbin=0; jbin<jetBins.size(); jbin++) {
+        for(unsigned int lbin=0; lbin<leptonBins.size(); lbin++) {
+            current_input_file_name = input_file_basepath+"/"+jetBins[jbin]+"/"+leptonBins[lbin]+
+                                      "/histos_"+leptonBins[lbin]+"_"+jetBins[jbin]+".root";
+            current_input_file = TFile::Open(current_input_file_name.c_str(),"READ");
+            if(!current_input_file) {
+                cout << "ERROR::MakeZJetsToLLDeltaPhiWeightFile Couldn't open the input file " << current_input_file_name << endl;
+                std::terminate();
+            }
+            for(unsigned int iprocess=0; iprocess<processes.size(); iprocess++) {
+                hname = processes[iprocess]+"_"+jetBins[jbin]+"_"+leptonBins[lbin];
+                htitle = "#Delta#phi(l,#nu) (";
+                htitle+= processes[iprocess]=="WJets"?"GEN)":"RECO)";
+                histograms[hname] = dynamic_cast<TH1D*>(current_input_file->Get((objectName+processes[iprocess]+
+                                                       "_"+leptonBins[lbin]).c_str()));
+                histograms[hname]->SetNameTitle(hname.c_str(),htitle.c_str());
+                histograms[hname]->SetDirectory(0);
+            }
+            current_input_file->Close();
+        }
+    }
     cout << "DONE" << endl;
 
     cout << "Opening output file ... " << flush;
@@ -63,101 +86,46 @@ void MakeZJetsToLLDeltaPhiWeightFile() {
     ofile->mkdir("validation");
     cout << "DONE" << endl;
 
-    cout << "Creating the histograms ... " << flush;
-    map<string, TH1D*> histograms;
-    string hname, htitle;
-    for(unsigned int jbin=0; jbin<jetBins.size(); jbin++) {
-        for(unsigned int lbin=0; lbin<leptonBins.size(); lbin++) {
-            for(unsigned int iprocess=0; iprocess<processes.size(); iprocess++) {
-                hname = processes[iprocess]+"_"+jetBins[jbin]+"_"+leptonBins[lbin];
-                htitle = "#Delta#phi(l,#nu) (";
-                htitle+= processes[iprocess]=="WJets"?"GEN)":"RECO)";
-                histograms[hname] = new TH1D(hname.c_str(),htitle.c_str(),62,-TMath::Pi(),TMath::Pi());
-                histograms[hname]->Sumw2();
-            }
-        }
-    }
-    cout << "DONE" << endl;
-
-    cout << "Opening input file ... " << flush;
-    TFile* _file0 = TFile::Open("$SMEInput/WJets.root","READ");
-    //TFile* _file1 = TFile::Open("$SMEInput/DYJetsToLL_M-50.root","READ");
-    TFile* _file1 = TFile::Open("$SMEInput/DYJetsToLL_M-50_lowerSubLeadingJet.root","READ");
-    cout << "DONE" << endl;
-
-    cout << "Filling the input histograms ... " << endl;
-    TTree *jets2p(0);
-    TLorentzVector lepton;
-    TLorentzVector neutrino;
-    int *l_pdgid = new int(0);
-    int *nu_pdgid = new int(0);
-    EventNtuple* ntuple = new EventNtuple();
-    jets2p = (TTree*)_file0->Get("PS/jets2p");
-    jets2p->SetBranchAddress("EvtNtuple", &ntuple);
-    jets2p->SetBranchStatus("*",0);
-    jets2p->SetBranchStatus("jLV*",1);
-    jets2p->SetBranchStatus("lLV*",1);
-    jets2p->SetBranchStatus("genParticleCollection*",1);
-    int nEntries = jets2p->GetEntries();
-    for(unsigned int ientry=0; ientry<jets2p->GetEntries(); ientry++) {
-        ProgressBar::loadbar2(ientry+1,nEntries);
-        jets2p->GetEntry(ientry);
-        lepton = ntuple->getGenVorDaughter(EventNtuple::LEPTON, 24, 0, l_pdgid, false);
-        neutrino = ntuple->getGenVorDaughter(EventNtuple::NEUTRINO, 24, 0, nu_pdgid, false);
-        //if(lepton.Pt()<28 || abs(lepton.Eta())>2.0 || abs(*l_pdgid)!=11){
-        //if(DEFS::getLeptonCatString(ntuple->lLV[0].leptonCat)!=leptonBins[lbin] ||
-        //   (ntuple->jLV.size() != 1 && jetBin == DEFS::jet1) ||
-        //   (ntuple->jLV.size() != 2 && jetBin == DEFS::jets2) ||
-        //   (ntuple->jLV.size() != 3 && jetBin == DEFS::jets3) ||
-        //   (ntuple->jLV.size() < 4 && jetBin == DEFS::jets4)) {
-        //    continue;
-        //}
-        hname = "WJets_"+DEFS::getJetBinString(DEFS::getJetBin(ntuple->jLV.size()))+"_"+DEFS::getLeptonCatString(ntuple->lLV[0].leptonCat);
-        if(histograms.find(hname)==histograms.end()) {
-            cout << "ERROR::MakeZJetsToLLDeltaPhiWeightFile Cannot find the histogram named " << hname << endl;
-            std::terminate();
-        }
-        if(lepton.Pt()>0 && neutrino.Pt()>0) {
-            histograms.find(hname)->second->Fill(lepton.DeltaPhi(neutrino));
-        }
-    }
-    cout << endl;
-
-    jets2p = (TTree*)_file1->Get("PS/jets2p");
-    jets2p->SetBranchAddress("EvtNtuple", &ntuple);
-    jets2p->SetBranchStatus("*",0);
-    jets2p->SetBranchStatus("jLV*",1);
-    jets2p->SetBranchStatus("lLV*",1);
-    nEntries = jets2p->GetEntries();
-    for(unsigned int ientry=0; ientry<jets2p->GetEntries(); ientry++) {
-        ProgressBar::loadbar2(ientry+1,nEntries);
-        jets2p->GetEntry(ientry);
-        //lepton = ntuple->getGenVorDaughter(EventNtuple::LEPTON, 23, 0, l_pdgid, false);
-        //neutrino = ntuple->getGenVorDaughter(EventNtuple::LEPTON, 23, 1, nu_pdgid, false);
-        //if(lepton.Pt()<28 || abs(lepton.Eta())>2.0 || abs(*l_pdgid)!=11){
-        //if(DEFS::getLeptonCatString(ntuple->lLV[0].leptonCat)!=leptonBins[lbin] ||
-        //   (ntuple->jLV.size() != 1 && jetBin == DEFS::jet1) ||
-        //   (ntuple->jLV.size() != 2 && jetBin == DEFS::jets2) ||
-        //   (ntuple->jLV.size() != 3 && jetBin == DEFS::jets3) ||
-        //   (ntuple->jLV.size() < 4 && jetBin == DEFS::jets4)) {
-        //    continue;
-        //}
-        //ZJetsToLL->Fill(lepton.DeltaPhi(neutrino));
-        hname = "ZJetsToLL_"+DEFS::getJetBinString(DEFS::getJetBin(ntuple->jLV.size()))+"_"+DEFS::getLeptonCatString(ntuple->lLV[0].leptonCat);
-        if(histograms.find(hname)==histograms.end()) {
-            cout << "ERROR::MakeZJetsToLLDeltaPhiWeightFile Cannot find the histogram named " << hname << endl;
-            std::terminate();
-        }
-        ntuple->lLV[0]*=(WMASS/ZMASS);
-        ntuple->lLV[1]*=(WMASS/ZMASS);
-        histograms.find(hname)->second->Fill(ntuple->lLV[0].DeltaPhi(ntuple->lLV[1]));
-    }
-
-    cout << "Checking filled histograms ... " << flush;
+    cout << "Checking the input histograms ... " << flush;
     for(map<string,TH1D*>::iterator it=histograms.begin(); it!=histograms.end(); it++) {
         if(it->second->GetEntries()==0) {
             cout << endl << "ERROR::MakeZJetsToLLDeltaPhiWeightFile The histogtam " << it->first << " has zero entries." << endl;
             std::terminate();
+        }
+    }
+    cout << "DONE" << endl;
+
+    cout << "Add ZJetsToLL_M10To50 to ZJetsToLL_M50 and remove ZJetsToLL_M10To50 from map ... " << flush;
+    for(unsigned int jbin=0; jbin<jetBins.size(); jbin++) {
+        for(unsigned int lbin=0; lbin<leptonBins.size(); lbin++) {
+            string M10To50_name = "ZJetsToLL_M10To50_"+jetBins[jbin]+"_"+leptonBins[lbin];
+            string M50_name = "ZJetsToLL_M50_"+jetBins[jbin]+"_"+leptonBins[lbin];
+            string combined_name = "ZJetsToLL_"+jetBins[jbin]+"_"+leptonBins[lbin];
+            if(histograms.find(M10To50_name)!=histograms.end() && histograms.find(M50_name)!=histograms.end()) {
+                histograms[M50_name]->Add(histograms[M10To50_name]);
+                histograms.erase(M10To50_name);
+                histograms[M50_name]->SetName(combined_name.c_str());
+                histograms[combined_name] = histograms[M50_name];
+                histograms.erase(M50_name);
+            }
+            else if(histograms.find(M10To50_name)!=histograms.end() && histograms.find(M50_name)==histograms.end()) {
+                cout << endl << "ERROR::MakeZJetsToLLDeltaPhiWeightFile Found the histogram " << M10To50_name
+                     << ", but not the histogram " << M50_name << endl
+                     << "\tContinuing now would be inaccurate" << endl;
+                std::terminate();                    
+            }
+            else if(histograms.find(M10To50_name)==histograms.end() && histograms.find(M50_name)!=histograms.end()) {
+                cout << endl << "ERROR::MakeZJetsToLLDeltaPhiWeightFile Found the histogram " << M50_name
+                     << ", but not the histogram " << M10To50_name << endl
+                     << "\tContinuing now would be inaccurate" << endl;
+                std::terminate();         
+            }
+            else {
+                cout << endl << "ERROR::MakeZJetsToLLDeltaPhiWeightFile Couldn't fine either the histogram "
+                     << M50_name << " or the histogram " << M10To50_name << endl
+                     << "\tContinuing now would make no sense" << endl;
+                std::terminate();         
+            }
         }
     }
     cout << "DONE" << endl;
@@ -180,7 +148,7 @@ void MakeZJetsToLLDeltaPhiWeightFile() {
     }
     cout << "DONE" << endl;
 
-    cout << "Making and writing a validation canvas ... " << flush;
+    cout << "Making and writing a validation canvas ... " << endl;
     map<string, TCanvas*> canvases;
     for(unsigned int jbin=0; jbin<jetBins.size(); jbin++) {
         for(unsigned int lbin=0; lbin<leptonBins.size(); lbin++) {
@@ -195,13 +163,13 @@ void MakeZJetsToLLDeltaPhiWeightFile() {
             TH1D* hdown = new TH1D("hdown","hdown",62,-TMath::Pi(),TMath::Pi());
             hdown->GetXaxis()->SetLimits(-TMath::Pi(),TMath::Pi());
             hdown->GetXaxis()->SetTitle("#Delta#phi(l,#nu(l))");
-            hdown->GetYaxis()->SetRangeUser(0,4);
+            hdown->GetYaxis()->SetRangeUser(0,2);
             hup->GetYaxis()->SetTitle("Events");
             hdown->GetYaxis()->SetTitle("Weight");
             canvases[cname] = st->tdrDiCanvas(cname.c_str(),hup,hdown);
             canvases[cname]->cd(1);
             st->tdrDraw(histograms[w_name],"",kFullCircle,kGreen,kSolid,kGreen);
-            st->tdrDraw(histograms[zll_name],"",kFullCircle,kRed,kSolid,kRed);
+            st->tdrDraw(histograms[zll_name],"",kOpenCircle,kRed,kSolid,kRed);
             TLegend* l = st->tdrLeg(0.5,0.8,0.85,0.9);
             l->AddEntry(histograms[w_name],"WJets (GEN)", "lep");
             l->AddEntry(histograms[zll_name],"ZJetsToLL (RECO)", "lep");
@@ -211,11 +179,6 @@ void MakeZJetsToLLDeltaPhiWeightFile() {
             canvases[cname]->Write();
         }
     }
-    cout << "DONE" << endl;
-
-    cout << "Closing the input files ... " << flush;
-    _file0->Close();
-    _file1->Close();
     cout << "DONE" << endl;
 
     cout << "Closing the output file ... " << flush;
@@ -237,7 +200,8 @@ void getBinValues(vector<string>& jetBins, vector<string>& leptonBins, vector<st
     leptonBins.push_back("muon");
 
     processes.push_back("WJets");
-    processes.push_back("ZJetsToLL");
+    processes.push_back("ZJetsToLL_M10To50");
+    processes.push_back("ZJetsToLL_M50");
 
     return;
 }

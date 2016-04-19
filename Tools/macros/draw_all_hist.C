@@ -6,6 +6,7 @@
 #include "TObject.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "TCanvas.h"
 #include "TProfile3D.h"
 #include "TRandom3.h"
 #include "TString.h"
@@ -13,6 +14,10 @@
 #include "TMath.h"
 #include "TBenchmark.h"
 #include "TRegexp.h"
+#include "TKey.h"
+#include "TList.h"
+#include "TLegend.h"
+#include "TLegendEntry.h"
 
 //
 // Standard Library Includes
@@ -21,7 +26,9 @@
 #include <iomanip>
 #include <string>
 #include <vector>
+#include <sstream>
 
+using namespace std;
 
 TCanvas* draw_all_hist(TString objectName = "", TString scaleToHistPattern = "", bool removeSys = true,
                    bool doLogX = false, bool doLogY = false, bool doGrid = true, double xmin = 20,
@@ -36,6 +43,7 @@ TCanvas* draw_all_hist(TString objectName = "", TString scaleToHistPattern = "",
         TString reg = objectName+scaleToHistPattern;
         TRegexp re(reg,kTRUE);
         TIter next(gDirectory->GetListOfKeys());
+        TKey* key(0);
         while ((key= (TKey*)next())) {
             TString st = key->GetName();
             if (st.Index(re) == kNPOS) continue;
@@ -47,12 +55,12 @@ TCanvas* draw_all_hist(TString objectName = "", TString scaleToHistPattern = "",
         }
         if(scaleToHist==0) {
             cout << "ERROR::draw_all_hist A scaleToHistPattern was specified (" << scaleToHistPattern << "), but no histogram was found." << endl;
-            return;
+            return 0;
         }
         scaleToHistInt = scaleToHist->Integral();
     }
 
-    next = gDirectory->GetListOfKeys();
+    TIter next = gDirectory->GetListOfKeys();
     TKey* key(0);
     int count = 0;
     TLegend* leg = new TLegend(0.65,0.6,0.8,1.0);
@@ -157,31 +165,6 @@ TCanvas* draw_all_hist(TString objectName = "", TString scaleToHistPattern = "",
     return c;
 }
 
-void draw_all_standard(bool save = false, bool batch = false) {
-    if(batch)
-        gROOT->SetBatch(kTRUE);
-    
-    draw_all_hist("LeptPt_","WJets_*",true,true,true,true);
-    draw_all_hist("MET_","WJets_*",true,true,true,true);
-    draw_all_hist("WmT_","WJets_*",true,true,true,true);
-    draw_all_hist("Ptjj_","WJets_*",true,true,true,true);
-    draw_all_hist("Jet1Pt_","WJets_*",true,true,true,true);
-    draw_all_hist("Jet2Pt_","WJets_*",true,true,true,true);
-    draw_all_hist("Ptlv_","WJets_*",true,true,true,true);
-    draw_all_hist("Mlv_","WJets_*",true,true,true,true);
-    draw_all_hist("Mlvjj_","WJets_*",true,true,true,true);
-    draw_all_hist("LeptPhi_","WJets_*",true,false,false,true,-TMath::Pi(),TMath::Pi());
-    draw_all_hist("LeptEta_","WJets_*",true,false,false,true,-TMath::Pi(),TMath::Pi());
-    draw_all_hist("Jet1Eta_","WJets_*",true,false,false,true,-TMath::Pi(),TMath::Pi());
-    draw_all_hist("Jet1Phi_","WJets_*",true,false,false,true,-TMath::Pi(),TMath::Pi());
-    draw_all_hist("DeltaPhi_LMET_","WJets_*",true,false,false,true,-TMath::Pi(),TMath::Pi());
-
-    if(save) {
-        save_all_canvases("./",".png");
-        save_all_canvases("./",".eps");
-    }
-}
-
 void save_all_canvases(string folder = "./", string format = ".eps") {
     TList* loc = (TList*)gROOT->GetListOfCanvases();
     TListIter itc(loc);
@@ -201,3 +184,88 @@ void DestroyCanvases() {
     TObject *o(0);
     while ((o = itc())) delete o;
 }
+
+void draw_all_standard(bool save = false, bool batch = false, bool doLogY = true) {
+    if(batch)
+        gROOT->SetBatch(kTRUE);
+    
+    draw_all_hist("LeptPt_","WJets_*",true,true,doLogY,true);
+    draw_all_hist("MET_","WJets_*",true,true,doLogY,true);
+    draw_all_hist("WmT_","WJets_*",true,true,doLogY,true);
+    draw_all_hist("Ptjj_","WJets_*",true,true,doLogY,true);
+    draw_all_hist("Jet1Pt_","WJets_*",true,true,doLogY,true);
+    draw_all_hist("Jet2Pt_","WJets_*",true,true,doLogY,true);
+    draw_all_hist("Ptlv_","WJets_*",true,true,doLogY,true);
+    draw_all_hist("Mlv_","WJets_*",true,true,doLogY,true);
+    draw_all_hist("Mlvjj_","WJets_*",true,true,doLogY,true);
+    draw_all_hist("LeptPhi_","WJets_*",true,false,false,true,-TMath::Pi(),TMath::Pi());
+    draw_all_hist("LeptEta_","WJets_*",true,false,false,true,-TMath::Pi(),TMath::Pi());
+    draw_all_hist("Jet1Eta_","WJets_*",true,false,false,true,-TMath::Pi(),TMath::Pi());
+    draw_all_hist("Jet1Phi_","WJets_*",true,false,false,true,-TMath::Pi(),TMath::Pi());
+    draw_all_hist("DeltaPhi_LMET_","WJets_*",true,false,false,true,-TMath::Pi(),TMath::Pi());
+
+    if(save) {
+        save_all_canvases("./",".png");
+        save_all_canvases("./",".eps");
+    }
+}
+
+void makeSetOfStandardCanvases(bool save = true, bool batch = true) {
+    if(batch)
+      gROOT->SetBatch(kTRUE);
+
+    TFile* ifile(0);
+    TCanvas* c(0);
+    TString jet[3] = {"jets2","jets3","jets4"};
+    TString lepton[2] = {"electron","muon"};
+    stringstream ss;
+
+    for(int j=0; j<3; j++) {
+        cout << "\t" << jet[j] << endl;
+        for(int k=0; k<2; k++) {
+            cout << "\t\t" << lepton[k] << endl;
+            ifile = TFile::Open(Form("%s/%s/histos_%s_%s.root",jet[j].Data(),lepton[k].Data(),lepton[k].Data(),jet[j].Data()),"READ");
+            draw_all_standard(false,true,false);
+            save_all_canvases(Form("%s/%s/",jet[j].Data(),lepton[k].Data()),".png");
+            DestroyCanvases();
+        }
+    }
+}
+
+void makeSetOfLeptonPtCanvases(bool batch = true) {
+    if(batch)
+        gROOT->SetBatch(kTRUE);
+
+    TFile* ifile(0);
+    TCanvas* c(0);
+    TString jet[3] = {"jets2","jets3","jets4"};
+    TString lepton[2] = {"electron","muon"};
+    stringstream ss;
+
+    for(int i=40; i<=70; i++) {
+        cout << "HighPtLeptonPercentage = " << i << "%:" << endl;
+        vector<TString> stats;
+        for(int j=0; j<3; j++) {
+            cout << "\t" << jet[j] << endl;
+            for(int k=0; k<2; k++) {
+                cout << "\t\t" << lepton[k] << endl;
+                ifile = TFile::Open(Form("HighPtLeptonKept0%i/%s/%s/histos_%s_%s.root",i,jet[j].Data(),lepton[k].Data(),lepton[k].Data(),jet[j].Data()),"READ");
+                c=draw_all_hist("LeptPt_","WJets_*",true,true,false,true);
+                stats.push_back(((TLegendEntry*)((TList*)((TLegend*)c->FindObject("leg_ks"))->GetListOfPrimitives())->At(1))->GetLabel());
+                stats.push_back(((TLegendEntry*)((TList*)((TLegend*)c->FindObject("leg_chi2NDF"))->GetListOfPrimitives())->At(1))->GetLabel());
+                c=draw_all_hist("MET_","WJets_*",true,true,false,true);
+                save_all_canvases(Form("HighPtLeptonKept0%i/%s/%s/",i,jet[j].Data(),lepton[k].Data()),".png");
+                DestroyCanvases();
+            }
+        }
+        ss << i << ", ";
+        for(unsigned int s=0; s<stats.size(); s++) {
+            ss << stats[s];
+            if(s<stats.size()-1) ss << ", ";
+        }
+        ss << endl;
+    }
+    cout << ss.str() << endl;
+}
+
+

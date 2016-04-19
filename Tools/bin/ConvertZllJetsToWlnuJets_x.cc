@@ -65,6 +65,11 @@ using namespace std;
 using namespace reco;
 
 ////////////////////////////////////////////////////////////////////////////////
+//  Typedefs
+////////////////////////////////////////////////////////////////////////////////
+typedef pair<map<int,int>,map<int,int> > pair_map;
+
+////////////////////////////////////////////////////////////////////////////////
 //  Declare Global Variables
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -86,14 +91,15 @@ pair<double,double> getMETResolution(EventNtuple *ntuple, int randIndex, double 
 // Move a randomly selected lepton to the MET (add the Lorentz vectors) and remove that lepton 
 //  from the lepton vector
 // The higher that probIndex1 is the more likely it is that the lower pT lepton will be moved
-//  to the MET Lorentz vector (i.e. the percentage of time that the higher pT lepton will be kept)
+//  to the MET Lorentz vector (i.e. the percentage of time that the higher pT lepton will be kept).
+//  The first probIndex1 is for muons and the second is for electrons.
 // Returns true is the lower pT lepton was moved to the MET (i.e. randIndex==1)
 // For the MET resolution smearing you have three methods to choose from real, simple, and coupled.
 //  The real one evaluates a function from an 8 TeV analysis to get a realistic estimation of the MET
 //  resolution. The simple one multiplies the MET.Px(y) by a random number from a Gaussian distribution
 //  centered around 1 with a sigma of METResolution. The coupled method uses a similar method from real,
 //  but only randomly chooses Px and then calculates Py assuming the pT will stay the same.
-bool moveLeptonToMET(EventNtuple *ntuple, double probIndex1, map<int,int> &leptonSelectionCounter,
+bool moveLeptonToMET(EventNtuple *ntuple, pair<double,double> probIndex1, pair_map &leptonSelectionCounter,
                      string METResMethod, double sumETMult, double METResolution, double METPhiResolution,
                      bool resetMETMass, bool genOnly, bool debug = false);
 
@@ -120,6 +126,10 @@ void scaleGenVFourVectorAndDaugters(EventNtuple *ntuple, bool debug = false);
 // If the oFilePath didn't point to an EOS directory, then move the output file to EOS
 void moveOutputFile(string oFilePath, string oProcessName, string suffix);
 
+// Counts the number of events which have been processed by using the leptonSelectionCounter
+// Use the leptonCat from DEFS to decide if the sum should be for muons, electrons, or both
+int leptonSelectionCounterSum(pair_map &leptonSelectionCounter, DEFS::LeptonCat leptonCat = DEFS::both);
+
 ////////////////////////////////////////////////////////////////////////////////
 //  main
 ////////////////////////////////////////////////////////////////////////////////
@@ -133,22 +143,22 @@ int main(int argc,char**argv)
     CommandLine cl;
     if (!cl.parse(argc,argv)) return 0;
 
-    string      iProcessName     = cl.getValue<string> ("iProcessName", "ZJetsToLL_M50");
-    string      oProcessName     = cl.getValue<string> ("oProcessName",      "WlnuJets");
-    string      suffix           = cl.getValue<string> ("suffix",               "_M-50");
-    string      oFilePath        = cl.getValue<string> ("oFilePath",                 "");
-    int         nEntriesMax      = cl.getValue<int>    ("nEntriesMax",               -1);
-    double      probIndex1       = cl.getValue<double> ("probIndex1",               0.5);
-    double      sumETMult        = cl.getValue<double> ("sumETMult",                1.0);
-    double      METResolution    = cl.getValue<double> ("METResolution",           -1.0);
-    double      METPhiResolution = cl.getValue<double> ("METPhiResolution",         0.0);
-    string      METResMethod     = cl.getValue<string> ("METResMethod",              "");
-    bool        resetMETMass     = cl.getValue<bool>   ("resetMETMass",            true);
-    bool        rebalanceEvt     = cl.getValue<bool>   ("rebalanceEvt",           false);
-    bool        genOnly          = cl.getValue<bool>   ("genOnly",                false);
-    bool        doMove           = cl.getValue<bool>   ("doMove",                  true);
-    bool        debug            = cl.getValue<bool>   ("debug",                  false);
-    bool        help             = cl.getValue<bool>   ("help",                   false);
+    string         iProcessName     = cl.getValue<string>  ("iProcessName", "ZJetsToLL_M50");
+    string         oProcessName     = cl.getValue<string>  ("oProcessName",      "WlnuJets");
+    string         suffix           = cl.getValue<string>  ("suffix",               "_M-50");
+    string         oFilePath        = cl.getValue<string>  ("oFilePath",                 "");
+    int            nEntriesMax      = cl.getValue<int>     ("nEntriesMax",               -1);
+    vector<double> probIndex1       = cl.getVector<double> ("probIndex1",       "0.5:::0.5");
+    double         sumETMult        = cl.getValue<double>  ("sumETMult",                1.0);
+    double         METResolution    = cl.getValue<double>  ("METResolution",           -1.0);
+    double         METPhiResolution = cl.getValue<double>  ("METPhiResolution",         0.0);
+    string         METResMethod     = cl.getValue<string>  ("METResMethod",              "");
+    bool           resetMETMass     = cl.getValue<bool>    ("resetMETMass",            true);
+    bool           rebalanceEvt     = cl.getValue<bool>    ("rebalanceEvt",           false);
+    bool           genOnly          = cl.getValue<bool>    ("genOnly",                false);
+    bool           doMove           = cl.getValue<bool>    ("doMove",                  true);
+    bool           debug            = cl.getValue<bool>    ("debug",                  false);
+    bool           help             = cl.getValue<bool>    ("help",                   false);
 
     if (help) {cl.print(); return 0;}
     if (!cl.check())       return 0;
@@ -165,6 +175,16 @@ int main(int argc,char**argv)
     // Trying to speed up the code by allowing it to prefetch data
     //
     gEnv->SetValue("TFile.AsyncPrefetching", 1);
+
+    //
+    // Some basic checks on the settings, specifically that there are only two values in the probIndex1 vector,
+    //  one for muons and one for electrons
+    //
+    if(probIndex1.size()!=2) {
+        cout << "ERROR::ConvertZllJetsToWlnuJets::main There must be two and only two values in the probIndex1 vector"
+             << ", one for muons and one for electrons." << endl;
+        std::terminate();
+    }
 
     //
     // Open the input physics process and the input file
@@ -224,9 +244,11 @@ int main(int argc,char**argv)
     //
     // Keep track of which lepton is kept
     //
-    map<int,int> leptonSelectionCounter;
-    leptonSelectionCounter.insert(pair<int,int>(0,0));
-    leptonSelectionCounter.insert(pair<int,int>(1,0));
+    pair_map leptonSelectionCounter;
+    leptonSelectionCounter.first.insert(pair<int,int>(0,0));
+    leptonSelectionCounter.first.insert(pair<int,int>(1,0));
+    leptonSelectionCounter.second.insert(pair<int,int>(0,0));
+    leptonSelectionCounter.second.insert(pair<int,int>(1,0));
 
     //
     // Loop over the events
@@ -290,7 +312,7 @@ int main(int argc,char**argv)
         //
         // Move one of the leptons to the MET Lorentz vector
         //
-        bool lowerPtLepton = moveLeptonToMET(ntuple, probIndex1, leptonSelectionCounter, METResMethod, 
+        bool lowerPtLepton = moveLeptonToMET(ntuple, make_pair(probIndex1[0],probIndex1[1]), leptonSelectionCounter, METResMethod, 
                                              sumETMult, METResolution, METPhiResolution, resetMETMass,
                                              genOnly, debug);
         setGenLeptonToNeutrino(ntuple, lowerPtLepton, debug);
@@ -343,10 +365,12 @@ int main(int argc,char**argv)
     //
     m_benchmark->Stop("sample");
     cout << "ConvertZllJetsToWlnuJetsNtuple_x" << endl
-         << "\tHigher pT lepton kept " << (double)leptonSelectionCounter[1]/(leptonSelectionCounter[0]+leptonSelectionCounter[1])*100 << "% of the time" << endl
-         << "\tLower pT lepton kept " << (double)leptonSelectionCounter[0]/(leptonSelectionCounter[0]+leptonSelectionCounter[1])*100 << "% of the time" << endl
-         //<< "\tp_{T}^{lepton}>=p_{T}^{MET} " << << "% of the time" << endl
-         //<< "\tp_{T}^{lepton}<p_{T}^{MET}  " << << "% of the time" << endl
+         << "\tMuon" << endl
+         << "\t\tHigher pT lepton kept " << (double)leptonSelectionCounter.first[1]/(leptonSelectionCounterSum(leptonSelectionCounter,DEFS::muon))*100 << "% of the time" << endl
+         << "\t\tLower pT lepton kept " << (double)leptonSelectionCounter.first[0]/(leptonSelectionCounterSum(leptonSelectionCounter,DEFS::muon))*100 << "% of the time" << endl
+         << "\tElectron" << endl
+         << "\t\tHigher pT lepton kept " << (double)leptonSelectionCounter.second[1]/(leptonSelectionCounterSum(leptonSelectionCounter,DEFS::electron))*100 << "% of the time" << endl
+         << "\t\tLower pT lepton kept " << (double)leptonSelectionCounter.second[0]/(leptonSelectionCounterSum(leptonSelectionCounter,DEFS::electron))*100 << "% of the time" << endl
          << "\tFile size = " << fileSize << " GB" << endl
          << "\tCPU time = " << m_benchmark->GetCpuTime("sample") << " s" << endl
          << "\tReal time = " << m_benchmark->GetRealTime("sample") << " s" << endl;
@@ -416,7 +440,7 @@ pair<double,double> getMETResolution(EventNtuple *ntuple, int randIndex, double 
 }
 
 //______________________________________________________________________________
-bool moveLeptonToMET(EventNtuple *ntuple, double probIndex1, map<int,int> &leptonSelectionCounter,
+bool moveLeptonToMET(EventNtuple *ntuple, pair<double,double> probIndex1, pair_map &leptonSelectionCounter,
                      string METResMethod, double sumETMult, double METResolution, double METPhiResolution,
                      bool resetMETMass, bool genOnly, bool debug) {
     // Randomly choose 0 or 1 for the index of the first or second lepton
@@ -436,12 +460,18 @@ bool moveLeptonToMET(EventNtuple *ntuple, double probIndex1, map<int,int> &lepto
     //int randIndex = mersenne()%2;
     //bernoulli_distribution::param_type pp(0.9)
     //distribution.param(pp)
-    static std::bernoulli_distribution distribution(probIndex1);
-    int randIndex = (int)distribution(mersenne);
-    leptonSelectionCounter[randIndex]++;
+    // Using a single seed/generator and two different distributions for muons and electrons
+    // It would be okay to use a single distribution except that the probIndex1 is not the same and using a
+    //  single distribution would necessitate us resetting the param_type every time we go through the loop.
+    // http://stackoverflow.com/questions/21327249/how-to-generate-uncorrelated-random-sequences-using-c
+    static std::bernoulli_distribution distributionMuon    (probIndex1.first);
+    static std::bernoulli_distribution distributionElectron(probIndex1.second);
+    int randIndex = (ntuple->lLV[0].leptonCat==1) ? (int)distributionMuon(mersenne) : (int)distributionElectron(mersenne);
+    (ntuple->lLV[0].leptonCat==1) ? leptonSelectionCounter.first[randIndex]++ : leptonSelectionCounter.second[randIndex]++;
     if(debug) {
-        cout << "probIndex1: " << probIndex1 << endl;
-        cout << "seed: " << seed << " " << randIndex << endl;
+        cout << "leptonCat: " << ntuple->lLV[0].leptonCat << endl;
+        cout << "probIndex1: " << ((ntuple->lLV[0].leptonCat==1) ? probIndex1.first : probIndex1.second) << endl;
+        cout << "seed: " << seed << " randIndex: " << randIndex << endl;
     }
 
     //
@@ -535,7 +565,7 @@ bool moveLeptonToMET(EventNtuple *ntuple, double probIndex1, map<int,int> &lepto
     if(resetMETMass) {
         double new_M=0.0, new_M2=0.0;
         static TF1 f("f","[3]*ROOT::Math::exponential_cdf_c(x+[0],[1],[2])+(x>1000)*[7]*ROOT::Math::exponential_pdf(x+[4],[5],[6])",0,40000);
-        if(leptonSelectionCounter[0]+leptonSelectionCounter[1]==1) {
+        if(leptonSelectionCounterSum(leptonSelectionCounter,DEFS::both)==1) {
             cout << "Setting the M2 PRNG parameters for the first time ... " << flush;
             f.SetParameters(-5.56021e+01, 4.13745e-03, 5.56021e+01, 6.61098e+03,-9.99958e+02, 1.27623e-03, 4.99997e+01, 2.90200e+04);
             f.SetNpx(500);
@@ -866,5 +896,19 @@ void moveOutputFile(string oFilePath, string oProcessName, string suffix) {
     else {
         cout << "ERROR::moveOutputFile Copy unsuccesful and returned the error code " << copyStatus << endl;
         exit (EXIT_FAILURE);
+    }
+}
+
+//______________________________________________________________________________
+int leptonSelectionCounterSum(pair_map &leptonSelectionCounter, DEFS::LeptonCat leptonCat) {
+    if(leptonCat == DEFS::muon)
+        return leptonSelectionCounter.first[0]+leptonSelectionCounter.first[1];
+    else if(leptonCat == DEFS::electron)
+        return leptonSelectionCounter.second[0]+leptonSelectionCounter.second[1];
+    else if(leptonCat == DEFS::both)
+        return leptonSelectionCounter.first[0]+leptonSelectionCounter.first[1]+leptonSelectionCounter.second[0]+leptonSelectionCounter.second[1];
+    else {
+        cout << "WARNING::ConvertZllJetsToWlnuJetsNtuple_x::leptonSelectionCounterSum Unable to determine the leptonCat and leptonSelectionCounterSum" << endl;
+        return -1;
     }
 }
