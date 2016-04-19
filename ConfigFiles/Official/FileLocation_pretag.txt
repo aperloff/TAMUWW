@@ -51,23 +51,29 @@ ZJets                        |   DYJets.root                                    
 ZJets_JESUp                  |   DYJets_JESUp.root                                  |   microZJets_JESUp_BaseCuts.root
 ZJets_JESDown                |   DYJets_JESDown.root                                |   microZJets_JESDown_BaseCuts.root
 #Used for making the WlnuJets samples
-ZJetsToLL_M10To50            |   DYJetsToLL_M-10To50.root                           |   microWlnuJets_M-10To50_BaseCuts.root
-ZJetsToLL_M50                |   DYJetsToLL_M-50.root                               |   microWlnuJets_M-50_BaseCuts.root
+#ZJetsToLL_M10To50            |   DYJetsToLL_M-10To50_lowerSubLeadingJet.root        |   microWlnuJets_M-10To50_BaseCuts.root
+#ZJetsToLL_M50                |   DYJetsToLL_M-50_lowerSubLeadingJet.root            |   microWlnuJets_M-50_BaseCuts.root
 #Generator level information only
 #ZJetsToLL_M50                |   DYJetsToLL_M-50_GEN.root                           |   microWlnuJets_M-50_GEN_BaseCuts.root
 #Used for the plotter code (The high and low pT leptons were chosen with equal/50% probability)
-#ZJetsToLL_M10To50            |   WlnuJets_M-10To50.root                             |   microWlnuJets_M-10To50_BaseCuts.root
-#ZJetsToLL_M50                |   WlnuJets_M-50.root                                 |   microWlnuJets_M-50_BaseCuts.root
-
-#Used for the plotter code (65% of the time the higher pT lepton was kept)
-#ZJetsToLL_M10To50            |   WlnuJets_M-10To50_HighPtLeptonKept65.root          |   microWlnuJets_M-10To50_HighPtLeptonKept65_BaseCuts.root
-#ZJetsToLL_M50                |   WlnuJets_M-50_HighPtLeptonKept65.root              |   microWlnuJets_M-50_HighPtLeptonKept65_BaseCuts.root
+#ZJetsToLL_M10To50            |   WlnuJetsTest/WlnuJets_M-10To50_HighPtLeptonKept050.root |   microWlnuJets_M-10To50_BaseCuts.root
+#ZJetsToLL_M50                |   WlnuJetsTest/WlnuJets_M-50_HighPtLeptonKept050.root     |   microWlnuJets_M-50_BaseCuts.root
+#Used for the plotter code (50(61)% of the time the higher pT lepton was kept for muons (electrons))
+ZJetsToLL_M10To50            |   WlnuJets_M-10To50_lowerSubLeadingJet_HighPtLeptonKept050mu061el.root          |   microWlnuJets_M-10To50_BaseCuts.root
+ZJetsToLL_M50                |   WlnuJets_M-50_lowerSubLeadingJet_HighPtLeptonKept050mu061el.root              |   microWlnuJets_M-50_BaseCuts.root
 #Used for the plotter code (MET/non-selected lepton was smeared out)
 #ZJetsToLL_M10To50            |   WlnuJets_M-10To50_SmearedMET.root                  |   microWlnuJets_M-10To50_SmearedMET_BaseCuts.root
 #ZJetsToLL_M50                |   WlnuJets_M-50_SmearedMET.root                      |   microWlnuJets_M-50_SmearedMET_BaseCuts.root
+#Used for the plotter code (62% of the time the higher pT lepton was kept and MET/non-selected lepton was smeared out)
+#ZJetsToLL_M10To50            |   WlnuJets_M-10To50_HighPtLeptonKept62_SmearedMET_real.root |   microWlnuJets_M-10To50_SmearedMET_BaseCuts.root
+#ZJetsToLL_M50                |   WlnuJets_M-50_HighPtLeptonKept62_SmearedMET_real.root     |   microWlnuJets_M-50_SmearedMET_BaseCuts.root
 #Used for the plotter code (65% of the time the higher pT lepton was kept and MET/non-selected lepton was smeared out)
 #ZJetsToLL_M10To50            |   WlnuJets_M-10To50_HighPtLeptonKept65_SmearedMET_realphi04.root |   microWlnuJets_M-10To50_SmearedMET_BaseCuts.root
 #ZJetsToLL_M50                |   WlnuJets_M-50_HighPtLeptonKept65_SmearedMET_realphi04.root     |   microWlnuJets_M-50_SmearedMET_BaseCuts.root
+
+#Used for the plotter code (variable % of the time the higher pT lepton was kept)
+#ZJetsToLL_M10To50            |   WlnuJetsTest/WlnuJets_M-10To50_lowerSubLeadingJet_HighPtLeptonKept050.root          |   microWlnuJets_M-10To50_BaseCuts.root
+#ZJetsToLL_M50                |   WlnuJetsTest/WlnuJets_M-50_lowerSubLeadingJet_HighPtLeptonKept050.root              |   microWlnuJets_M-50_BaseCuts.root
 
 DYJets                       |   ZJets.root                                         |   microZJets_BaseCuts.root
 ZpJ                          |   ZJets.root                                         |   microZJets_BaseCuts.root
