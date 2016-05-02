@@ -2,7 +2,9 @@ from os import system
 from ROOT import *
 from math import ceil
 
-basepath = "/eos/uscms/store/user/aperloff/MatrixElement/Summer12ME8TeV/MEInput/"
+#basepath = "/eos/uscms/store/user/aperloff/MatrixElement/Summer12ME8TeV/MEInput/"
+#basepath = "root://cmseos.fnal.gov//store/user/aperloff/MatrixElement/Summer12ME8TeV/MEInput/WlnuJetsTest/"
+basepath = "root://cmseos.fnal.gov//store/user/aperloff/MatrixElement/Summer12ME8TeV/MEInput/"
 
 processes = [
 #"qqH125", #submitted 05/08/2015 #needed completion job (qqH125_0.root) because skipped first 100 events #finished on 
@@ -38,24 +40,32 @@ processes = [
 #"TTH_HToBB_M125_JESDown", #submitted 05/11/2015
 #"TTbar_JESUp", #submitted 05/14/2015
 #"TTbar_JESDown", #submitted 05/14/2015
-"WW_JESUp", #submitted 05/14/2015
-"WW_JESDown", #submitted 05/14/2015
+#"WW_JESUp", #submitted 05/14/2015
+#"WW_JESDown", #submitted 05/14/2015
 #"WJets_matchingdown",
 #"WJets_matchingup",
 #"WJets_scaledown",
 #"WJets_scaleup"
+#"WlnuJets_M-10To50_HighPtLeptonKept062",
+#"WlnuJets_M-50_HighPtLeptonKept062",
+#"WlnuJets_M-10To50_HighPtLeptonKept070",
+#"WlnuJets_M-50_HighPtLeptonKept070",
+#"WlnuJets_M-10To50_HighPtLeptonKept075",
+#"WlnuJets_M-50_HighPtLeptonKept075",
+"WlnuJets_M-10To50_lowerSubLeadingJet_HighPtLeptonKept050mu061el",
+"WlnuJets_M-50_lowerSubLeadingJet_HighPtLeptonKept050mu061el"
 ]
 
 
 template='crab_scriptExe_cfg.py'
 template2='emptyPSet_cfg.py'
 
-nevents = 60.0
+nevents = 100.0
 
 for iprocess in processes:
 	print "Doing Process " + iprocess + " ... "
 
-	ifile=TFile(basepath+iprocess+".root","READ")
+	ifile=TFile.Open(basepath+iprocess+".root","READ")
 	t=ifile.Get("PS/jets2p")
 	n=t.GetEntries()
 	njobs = ceil(n/nevents)

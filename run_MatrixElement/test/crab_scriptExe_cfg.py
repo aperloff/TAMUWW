@@ -16,8 +16,8 @@ config.JobType.inputFiles = ['FrameworkJobReport.xml','../../../../bin/slc6_amd6
 config.JobType.outputFiles = ['PROCESSNAME.root']
 
 config.section_("Data")
-config.Data.userInputFiles = ['root://cmsxrootd.fnal.gov//store/user/aperloff/MatrixElement/Summer12ME8TeV/MEInput/PROCESSNAME.root']
-config.Data.primaryDataset = 'PROCESSNAME'
+#config.Data.userInputFiles = ['root://cmsxrootd.fnal.gov//store/user/aperloff/MatrixElement/Summer12ME8TeV/MEInput/PROCESSNAME.root']
+config.Data.outputPrimaryDataset = 'PROCESSNAME'
 config.Data.splitting = 'EventBased'
 config.Data.unitsPerJob = 1
 NJOBS = NUMBEROFJOBS  # This is not a configuration parameter, but an auxiliary variable that we use in the next line.
