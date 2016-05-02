@@ -3,6 +3,7 @@
 #include "TAMUWW/SpecialTools/interface/Table.hh"
 #include "TAMUWW/SpecialTools/interface/TableRow.hh"
 #include "TAMUWW/SpecialTools/interface/TableCellVal.hh"
+#include "TAMUWW/SpecialTools/interface/TableCellText.hh"
 #include "TAMUWW/SpecialTools/interface/Value.hh"
 #include "TAMUWW/SpecialTools/interface/Defs.hh"
 #include "TAMUWW/SpecialTools/interface/DefaultValues.hh"
@@ -1305,12 +1306,15 @@ void doPlotter(MapOfPlots & plots, vector<PhysicsProcess*> procs, bool doJER, bo
                TString MVAWeightDir, vector<TString> MVAMethods, vector<TString> MVAVars,
                vector<TString> MVASpec, bool verbose);
 
-// write the Canvases and plots to output files 
+/// write the Canvases and plots to output files 
 void writePlotsToFile(TString histoFileName, TString canvasFileName,
                       MapOfPlots & plots, vector<PhysicsProcess*> procs);
 
 /// returns a map containing all of the plots that will be made for each process and their specific attributes
 PlotFiller::MapOfPlots getPlots(DEFS::LeptonCat leptonCat, bool norm_data);
+
+/// Make a table of the plot names from the MapOfPlots (optional: print the table to the command line)
+Table makePlotTable(MapOfPlots& plots);
 
 ////////////////////////////////////////////////////////////////////////////////
 //  main
@@ -1473,10 +1477,12 @@ int main(int argc,char**argv) {
    if(UserFunctions::doBenchmarks)
       UserFunctions::once_benchmark->Reset();
 
-   cout << "Doing lepton category "<<lepCat << endl;
 
    // The vector containing all plots to be made
    MapOfPlots plots = getPlots(UserFunctions::leptonCat,norm_data);
+
+   // Make a table of the plots to be run
+   Table plotTable = makePlotTable(plots);
    
    // The vector holding all processes.
    vector <PhysicsProcess*> procs;
@@ -1511,7 +1517,7 @@ int main(int argc,char**argv) {
    }
 
    // Report Scale Factors
-   cout << "Process " << setw(20) << "<name>" << " will be scaled by " << setw(15) << "<cross section>" << " * " << setw(12) << "<luminosity>"
+   cout << endl << "Process " << setw(20) << "<name>" << " will be scaled by " << setw(15) << "<cross section>" << " * " << setw(12) << "<luminosity>"
         << " * " << setw(14) << "<scale factor>" << " * " << setw(17) << "<branching ratio>" << " / " << setw(15) << "<events in PAT>" << " = " << setw(13) << "<final value>" << endl; 
    for (unsigned p = 0; p< procs.size(); p++) {
       //Reset the scale factors for QCD/WJets if doing systematics
@@ -1567,6 +1573,10 @@ int main(int argc,char**argv) {
          <<" = "<<setw(13)<<procs[p]->getScaleFactor(UserFunctions::leptonCat)<<endl;
    }
 
+   // Print the plot table
+   // I like doing this here for the aesthetics of the printouts
+   plotTable.printTable(cout);
+
    // Fill all the plots 
    doPlotter(plots, procs, UserFunctions::doJER, UserFunctions::doPUreweight, UserFunctions::doCSVreweight, UserFunctions::doTTbarreweight,
              UserFunctions::doFNAL, maxEvts, UserFunctions::WJweight, MVAWeightDir,
@@ -1614,8 +1624,7 @@ void writePlotsToFile(TString histoFileName, TString canvasFileName,
    cout<<"Writing canvas(es) to rootfile "<<canvasFileName<<endl;
    TFile * canOutFile = new TFile(canvasFileName,"RECREATE");
    for ( MapOfPlots::iterator p = plots.begin(); p != plots.end() ; p++)
-      for ( map<string,  Plot * >::iterator p2 = p->second.begin(); 
-            p2 != p->second.end() ; p2++){
+      for ( map<string,  Plot * >::iterator p2 = p->second.begin(); p2 != p->second.end() ; p2++){
             if(UserFunctions::fillLimitTemplatesOnly && 
                ((TString(p2->first).CompareTo("MVADiscriminator")!=0) && (TString(p2->first).CompareTo("MEBDT")!=0) &&
                 (TString(p2->first).CompareTo("KinBDT")!=0) && !(TString(p2->first).Contains("KinMEBDT")) &&
@@ -3075,4 +3084,28 @@ MapOfPlots getPlots(DEFS::LeptonCat leptonCat, bool norm_data){
       UserFunctions::once_benchmark->Stop("getPlots");
 
    return plots;
+}
+
+//______________________________________________________________________________
+Table makePlotTable(MapOfPlots& plots) {
+   Table table("List of Plots");
+   TableRow* tableRow;
+   TableCellText* tableCellText;
+   stringstream out;
+
+   for ( MapOfPlots::iterator p = plots.begin(); p != plots.end() ; p++) {
+      int counter = 0;
+      for ( map<string,  Plot * >::iterator p2 = p->second.begin(); p2 != p->second.end() ; p2++, counter++){
+         out << counter;
+         tableRow = new TableRow(out.str());
+         out.str("");
+         tableCellText = new TableCellText("Plot Name");
+         tableCellText->text = p2->first;
+         tableRow->addCellEntries(tableCellText);
+         table.addRow(*tableRow);
+         delete tableRow;
+      }
+   }
+
+   return table;
 }
