@@ -223,7 +223,14 @@ if runOnMC:
   #inputFiles = cms.untracked.vstring('/store/mc/Summer12_DR53X/WH_ZH_TTH_HToWW_M-125_8TeV-pythia6/AODSIM/PU_S10_START53_V7A-v1/0000/0CE9D2F9-3CF5-E111-A26E-00215E21DC78.root')
   inputFiles = cms.untracked.vstring('/store/user/lnujj/PatTuples_8TeV_53X/custodio/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/SQWaT_PAT_53X_Summer12_v1/829f288d768dd564418efaaf3a8ab9aa/pat_53x_test_v03_100_1_qoN.root')
 else:
-  inputFiles = cms.untracked.vstring('file:/afs/cern.ch/work/d/dimatteo/public/TestSamples/singleEle_532.root')         
+  inputFiles = cms.untracked.vstring('/store/data/Run2012A/SingleMu/AOD/13Jul2012-v1/00000/001D2347-D8D0-E111-A115-1CC1DE1D0600.root',
+                                     '/store/data/Run2012A/SingleMu/AOD/13Jul2012-v1/00000/00467077-E6D0-E111-A114-00266CFFC0C0.root',
+                                     '/store/data/Run2012A/SingleMu/AOD/13Jul2012-v1/00000/00665023-27D0-E111-945A-00266CFF0840.root',
+                                     '/store/data/Run2012A/SingleMu/AOD/13Jul2012-v1/00000/006AD7C4-3ED2-E111-A705-1CC1DE05D2F8.root',
+                                     '/store/data/Run2012A/SingleMu/AOD/13Jul2012-v1/00000/009C369E-85D0-E111-BD58-1CC1DE046FC0.root',
+                                     '/store/data/Run2012A/SingleMu/AOD/13Jul2012-v1/00000/00CBDDFD-E0D0-E111-A5A8-00266CFFC0C0.root',
+                                     '/store/data/Run2012A/SingleMu/AOD/13Jul2012-v1/00000/026DA000-82D0-E111-9930-1CC1DE046F18.root')
+  #inputFiles = cms.untracked.vstring('file:/afs/cern.ch/work/d/dimatteo/public/TestSamples/singleEle_532.root')         
 
 process.source.fileNames = inputFiles
 process.maxEvents.input  = maxInputEvents

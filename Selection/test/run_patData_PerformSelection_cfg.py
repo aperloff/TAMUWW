@@ -158,7 +158,7 @@ useRelVals = False # if 'False', "inputFiles" is used
 inputFiles = [] # overwritten, if "useRelVals" is 'True'
 
 # maximum number of events
-maxInputEvents = 2000 # reduce for testing
+maxInputEvents = 1000 # reduce for testing
 
 ### Conditions
 
@@ -219,7 +219,9 @@ if useRelVals:
                                      )
 
 if runOnMC:
-  inputFiles = cms.untracked.vstring('file:/afs/cern.ch/work/d/dimatteo/public/TestSamples/RelValTTbar.root')
+  #inputFiles = cms.untracked.vstring('file:/afs/cern.ch/work/d/dimatteo/public/TestSamples/RelValTTbar.root')
+  #inputFiles = cms.untracked.vstring('/store/mc/Summer12_DR53X/WH_ZH_TTH_HToWW_M-125_8TeV-pythia6/AODSIM/PU_S10_START53_V7A-v1/0000/0CE9D2F9-3CF5-E111-A26E-00215E21DC78.root')
+  inputFiles = cms.untracked.vstring('/store/user/lnujj/PatTuples_8TeV_53X/custodio/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/SQWaT_PAT_53X_Summer12_v1/829f288d768dd564418efaaf3a8ab9aa/pat_53x_test_v03_100_1_qoN.root')
 else:
   inputFiles = cms.untracked.vstring('/store/data/Run2012A/SingleMu/AOD/13Jul2012-v1/00000/001D2347-D8D0-E111-A115-1CC1DE1D0600.root',
                                      '/store/data/Run2012A/SingleMu/AOD/13Jul2012-v1/00000/00467077-E6D0-E111-A114-00266CFFC0C0.root',
@@ -1686,8 +1688,8 @@ if runPF2PAT:
   process.PS.pileupSource      = cms.InputTag('addPileupInfo')                        # InputTag for pileupSummaryInfos collection
   
       #-----Trigger Information
-  #process.PS.muTrigger         = cms.vstring('HLT_IsoMu24_eta2p1_v*')                 # Muon trigger name
-  process.PS.muTrigger         = cms.vstring('HLT_Mu24_eta2p1_v*')                    # Muon trigger name
+  process.PS.muTrigger         = cms.vstring('HLT_IsoMu24_eta2p1_v*')                 # Muon trigger name
+  #process.PS.muTrigger         = cms.vstring('HLT_Mu24_eta2p1_v*')                    # Muon trigger name
   #process.PS.muTrigger         = cms.vstring('HLT_IsoMu24_*',"HLT_IsoMu30_*")                 # Muon trigger name
   process.PS.eleTrigger        = cms.vstring('HLT_Ele27_WP80_v*')                     # Electron trigger name
   #process.PS.eleTrigger        = cms.vstring('HLT_Ele27_*','HLT_Ele32_*')                     # Electron trigger name 
@@ -1706,15 +1708,21 @@ if runPF2PAT:
   process.PS.doDetectorIso     = cms.bool(False)               # if true, use a rho corrected, detector based isolation cut
   process.PS.doPFIso           = cms.bool(True)                # if true, use a rho corrected, PF based isolation cut
   process.PS.doMVAeleSel       = cms.bool(True)                # if true, use the MVA based electron selection
-  process.PS.noMVAIsoCut       = cms.bool(True)                # if true, turn off the MVA and PF isolation requirements to make a "Full" sample
+  process.PS.noMVAIsoCut       = cms.bool(False)               # if true, turn off the MVA and PF isolation requirements to make a "Full" sample
   process.PS.doJER             = cms.bool(True)                # if true, JER corrections will be applied to all of the jets before passing selection
   process.PS.doMETPhi          = cms.bool(True)                # if true, the inherent METx and METy shifts will be corrected for using hard coded functions only needed before CMSSW_6_2_X
+  process.PS.doJESUncertainty  = cms.bool(False)               # if true, turns on the jet uncertainty scaling
+  process.PS.JESUncertainty    = cms.string("up")            # if none, the jet energy uncertainty is stored
+                                                               # if up, the jet energy is scaled up by the uncertainty
+                                                               # if down, the jet energy is scaled down by the uncertainty
+  process.PS.JESUncertaintyType= cms.string("TotalNoTime")     # JES uncertainty collection
+  process.PS.JESUncertaintyFile= cms.string("Winter14_V5_DATA_UncertaintySources_AK5PFchs.txt")
   
   process.PS.Data              = cms.bool(True)                # is the dataset from real data or Monte Carlo
   process.PS.MCpTrigger        = cms.bool(False)               # if true, only event that pass the trigger requirements will be saved
   process.PS.saveGenParticles  = cms.bool(False)               # save the generated particle information for hard scatter decays
   process.PS.saveMETPhiPlots   = cms.bool(False)               # save the TH1D and TH2D plots that have to do with MET Phi Corrections.
-  process.PS.noMETCut          = cms.bool(False)               # disregard the MET cut when storing the events
+  process.PS.noMETCut          = cms.bool(True)                # disregard the MET cut when storing the events
   process.PS.invertEID         = cms.bool(False)               # electrons which *fail* at least two of the EID requirements will be kept instead
   process.PS.PFlowLoose        = cms.bool(False)               # use the collections with the PF2PAT postfix=PFlowLoose (instead of PFlow)
   process.PS.elONLY            = cms.bool(False)               # only save the output if the lepton is an electron
@@ -1729,6 +1737,7 @@ if runPF2PAT:
   process.PS.elcnt_Loose                = cms.int32(0)
   process.PS.mucnt_Prim                 = cms.int32(0)
   process.PS.mucnt_Loose                = cms.int32(0)
+  process.PS.leptonCnt                  = cms.int32(2)
   process.PS.jcnt_tot                   = cms.int32(0)
   process.PS.EvtTotCount                = cms.int32(0)
   process.PS.mu_passAll                 = cms.bool(False)
@@ -1835,7 +1844,7 @@ if runPF2PAT:
   
       #-----MET Variable Inputs
   process.PS.MET_PtMin                  = cms.double(25)
-  process.PS.MET_PtMin_invertEID        = cms.double(25)
+  process.PS.MET_PtMin_invertEID        = cms.double(20)
   
       #-----Additional Variable Inputs
   process.PS.lTotIso                    = cms.double(-1)
