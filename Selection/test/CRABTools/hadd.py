@@ -10,7 +10,8 @@ from time import sleep
 #output_file = "/uscms_data/d2/aperloff/DYJetsToLL_M-10to50_script"
 #output_file = "/uscms_data/d2/aperloff/WlnuJets_M-50_HighPtLeptonKept062"
 #output_file = "/uscms_data/d2/aperloff/WlnuJets_M-50_HighPtLeptonKept075"
-output_file = "/uscms_data/d2/aperloff/DYJetsToLL_M-10to50_lowerSubLeadingJet"
+#output_file = "/uscms_data/d2/aperloff/DYJetsToLL_M-10to50_lowerSubLeadingJet"
+output_file = "/uscms_data/d2/aperloff/WlnuJets_M-50_lowerSubLeadingJet_HighPtLeptonKept050mu061el_partialHadd/WlnuJets_M-50_lowerSubLeadingJet_HighPtLeptonKept050mu061el"
 
 USEGLOB = False
 #files = glob("/eos/uscms/store/user/aperloff/MatrixElement/PS_outfiles_20130916_MC13/WJets_part1_nominal/PS_*.root")
@@ -23,7 +24,8 @@ USEGLOB = False
 #lsCmd = "eos root://cmseos.fnal.gov/ find /store/user/aperloff/MatrixElement/Summer12ME8TeV/MEResults/rootOutput/WlnuJets_M-50_HighPtLeptonKept062/crab_run_MatrixElement_WlnuJets_M-50_HighPtLeptonKept062/160309_233526/ | grep -v failed | grep -v log | grep -F .root"
 #lsCmd = "eos root://cmseos.fnal.gov/ find /store/user/aperloff/MatrixElement/Summer12ME8TeV/MEResults/rootOutput/WlnuJets_M-50_HighPtLeptonKept070/crab_run_MatrixElement_WlnuJets_M-50_HighPtLeptonKept070_v2/160320_062201/ | grep -v failed | grep -v log | grep -F .root"
 #lsCmd = "eos root://cmseos.fnal.gov/ find /store/user/aperloff/MatrixElement/Summer12ME8TeV/MEResults/rootOutput/WlnuJets_M-50_HighPtLeptonKept075/crab_run_MatrixElement_WlnuJets_M-50_HighPtLeptonKept075_v2/160320_062308/ | grep -v failed | grep -v log | grep -F .root"
-lsCmd = "eos root://cmseos.fnal.gov/ find /store/user/aperloff/MatrixElement/PS_outfiles_20150202_MC20/ | grep -F .root"
+#lsCmd = "eos root://cmseos.fnal.gov/ find /store/user/aperloff/MatrixElement/PS_outfiles_20150202_MC20/ | grep -F .root"
+lsCmd = "eos root://cmseos.fnal.gov/ find /store/user/eusebi/Winter12to13ME8TeV/rootOutput/WlnuJets_M-50_lowerSubLeadingJet_HighPtLeptonKept050mu061el/ | grep -F .root"
 p = subprocess.Popen(lsCmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 files, err = p.communicate()
 
