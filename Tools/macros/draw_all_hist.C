@@ -133,6 +133,7 @@ TCanvas* draw_all_hist(TString objectName = "", TString scaleToHistPattern = "",
         }
         else{
             h->Draw("same");
+            h->GetXaxis()->SetRangeUser(xmin,xmax);
         }
 
         string name = h->GetName();
@@ -189,19 +190,19 @@ void draw_all_standard(bool save = false, bool batch = false, bool doLogY = true
     if(batch)
         gROOT->SetBatch(kTRUE);
     
-    draw_all_hist("LeptPt_","WJets_*",true,true,doLogY,true);
-    draw_all_hist("MET_","WJets_*",true,true,doLogY,true);
-    draw_all_hist("WmT_","WJets_*",true,true,doLogY,true);
-    draw_all_hist("Ptjj_","WJets_*",true,true,doLogY,true);
-    draw_all_hist("Jet1Pt_","WJets_*",true,true,doLogY,true);
-    draw_all_hist("Jet2Pt_","WJets_*",true,true,doLogY,true);
-    draw_all_hist("Ptlv_","WJets_*",true,true,doLogY,true);
-    draw_all_hist("Mlv_","WJets_*",true,true,doLogY,true);
-    draw_all_hist("Mlvjj_","WJets_*",true,true,doLogY,true);
-    draw_all_hist("LeptPhi_","WJets_*",true,false,false,true,-TMath::Pi(),TMath::Pi());
-    draw_all_hist("LeptEta_","WJets_*",true,false,false,true,-TMath::Pi(),TMath::Pi());
-    draw_all_hist("Jet1Eta_","WJets_*",true,false,false,true,-TMath::Pi(),TMath::Pi());
-    draw_all_hist("Jet1Phi_","WJets_*",true,false,false,true,-TMath::Pi(),TMath::Pi());
+    draw_all_hist("LeptPt_",       "WJets_*",true,true,doLogY,true);
+    draw_all_hist("MET_",          "WJets_*",true,true,doLogY,true);
+    draw_all_hist("WmT_",          "WJets_*",true,true,doLogY,true);
+    draw_all_hist("Ptjj_",         "WJets_*",true,true,doLogY,true);
+    draw_all_hist("Jet1Pt_",       "WJets_*",true,true,doLogY,true);
+    draw_all_hist("Jet2Pt_",       "WJets_*",true,true,doLogY,true);
+    draw_all_hist("Ptlv_",         "WJets_*",true,true,doLogY,true);
+    draw_all_hist("Mlv_",          "WJets_*",true,true,doLogY,true);
+    draw_all_hist("Mlvjj_",        "WJets_*",true,true,doLogY,true);
+    draw_all_hist("LeptPhi_",      "WJets_*",true,false,false,true,-TMath::Pi(),TMath::Pi());
+    draw_all_hist("LeptEta_",      "WJets_*",true,false,false,true,-TMath::Pi(),TMath::Pi());
+    draw_all_hist("Jet1Eta_",      "WJets_*",true,false,false,true,-TMath::Pi(),TMath::Pi());
+    draw_all_hist("Jet1Phi_",      "WJets_*",true,false,false,true,-TMath::Pi(),TMath::Pi());
     draw_all_hist("DeltaPhi_LMET_","WJets_*",true,false,false,true,-TMath::Pi(),TMath::Pi());
 
     if(save) {
@@ -210,7 +211,27 @@ void draw_all_standard(bool save = false, bool batch = false, bool doLogY = true
     }
 }
 
-void makeSetOfStandardCanvases(bool save = true, bool batch = true) {
+void draw_me_validation(bool save = false, bool batch = false, bool doLogY = false) {
+    if(batch)
+        gROOT->SetBatch(kTRUE);
+    
+    for(int i=0; i<=12; i++) {
+        draw_all_hist(Form("tEventProb%i_",i),"WJets_*",true,false,doLogY,true,-20.0,0.0);
+    }
+    draw_all_hist(Form("tEventProb%i_",19),"WJets_*",true,false,doLogY,true,-20.0,0.0);
+    draw_all_hist(Form("tEventProb%i_",54),"WJets_*",true,false,doLogY,true,-20.0,0.0);
+    draw_all_hist("KinMEBDT_",             "WJets_*",true,false,doLogY,true,-1.0,1.0);
+    draw_all_hist("MEBDT_",                "WJets_*",true,false,doLogY,true,-1.0,1.0);
+    draw_all_hist("KinBDT_",               "WJets_*",true,false,doLogY,true,-1.0,1.0);
+
+
+    if(save) {
+        save_all_canvases("./",".png");
+        save_all_canvases("./",".eps");
+    }
+}
+
+void makeSetOfCanvases(bool standard = true, bool save = true, bool batch = true) {
     if(batch)
       gROOT->SetBatch(kTRUE);
 
@@ -225,7 +246,10 @@ void makeSetOfStandardCanvases(bool save = true, bool batch = true) {
         for(int k=0; k<2; k++) {
             cout << "\t\t" << lepton[k] << endl;
             ifile = TFile::Open(Form("%s/%s/histos_%s_%s.root",jet[j].Data(),lepton[k].Data(),lepton[k].Data(),jet[j].Data()),"READ");
-            draw_all_standard(false,true,false);
+            if(standard)
+                draw_all_standard(false,true,false);
+            else
+                draw_me_validation(false,true,false);
             save_all_canvases(Form("%s/%s/",jet[j].Data(),lepton[k].Data()),".png");
             DestroyCanvases();
         }

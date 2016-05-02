@@ -263,8 +263,10 @@ void doThis(TString title){
    cout << "DONE" << endl;
 }
 /*************************************************************************************************************/
-TString samples[14] = {"QCD","STopS_Tbar","STopTW_T","STopTW_Tbar","STopT_T","STopT_Tbar","TTbar","WH125","WJets","WW","WZ","ZJets","ggH125","qqH125"};
-Color_t colors[14] = {kBlack,kRed,kOrange,kGreen,kBlue,kViolet,kMagenta,kCyan,36,30,46,42,40,41};
+//TString samples[15] = {"QCD","STopS_Tbar","STopTW_T","STopTW_Tbar","STopT_T","STopT_Tbar","TTbar","WH125","WJets","WW","WZ","ZJets","ggH125","qqH125","WlnuJets"};
+//Color_t colors[15] = {kBlack,kRed,kOrange,kGreen,kBlue,kViolet,kMagenta,kCyan,36,30,46,42,40,41,kBlack};
+TString samples[2] = {"WJets","ZJets","WlnuJets"};
+Color_t colors[2] = {kGreen,kBlue,kRed};
 TString ep[9] = {"WW","WZ","WLg","WLg sub","Wgg","WLL","QCD","ggH125","WH125"};
 TString eps[9] = {"0","1","3","4","5","6","12","19","54"}
 
@@ -273,45 +275,51 @@ void eventProbPlot_2() {
    TCanvas* c = new TCanvas("c","c",1200,950);
    c->Divide(3,3);
 
-   TFile* fQCD         = new TFile("/uscms_data/d2/aperloff/Summer12ME8TeV/MEResults/microNtuples_optimized/microQCD_Electron_Dp6p7_BaseCuts.root","READ");
-   TFile* fSTopS_Tbar  = new TFile("/uscms_data/d2/aperloff/Summer12ME8TeV/MEResults/microNtuples_optimized/microSTopS_Tbar_BaseCuts.root","READ");
-   TFile* fSTopTW_T    = new TFile("/uscms_data/d2/aperloff/Summer12ME8TeV/MEResults/microNtuples_optimized/microSTopTW_T_BaseCuts.root","READ");
-   TFile* fSTopTW_Tbar = new TFile("/uscms_data/d2/aperloff/Summer12ME8TeV/MEResults/microNtuples_optimized/microSTopTW_Tbar_BaseCuts.root","READ");
-   TFile* fSTopT_T     = new TFile("/uscms_data/d2/aperloff/Summer12ME8TeV/MEResults/microNtuples_optimized/microSTopT_T_BaseCuts.root","READ");
-   TFile* fSTopT_Tbar  = new TFile("/uscms_data/d2/aperloff/Summer12ME8TeV/MEResults/microNtuples_optimized/microSTopT_Tbar_BaseCuts.root","READ");
-   TFile* fTTbar       = new TFile("/uscms_data/d2/aperloff/Summer12ME8TeV/MEResults/microNtuples_optimized/microTTbar_BaseCuts.root","READ");
-   TFile* fWH125       = new TFile("/uscms_data/d2/aperloff/Summer12ME8TeV/MEResults/microNtuples_optimized/microWH125_BaseCuts.root","READ");
-   TFile* fWJets       = new TFile("/uscms_data/d2/aperloff/Summer12ME8TeV/MEResults/microNtuples_optimized/microWJets_BaseCuts.root","READ");
-   TFile* fWW          = new TFile("/uscms_data/d2/aperloff/Summer12ME8TeV/MEResults/microNtuples_optimized/microWW_BaseCuts.root","READ");
-   TFile* fWZ          = new TFile("/uscms_data/d2/aperloff/Summer12ME8TeV/MEResults/microNtuples_optimized/microWZ_BaseCuts.root","READ");
-   TFile* fZJets       = new TFile("/uscms_data/d2/aperloff/Summer12ME8TeV/MEResults/microNtuples_optimized/microZJets_BaseCuts.root","READ");
-   TFile* fggH125      = new TFile("/uscms_data/d2/aperloff/Summer12ME8TeV/MEResults/microNtuples_optimized/microggH125_BaseCuts.root","READ");
-   TFile* fqqH125      = new TFile("/uscms_data/d2/aperloff/Summer12ME8TeV/MEResults/microNtuples_optimized/microqqH125_BaseCuts.root","READ");
+   //TFile* fQCD         = TFile::Open("root://cmseos.fnal.gov//store/user/aperloff//MatrixElement/Summer12ME8TeV/MEResults/2015_07_23_microNtuples_optimized_BDT/rootFiles/microSingleEl_Full_Subset_BaseCuts.root","READ");
+   //TFile* fSTopS_Tbar  = TFile::Open("root://cmseos.fnal.gov//store/user/aperloff//MatrixElement/Summer12ME8TeV/MEResults/2015_07_23_microNtuples_optimized_BDT/rootFiles/microSTopS_Tbar_BaseCuts.root","READ");
+   //TFile* fSTopTW_T    = TFile::Open("root://cmseos.fnal.gov//store/user/aperloff//MatrixElement/Summer12ME8TeV/MEResults/2015_07_23_microNtuples_optimized_BDT/rootFiles/microSTopTW_T_BaseCuts.root","READ");
+   //TFile* fSTopTW_Tbar = TFile::Open("root://cmseos.fnal.gov//store/user/aperloff//MatrixElement/Summer12ME8TeV/MEResults/2015_07_23_microNtuples_optimized_BDT/rootFiles/microSTopTW_Tbar_BaseCuts.root","READ");
+   //TFile* fSTopT_T     = TFile::Open("root://cmseos.fnal.gov//store/user/aperloff//MatrixElement/Summer12ME8TeV/MEResults/2015_07_23_microNtuples_optimized_BDT/rootFiles/microSTopT_T_BaseCuts.root","READ");
+   //TFile* fSTopT_Tbar  = TFile::Open("root://cmseos.fnal.gov//store/user/aperloff//MatrixElement/Summer12ME8TeV/MEResults/2015_07_23_microNtuples_optimized_BDT/rootFiles/microSTopT_Tbar_BaseCuts.root","READ");
+   //TFile* fTTbar       = TFile::Open("root://cmseos.fnal.gov//store/user/aperloff//MatrixElement/Summer12ME8TeV/MEResults/2015_07_23_microNtuples_optimized_BDT/rootFiles/microTTbar_BaseCuts.root","READ");
+   //TFile* fWH125       = TFile::Open("root://cmseos.fnal.gov//store/user/aperloff//MatrixElement/Summer12ME8TeV/MEResults/2015_07_23_microNtuples_optimized_BDT/rootFiles/microWH125_HToBB_BaseCuts.root","READ");
+   TFile* fWJets       = TFile::Open("root://cmseos.fnal.gov//store/user/aperloff//MatrixElement/Summer12ME8TeV/MEResults/2015_07_23_microNtuples_optimized_BDT/rootFiles/microWJets_BaseCuts.root","READ");
+   //TFile* fWW          = TFile::Open("root://cmseos.fnal.gov//store/user/aperloff//MatrixElement/Summer12ME8TeV/MEResults/2015_07_23_microNtuples_optimized_BDT/rootFiles/microWW_BaseCuts.root","READ");
+   //TFile* fWZ          = TFile::Open("root://cmseos.fnal.gov//store/user/aperloff//MatrixElement/Summer12ME8TeV/MEResults/2015_07_23_microNtuples_optimized_BDT/rootFiles/microWZ_BaseCuts.root","READ");
+   TFile* fZJets       = TFile::Open("root://cmseos.fnal.gov//store/user/aperloff//MatrixElement/Summer12ME8TeV/MEResults/2015_07_23_microNtuples_optimized_BDT/rootFiles/microZJets_BaseCuts.root","READ");
+   //TFile* fggH125      = TFile::Open("root://cmseos.fnal.gov//store/user/aperloff//MatrixElement/Summer12ME8TeV/MEResults/2015_07_23_microNtuples_optimized_BDT/rootFiles/microggH125_BIG_BaseCuts.root","READ");
+   //TFile* fqqH125      = TFile::Open("root://cmseos.fnal.gov//store/user/aperloff//MatrixElement/Summer12ME8TeV/MEResults/2015_07_23_microNtuples_optimized_BDT/rootFiles/microqqH125_BaseCuts.root","READ");
+   TFile* fWlnuJets    = TFile::Open("root://cmseos.fnal.gov//store/user/aperloff//MatrixElement/Summer12ME8TeV/MEResults/2015_07_23_microNtuples_optimized_BDT/rootFiles/microWlnuJets_M-50_lowerSubLeadingJet_HighPtLeptonKept050mu061el_BaseCuts.root","READ");
 
-   TFile* fArray[14];
-   fArray[0] = fQCD;
-   fArray[1] = fSTopS_Tbar;
-   fArray[2] = fSTopTW_T;
-   fArray[3] = fSTopTW_Tbar;
-   fArray[4] = fSTopT_T;
-   fArray[5] = fSTopT_Tbar;
-   fArray[6] = fTTbar;
-   fArray[7] = fWH125;
-   fArray[8] = fWJets;
-   fArray[9] = fWW;
-   fArray[10] = fWZ;
-   fArray[11] = fZJets;
-   fArray[12] = fggH125;
-   fArray[13] = fqqH125;
+   //TFile* fArray[15];
+   //fArray[0] = fQCD;
+   //fArray[1] = fSTopS_Tbar;
+   //fArray[2] = fSTopTW_T;
+   //fArray[3] = fSTopTW_Tbar;
+   //fArray[4] = fSTopT_T;
+   //fArray[5] = fSTopT_Tbar;
+   //fArray[6] = fTTbar;
+   //fArray[7] = fWH125;
+   //fArray[8] = fWJets;
+   //fArray[9] = fWW;
+   //fArray[10] = fWZ;
+   //fArray[11] = fZJets;
+   //fArray[12] = fggH125;
+   //fArray[13] = fqqH125;
+   //fArray[14] = fWlnuJets;
+
+   TFile* fArray[3];
+   fArray[0] = fWJets;
+   fArray[1] = fZJets;
+   fArray[2] = fWlnuJets;
 
    for(unsigned int iep=0; iep<9; iep++) {
       c->cd(iep+1);
-      doThis_2(iep,ep[iep]+" eventProbs",fArray);
+      doThis_2(iep,ep[iep]+" eventProbs",fArray,sizeof(fArray)/sizeof(*fArray));
       c->Update();
    }
 
    c->SaveAs("eventProbs_2.eps");
-   c->SaveAs("eventProbs_2.pdf");
    c->SaveAs("eventProbs_2.png");
 
    ofile->cd();
@@ -319,8 +327,8 @@ void eventProbPlot_2() {
    ofile->Close();
 }
 
-void doThis_2(int iep, TString title, TFile* fArray[14]){
-   cout << "\tPlotting " << title << " ... " << std::flush;
+void doThis_2(int iep, TString title, TFile* fArray[15], int array_size){
+   cout << "\tPlotting " << title << " ... " << std::endl;
    gPad->SetTitle(title);
    TPaveText *pt = new TPaveText(.05,.94,.95,0.99,"brNDC");
    pt->SetFillColor(0);
@@ -333,9 +341,14 @@ void doThis_2(int iep, TString title, TFile* fArray[14]){
    double min = -30.0;
    double max = 0.0;
    bool minSet = false;
-   for(unsigned int isample=0; isample<14; isample++) {
+   for(unsigned int isample=0; isample<array_size; isample++) {
+      cout << "\t\tDoing sample (" << isample+1 << "/" << array_size << ") ... " << std::flush;
       fArray[isample]->cd();
       METree->SetLineColor(colors[isample]);
+      if (isample == array_size-1)
+         METree->SetLineStyle(kDashed);
+      else
+         METree->SetLineStyle(kSolid);
       if(isample==0) {
          METree->Draw("TMath::Log10(eventProb["+eps[iep]+"])>>"+samples[isample]+"_"+ep[iep],"","norm");
       }
@@ -361,11 +374,11 @@ void doThis_2(int iep, TString title, TFile* fArray[14]){
       }
       htemp->GetXaxis()->SetRangeUser(min,max);
       l->AddEntry(htemp,samples[isample],"l");
+      cout << "DONE" << endl;
    }
    l->Draw("same");
    pt->Draw("same");
 
-   cout << "DONE" << endl;
 }
 
 /*
