@@ -1476,7 +1476,6 @@ if runPF2PAT:
 ### Added fix when switched to SL6 05/02/2016
 process.hpsPFTauDiscriminationByIsolationMVArawPFlow.rhoProducer = cms.InputTag('kt6PFJetsPFlow','rho')
 process.hpsPFTauDiscriminationByIsolationMVA2rawPFlow.rhoProducer = cms.InputTag('kt6PFJetsPFlow','rho')
-#process.combinedMVABJetTagsAODPFlow.tagInfos = cms.VInputTag(cms.InputTag("impactParameterTagInfosAODPFlow"), cms.InputTag("inclusiveSecondaryVertexFinderTagInfosAODPFlow"), cms.InputTag("softMuonTagInfosAODPFlow"))#, cms.InputTag("softPFElectronsTagInfosAODPFlow"))
 
 # The paths
 if runStandardPAT:
