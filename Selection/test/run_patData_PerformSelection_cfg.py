@@ -158,7 +158,7 @@ useRelVals = False # if 'False', "inputFiles" is used
 inputFiles = [] # overwritten, if "useRelVals" is 'True'
 
 # maximum number of events
-maxInputEvents = 1000 # reduce for testing
+maxInputEvents = 5000 # reduce for testing
 
 ### Conditions
 
@@ -752,8 +752,7 @@ if runStandardPAT:
   process.kt6PFJets = kt6PFJets.clone( src          = cms.InputTag( 'particleFlow' )
                                      , doRhoFastjet = True
                                      )
-                                     
-                                   
+
   # compute FastJet rho to correct isolation
   #process.kt6PFJetsForIsolation = kt6PFJets.clone()
   #process.kt6PFJetsForIsolation.Rho_EtaMax = cms.double(2.5)
@@ -1474,6 +1473,10 @@ if runPF2PAT:
       electronSource = cms.InputTag("selectedPatElectronsPFlow")  
       )
 
+### Added fix when switched to SL6 05/02/2016
+process.hpsPFTauDiscriminationByIsolationMVArawPFlow.rhoProducer = cms.InputTag('kt6PFJetsPFlow','rho')
+process.hpsPFTauDiscriminationByIsolationMVA2rawPFlow.rhoProducer = cms.InputTag('kt6PFJetsPFlow','rho')
+#process.combinedMVABJetTagsAODPFlow.tagInfos = cms.VInputTag(cms.InputTag("impactParameterTagInfosAODPFlow"), cms.InputTag("inclusiveSecondaryVertexFinderTagInfosAODPFlow"), cms.InputTag("softMuonTagInfosAODPFlow"))#, cms.InputTag("softPFElectronsTagInfosAODPFlow"))
 
 # The paths
 if runStandardPAT:
@@ -1659,7 +1662,7 @@ if runPF2PAT:
   if use3Jets:
     pPF += getattr( process, 'step4c' + postfix )
   if use4Jets:
-    pPF += getattr( process, 'step5' + postfix )
+    pPF += getattr( process, 'step5' + postfix )                                   
 
 
 #PerformSelectionCrab part of code
@@ -1721,6 +1724,7 @@ if runPF2PAT:
   process.PS.Data              = cms.bool(True)                # is the dataset from real data or Monte Carlo
   process.PS.MCpTrigger        = cms.bool(False)               # if true, only event that pass the trigger requirements will be saved
   process.PS.saveGenParticles  = cms.bool(False)               # save the generated particle information for hard scatter decays
+  process.PS.particleStatus    = cms.int32(3)                  # The hard scatter particle status (eliminates the shower particles and protons). Pythia6 = 3, herwigpp = 2
   process.PS.saveMETPhiPlots   = cms.bool(False)               # save the TH1D and TH2D plots that have to do with MET Phi Corrections.
   process.PS.noMETCut          = cms.bool(True)                # disregard the MET cut when storing the events
   process.PS.invertEID         = cms.bool(False)               # electrons which *fail* at least two of the EID requirements will be kept instead
