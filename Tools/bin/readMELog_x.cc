@@ -28,6 +28,10 @@ using namespace std;
 /// prints out the average CPU times and real times for each of the ME processes
 void average_times_per_process(string ifile);
 
+/// prints out the average CPU times and real times for each of the ME processes,
+///  but uses the logs stored in the ROOT files instead of the text file logs
+void average_times_per_process_root(string ifile);
+
 ////////////////////////////////////////////////////////////////////////////////
 //  main
 ////////////////////////////////////////////////////////////////////////////////
@@ -52,7 +56,14 @@ int main(int argc,char**argv) {
 
    // Analyze the log file
    cout << "readMELog::Average times for " << mcSample << " sample:" << endl;
-   average_times_per_process(ifile);
+   if(ifile.find(".txt")!=string::npos)
+      average_times_per_process(ifile);
+   else if(ifile.find("*.root")!=string::npos)
+      average_times_per_process_root(ifile);
+   else
+      cout << "ERROR::readMELog_x Can't process the ME logs because the input file type is not a known type [txt or root]" << endl;
+      std::terminate();
+
    
    // benchmark this executable
    m_benchmark->Stop("event");
@@ -169,3 +180,8 @@ void average_times_per_process(string ifile) {
    fin.close();
 
 }//average_times_per_process
+
+//______________________________________________________________________________
+void average_times_per_process_root(string ifile) {
+
+}//average_times_per_process_root
