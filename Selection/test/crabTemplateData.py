@@ -12,6 +12,7 @@ config.JobType.inputFiles = ['Winter14_V5_DATA_UncertaintySources_AK5PFchs.txt']
 config.section_("Data")
 config.Data.inputDataset = 'INPUTDATASET'
 config.Data.inputDBS = 'https://cmsweb.cern.ch/dbs/prod/DBSURL/DBSReader/'
+#config.Data.splitting = 'EventAwareLumiBased'
 config.Data.splitting = 'LumiBased'
 config.Data.unitsPerJob = UNITSPERJOB
 config.Data.lumiMask = 'LUMIMASK'
