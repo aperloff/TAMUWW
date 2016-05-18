@@ -56,7 +56,7 @@ int main(int argc,char**argv) {
 
    // Analyze the log file
    cout << "readMELog::Average times for " << mcSample << " sample:" << endl;
-   if(ifile.find(".txt")!=string::npos)
+   if(ifile.find(".txt")!=string::npos || ifile.find(".stdout")!=string::npos)
       average_times_per_process(ifile);
    else if(ifile.find("*.root")!=string::npos)
       average_times_per_process_root(ifile);
