@@ -31,7 +31,12 @@ def do_hadd(input_path, pattern, file_types):
     files = checkfiles.get_list_of_files(pattern=pattern, file_types=file_types, path=input_path)
 
     file_split = len(files)/900
-    files = [f.replace('/eos/uscms', 'root://cmseos.fnal.gov/') for f in files]
+
+    stores = ("/store/user/","/store/group/")
+    if any(x in input_path for x in stores) and ("/eos/uscms/" not in input_path):
+        files = [f.replace('/eos/uscms', 'root://cmseos.fnal.gov/') for f in files]
+    else:
+        files = [input_path+f for f in files]
 
     if DEBUG:
         print "Files after splitting and filtering:\n"

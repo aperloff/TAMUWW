@@ -50,6 +50,10 @@ ZJets_JESUp     			 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
 ZJets_JESDown     			 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
 ZJetsToLL_M10To50			 |  1.000 	 +/- 0.00        |  Inclusive
 ZJetsToLL_M50				 |  1.000 	 +/- 0.00        |  Inclusive
+SingleEl_ZJetsToLL  		 |  1.000 	 +/- 0.00        |  Inclusive
+SingleMu_ZJetsToLL  		 |  1.000 	 +/- 0.00        |  Inclusive
+SingleEl_WlnuJets   		 |  1.000 	 +/- 0.00        |  Inclusive
+SingleMu_WlnuJets   		 |  1.000 	 +/- 0.00        |  Inclusive
 DYJets                  	 |  1.000 	 +/- 0.00        |  Inclusive
 DYJets_JESUp                 |  1.000 	 +/- 0.00        |  Inclusive, Systematic
 DYJets_JESDown               |  1.000 	 +/- 0.00        |  Inclusive, Systematic

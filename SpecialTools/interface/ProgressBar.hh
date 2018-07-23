@@ -10,10 +10,12 @@
 
 #include <iostream>
 #include <iomanip>
+#include <string>
 
 using std::cout;
 using std::setw;
 using std::flush;
+using std::string;
 
 class ProgressBar {
 public:
@@ -21,6 +23,7 @@ public:
   // C Versions
   static void loadbar(unsigned int x, unsigned int n, unsigned int w = 50); //static inline?
   static void loadbar2(unsigned int x, unsigned int n, unsigned int w = 50); //static inline?
+  static void loadbar3(string prefix, unsigned int x, unsigned int n, unsigned int w = 50); //static inline?
   // C++ Version
   static void loadBar(int x, int n, int r, int w); //static inline?
 

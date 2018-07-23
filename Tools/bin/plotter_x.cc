@@ -175,7 +175,7 @@ void UserFunctions::fillPlots(MapOfPlots &  plots, TString processName, EventNtu
       double Mjj = 0;
       double Mlv = 0;
 
-      if (UserFunctions::fillGen && !processName.Contains("Data") && !processName.Contains("QCD")) {
+      if (UserFunctions::fillGen && !processName.Contains("Data") && !processName.Contains("QCD") && !processName.Contains("WlnuJets")) {
          TLorentzVector lepton;
          TLorentzVector boson;
          if(processName.Contains("ZJets") && !processName.Contains("ZJetsToLL")) {
@@ -223,9 +223,9 @@ void UserFunctions::fillPlots(MapOfPlots &  plots, TString processName, EventNtu
       }
 
       if(UserFunctions::fillStandard) {
-         if(!processName.Contains("Data") && processName.Contains("QCD"))//&& processName.Contains("Enriched"))
+         if(!processName.Contains("Data") && (processName.Contains("QCD") || processName.Contains("WlnuJets")))
             plots[leptonCat]["PUWeights"]->Fill(puweight->getWeight(ntuple->vLV[0].npv));
-         else if(!processName.Contains("Data") && !processName.Contains("QCD"))
+         else if(!processName.Contains("Data") && !processName.Contains("QCD") && !processName.Contains("WlnuJets"))
             plots[leptonCat]["PUWeights"]->Fill(puweight->getWeight(ntuple->vLV[0].tnpus[1]));
    
          if (ntuple->jLV.size()>1) {
@@ -591,9 +591,10 @@ bool UserFunctions::eventPassCuts(EventNtuple * ntuple, MicroNtuple * mnt, const
      return false;
 
    //X axis cuts
-   if (controlRegion == DEFS::signal || controlRegion == DEFS::BDTBump || controlRegion == DEFS::BDTAntiBump ||
+   if (controlRegion == DEFS::signal || controlRegion == DEFS::LowKinBDT || controlRegion == DEFS::HighKinBDT ||
+       controlRegion == DEFS::BDTBump || controlRegion == DEFS::BDTAntiBump ||
        controlRegion == DEFS::MVAEleID || controlRegion == DEFS::AntiMVAEleID || controlRegion == DEFS::FlatMVAEleID ||
-       controlRegion == DEFS::HailMary || controlRegion == DEFS::HailMaryLoose) {
+       controlRegion == DEFS::HailMary || controlRegion == DEFS::HailMaryLoose || controlRegion == DEFS::Andrea) {
 
       //test if cutting much harder on eta of lepton will work
       //if(ntuple->lLV[0].Eta()>=1.3)
@@ -612,6 +613,18 @@ bool UserFunctions::eventPassCuts(EventNtuple * ntuple, MicroNtuple * mnt, const
          return false;
       }
       */
+
+     if (controlRegion == DEFS::LowKinBDT || controlRegion == DEFS::HighKinBDT) {
+         //cout << "control region = " << DEFS::getControlRegionString(controlRegion) << endl;
+         //cout << "medianPurityValue = " << DefaultValues::getMedianPurity(UserFunctions::jetBin,leptonCat,"KinBDT").first << endl;
+         //cout << "KinBDT = " << mnt->KinBDT << endl;
+         if (controlRegion == DEFS::LowKinBDT && mnt->KinBDT > DefaultValues::getMedianPurity(UserFunctions::jetBin,leptonCat,"KinBDT").first) {
+            return false;
+         }
+         else if(controlRegion == DEFS::HighKinBDT && mnt->KinBDT < DefaultValues::getMedianPurity(UserFunctions::jetBin,leptonCat,"KinBDT").first) {
+            return false;
+         }
+     }
 
      if (controlRegion == DEFS::BDTBump || controlRegion == DEFS::BDTAntiBump) {
          double combinedBDT = computeCombinedBDT(ntuple,mnt,evMap,MVAMethods,"response");
@@ -664,6 +677,22 @@ bool UserFunctions::eventPassCuts(EventNtuple * ntuple, MicroNtuple * mnt, const
         if(tagCat == DEFS::ge1tag && nBtag<1) {
            return false;
         }
+     }
+
+     double tmpHT = 0.0;
+     for(unsigned int i=0; i<ntuple->jLV.size(); i++) {
+         tmpHT+=ntuple->jLV[i].Et();
+     }
+     tmpHT+=ntuple->lLV[0].Pt();
+
+     if (controlRegion == DEFS::Andrea) {
+         if(ntuple->METLV[0].Pt() < 50.0 ||
+         tmpHT < 400.0 ||
+         ntuple->jLV[0].Pt() < 110.0 ||
+         (ntuple->jLV.size()>1 && TMath::Abs(ntuple->jLV[0].DeltaPhi(ntuple->jLV[1])) > 2.5) || 
+         nBtag!=0) {
+            return false;
+         }
      }
 
      if (controlRegion == DEFS::HailMary) {
@@ -893,7 +922,7 @@ double UserFunctions::weightFunc(EventNtuple* ntuple, MicroNtuple* mnt, const Ph
 
    if (doMetPhiWeight){
      
-      if(auxName.Contains("DATA") || auxName.Contains("QCD")) {
+      if(auxName.Contains("DATA") || auxName.Contains("QCD") || auxName.Contains("WLNUJETS")) {
         
          // TEST OF MET PHI WEIGHTING
          double metphi = ntuple->METLV[0].Phi();
@@ -906,15 +935,15 @@ double UserFunctions::weightFunc(EventNtuple* ntuple, MicroNtuple* mnt, const Ph
   
    // Pileup reweighting
    if (doPUreweight){
-      if(!auxName.Contains("DATA") && auxName.Contains("QCD")) //&& auxName.Contains("ENRICHED"))
+      if(!auxName.Contains("DATA") && (auxName.Contains("QCD") || auxName.Contains("WLNUJETS")))
          weight *= puweight->getWeight(ntuple->vLV[0].npv);
-      else if(!auxName.Contains("DATA") && !auxName.Contains("QCD"))
+      else if(!auxName.Contains("DATA") && !auxName.Contains("QCD") && !auxName.Contains("WLNUJETS"))
          weight *= puweight->getWeight(ntuple->vLV[0].tnpus[1]);
    }
 
    //CSV reweighting
    if (doCSVreweight) {
-      if (!auxName.Contains("DATA") && !auxName.Contains("QCD")) {
+      if (!auxName.Contains("DATA") && !auxName.Contains("QCD") && !auxName.Contains("WLNUJETS")) {
          if(doCSVsys.CompareTo("up",TString::kIgnoreCase)==0)
             weight *= TMath::Power(csvweight->getWeight(ntuple),2);
          else if(doCSVsys.CompareTo("down",TString::kIgnoreCase)==0)
@@ -991,11 +1020,11 @@ double UserFunctions::weightFunc(EventNtuple* ntuple, MicroNtuple* mnt, const Ph
       weight *= WPtWeightFunc->GetBinContent(WPtWeightFunc->FindBin((ntuple->lLV[0]+ntuple->METLV[0]).Pt()));
    }
 
-   if (PtWeight && !auxName.Contains("DATA") && auxName.Contains("QCD")) {
+   if (PtWeight && !auxName.Contains("DATA") && (auxName.Contains("QCD") || auxName.Contains("WLNUJETS"))) {
       weight *= PtWeightFunc->GetBinContent(PtWeightFunc->FindBin(ntuple->lLV[0].Pt()));
    }
 
-   if (ZllPtWeight && auxName.Contains("ZJETSTOLL")) {
+   if (ZllPtWeight && (auxName.Contains("ZJETSTOLL") || auxName.Contains("WLNUJETS"))) {
       weight *= ZllPtWeightFunc->GetBinContent(ZllPtWeightFunc->FindBin(ntuple->lLV[0].Pt()));
    }
 
@@ -1011,11 +1040,11 @@ double UserFunctions::weightFunc(EventNtuple* ntuple, MicroNtuple* mnt, const Ph
       weight *= 9.34690809464712835e-01;
    }
 
-   if (ZllDeltaPhiWeight && auxName.Contains("ZJETSTOLL")) {
+   if (ZllDeltaPhiWeight && (auxName.Contains("ZJETSTOLL") || auxName.Contains("WLNUJETS"))) {
       weight *= ZllDeltaPhiWeightFunc->GetBinContent(ZllDeltaPhiWeightFunc->FindBin(ntuple->lLV[0].DeltaPhi(ntuple->METLV[0].refLV)));
    }
 
-   if (ZllEventProbWeight && auxName.Contains("ZJETSTOLL")) {
+   if (ZllEventProbWeight && (auxName.Contains("ZJETSTOLL") || auxName.Contains("WLNUJETS"))) {
       double ZJetsMax = DefaultValues::getMaxEventProbAndError(DEFS::PhysicsProcess::ZJets,"ZLight",ZllEventProbWeightFunc).first;
       double WJetsMax = DefaultValues::getMaxEventProbAndError(DEFS::PhysicsProcess::WJets,"WLg",ZllEventProbWeightFunc).first;
       weight *= (((mnt->eventProb[3]+mnt->eventProb[4]+mnt->eventProb[5]+mnt->eventProb[6]+mnt->eventProb[7]+mnt->eventProb[8])/WJetsMax)/
@@ -1050,7 +1079,7 @@ void UserFunctions::initEventFunc(EventNtuple* ntuple, const PhysicsProcess* pro
 
    // Correct MET Phi
    if (doMETPhiCorrection) {
-      if(auxName.Contains("DATA") || auxName.Contains("QCD")) {
+      if(auxName.Contains("DATA") || auxName.Contains("QCD") || auxName.Contains("WLNUJETS")) {
          if(verbose) cout << "BEFORE\tPx=" << ntuple->METLV[0].Px() << "\tPy=" << ntuple->METLV[0].Py() << endl;
          //ntuple->doMETPhiCorrection("pfMEtSysShiftCorrParameters_2012runAvsNvtx_data");
          ntuple->doMETPhiCorrection("pfMEtSysShiftCorrParameters_2012runAvsNvtx_TAMUWW_data");
@@ -1064,7 +1093,7 @@ void UserFunctions::initEventFunc(EventNtuple* ntuple, const PhysicsProcess* pro
       }
    }
 
-   if(auxName.Contains("DATA") || auxName.Contains("QCD"))
+   if(auxName.Contains("DATA") || auxName.Contains("QCD") || auxName.Contains("WLNUJETS"))
       return;
 
    // Performs JER
@@ -1144,7 +1173,7 @@ void UserFunctions::processFunc(EventNtuple* ntuple, const PhysicsProcess* proc)
       cout << "\t" << auxName << ": Using " << hname << " from " << filename << endl;
    }
 
-   if (PtWeight && !auxName.Contains("DATA") && auxName.Contains("QCD")) {
+   if (PtWeight && !auxName.Contains("DATA") && (auxName.Contains("QCD") || auxName.Contains("WLNUJETS"))) {
       TString filename = "PtWeight_";
       filename += DEFS::getLeptonCatString(UserFunctions::leptonCat)+".root";
       TString hname;
@@ -1159,7 +1188,7 @@ void UserFunctions::processFunc(EventNtuple* ntuple, const PhysicsProcess* proc)
       PtWeightFunc = (TH1D*) DefaultValues::getConfigTH1(filename,hname,hname+"_Clone");
    }
 
-   if (ZllPtWeight && auxName.Contains("ZJETSTOLL")) {
+   if (ZllPtWeight && (auxName.Contains("ZJETSTOLL") || auxName.Contains("WLNUJETS"))) {
       cout << "Initializing ZllPt Weighting:" << endl;
       TString filename = "ZllPtWeights.root";
       TString hname = "ZllWeight_";
@@ -1168,7 +1197,7 @@ void UserFunctions::processFunc(EventNtuple* ntuple, const PhysicsProcess* proc)
       cout << "\t" << auxName << ": Using " << hname << " from " << filename << endl;
    }
 
-   if (ZllGenNeutrinoPtWeight && auxName.Contains("ZJETSTOLL")) {
+   if (ZllGenNeutrinoPtWeight && (auxName.Contains("ZJETSTOLL") || auxName.Contains("WLNUJETS"))) {
       cout << "Initializing ZllGenNeutrinoPt Weighting:" << endl;
       //string number = string(proc->fileName);
       //number = number.substr(number.find("HighPtLeptonKept")+16,3);
@@ -1180,7 +1209,7 @@ void UserFunctions::processFunc(EventNtuple* ntuple, const PhysicsProcess* proc)
       cout << "\t" << auxName << ": Using " << hname << " from " << filename << endl;
    }
 
-   if (ZllDeltaPhiWeight && auxName.Contains("ZJETSTOLL")) {
+   if (ZllDeltaPhiWeight && (auxName.Contains("ZJETSTOLL") || auxName.Contains("WLNUJETS"))) {
       cout << "Initializing ZllDeltaPhi Weighting:" << endl;
       TString filename = "ZllDeltaPhiWeights.root";
       TString hname = "ZllWeight_";
@@ -1189,7 +1218,7 @@ void UserFunctions::processFunc(EventNtuple* ntuple, const PhysicsProcess* proc)
       cout << "\t" << auxName << ": Using " << hname << " from " << filename << endl;
    }
 
-   if (ZllEventProbWeight && auxName.Contains("ZJETSTOLL")) {
+   if (ZllEventProbWeight && (auxName.Contains("ZJETSTOLL") || auxName.Contains("WLNUJETS"))) {
       cout << "Initializing ZllEventProb Weighting:" << endl;
       ZllEventProbWeightFunc = new Table();
       string filename = DefaultValues::getConfigPath()+"MaxMeanMedianEventProbs.txt";
@@ -1234,13 +1263,25 @@ void UserFunctions::processFunc(EventNtuple* ntuple, const PhysicsProcess* proc)
    else if(pileupSystematic.CompareTo("down")==0)
       dataname = DefaultValues::getConfigPath()+"pileup12_noTrig_minBiasXsec64542_coarseBinning_withAdditionalNPVHist.root";
    string MCname   = DefaultValues::getConfigPath()+"TPUDistributions.root";
-   if(auxName.Contains("QCD") && (auxName.Contains("ElFULL") || auxName.Contains("ElEnriched"))) {
+   if(auxName.Contains("QCD") && (auxName.Contains("ELFULL") || auxName.Contains("ElEnriched"))) {
       cout << "\t" << auxName << ": Using pileup_SingleEl from " << dataname << " and " << TString("TPUDist_")+proc->name << " from " << MCname << endl;
       puweight = new PUreweight(dataname,MCname,"pileup_SingleEl",
                                 string(TString("TPUDist_")+proc->name),
                                 make_pair(1,10));
    }
-   else if(auxName.Contains("QCD") && (auxName.Contains("MuFULL") || auxName.Contains("MuEnriched"))) {
+   else if(auxName.Contains("QCD") && (auxName.Contains("MUFULL") || auxName.Contains("MuEnriched"))) {
+      cout << "\t" << auxName << ": Using pileup_SingleMu from " << dataname << " and " << TString("TPUDist_")+proc->name << " from " << MCname << endl;
+      puweight = new PUreweight(dataname,MCname,"pileup_SingleMu",
+                                string(TString("TPUDist_")+proc->name),
+                                make_pair(1,10));
+   }
+   else if(auxName.Contains("SINGLEEL_WLNUJETS")) {
+      cout << "\t" << auxName << ": Using pileup_SingleMu from " << dataname << " and " << TString("TPUDist_")+proc->name << " from " << MCname << endl;
+      puweight = new PUreweight(dataname,MCname,"pileup_SingleEl",
+                                string(TString("TPUDist_")+proc->name),
+                                make_pair(1,10));
+   }
+   else if(auxName.Contains("SINGLEMU_WLNUJETS")) {
       cout << "\t" << auxName << ": Using pileup_SingleMu from " << dataname << " and " << TString("TPUDist_")+proc->name << " from " << MCname << endl;
       puweight = new PUreweight(dataname,MCname,"pileup_SingleMu",
                                 string(TString("TPUDist_")+proc->name),
@@ -1278,10 +1319,15 @@ void UserFunctions::processFunc(EventNtuple* ntuple, const PhysicsProcess* proc)
       return;
 
    if (doTTbarreweight && auxName.Contains("TTBAR")){
+      cout << "Initializing TTbar Reweighting ... " << flush;
       ttbarweight = new TTbarreweight();
+      cout << "DONE" << endl;
    }
 
+   cout << "Initializing CSV Reweighting ... " << flush;
    csvweight = new CSVreweight();
+   cout << "DONE" << endl;
+
 
    if(UserFunctions::doBenchmarks)
       UserFunctions::func_benchmark->Stop("processFunc");
@@ -1490,6 +1536,10 @@ int main(int argc,char**argv) {
       //procs.erase(procs.begin(),procs.begin()+17);
       //procs.erase(procs.begin()+1,procs.begin()+8);
       vector<DEFS::PhysicsProcess::Type> p;
+      if(UserFunctions::leptonCat==DEFS::electron)
+         p.push_back(DEFS::PhysicsProcess::SingleEl_WlnuJets);
+      else if(UserFunctions::leptonCat==DEFS::muon)
+         p.push_back(DEFS::PhysicsProcess::SingleMu_WlnuJets);
       p.push_back(DEFS::PhysicsProcess::ZJetsToLL_M10To50);
       p.push_back(DEFS::PhysicsProcess::ZJetsToLL_M50);
       p.push_back(DEFS::PhysicsProcess::WJets);
@@ -1774,7 +1824,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events / 5 GeV");
       a->range = make_pair(30.,150.);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -1789,7 +1841,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events / 2 GeV");
          a->range = make_pair(20.,150.);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -1801,7 +1855,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events ");
          a->range = make_pair(-3.,3.);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -1813,7 +1869,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events / 0.1 Radians");
          a->range = make_pair(-3.5,3.5);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -1825,7 +1883,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(0.0,150.0);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -1837,7 +1897,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(0.0,150.0);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -1849,7 +1911,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(-3.0,3.0);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -1861,7 +1925,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events / 0.1 Radians");
          a->range = make_pair(-3.5,3.5);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -1876,7 +1942,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(-TMath::Pi(),TMath::Pi());
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -1889,7 +1957,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(1,MET_binning.back());
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -1904,7 +1974,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->range = make_pair(0,60);
          a->logxy = make_pair(false,false);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -1916,7 +1988,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events / 5 GeV");
          a->range = make_pair(40.,150.);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -1928,7 +2002,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events / 5 GeV");
          a->range = make_pair(40.,150.);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -1940,7 +2016,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events / GeV");
          a->range = make_pair(-100.,250.);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -1952,7 +2030,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events / 2 GeV");
          a->range = make_pair(20.,150.);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -1964,7 +2044,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events ");
          a->range = make_pair(-3.,3.);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -1976,7 +2058,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events / 0.1 Radians");
          a->range = make_pair(-3.5,3.5);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -1988,7 +2072,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(0,7);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2000,19 +2086,39 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events" );
          a->range = make_pair(-3.5, 3.5);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
       
          a = new FormattedPlot;
          name = "Ptlv";
-         a->templateHisto = new TH1D(name + lepStr, name,100,0,500);
+         if(UserFunctions::controlRegion==DEFS::Andrea) {
+            vector<double> Andrea_binning;
+            for(int i=0; i<=200; i+=5) {
+               Andrea_binning.push_back(i);
+            }
+            Andrea_binning.push_back(250);
+            Andrea_binning.push_back(300);
+            Andrea_binning.push_back(350);
+            Andrea_binning.push_back(450);
+            Andrea_binning.push_back(650);
+            Andrea_binning.push_back(800);
+            Andrea_binning.push_back(1200);
+            a->templateHisto = new TH1D(name + lepStr, name,Andrea_binning.size()-1,&Andrea_binning[0]);
+         }
+         else {
+            a->templateHisto = new TH1D(name + lepStr, name,100,0,500);      
+         }
          a->axisTitles.push_back("p_{T}^{W_{l#nu}} [GeV]");
          a->axisTitles.push_back("Number of Events / 5 GeV");
-         a->range = make_pair(0.,150.);
+         a->range = make_pair(0.,500.);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2024,7 +2130,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events / 5 GeV");
          a->range = make_pair(0.,150.);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2036,7 +2144,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events / 5 GeV");
          a->range = make_pair(20.,200.);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2048,7 +2158,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events ");
          a->range = make_pair(-3.,3.);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2060,7 +2172,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events / 0.1 Radians");
          a->range = make_pair(-3.5,3.5);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2072,7 +2186,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events / 5 GeV");
          a->range = make_pair(20.,100.);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2084,7 +2200,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(-3.,3.);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2096,7 +2214,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events / 0.1 Radians");
          a->range = make_pair(-3.5,3.5);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2108,7 +2228,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events ");
          a->range = make_pair(0.,5.);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2120,7 +2242,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events / 10 GeV");
          a->range = make_pair(0.,250.);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2132,7 +2256,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events / 0.01 GeV");
          a->range = make_pair(0.,2.);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2144,7 +2270,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events / 0.01 GeV");
          a->range = make_pair(0.,1.5);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2156,7 +2284,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events / 4 GeV");
          a->range = make_pair(50.,800.);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2168,7 +2298,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(0.,7.);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2180,7 +2312,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events / .2 Radians");
          a->range = make_pair(-pi,pi);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2192,7 +2326,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(0,40);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2204,7 +2340,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(0.,7.);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2216,7 +2354,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(0.,7.);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2228,7 +2368,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(0.,7.);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2240,7 +2382,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(-2,2);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;      
@@ -2252,7 +2396,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(0,800);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a; 
@@ -2264,7 +2410,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(0,150);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a; 
@@ -2276,7 +2424,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(-TMath::Pi(),TMath::Pi());
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a; 
@@ -2288,7 +2438,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(-TMath::Pi(),TMath::Pi());
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a; 
@@ -2300,7 +2452,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(0.,7.);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2312,7 +2466,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events / .2 Radians");
          a->range = make_pair(-pi,pi);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2325,7 +2481,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->range = make_pair(-pi,pi);
          a->logxy = make_pair(false,false);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2337,7 +2495,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events / .1 Radians");
          a->range = make_pair(-pi,pi);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2349,7 +2509,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(-TMath::Pi(),TMath::Pi());
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a; 
@@ -2361,7 +2523,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(-TMath::Pi(),TMath::Pi());
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a; 
@@ -2373,7 +2537,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(-TMath::Pi(),TMath::Pi());
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a; 
@@ -2385,7 +2551,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(-TMath::Pi(),TMath::Pi());
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2403,7 +2571,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
                else
                   a->range = make_pair(-25,0);
                a->normToData = norm_data;
-               a->stacked = true; a->leptonCat = leptonCat;
+               a->stacked = true;
+               a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+               a->controlRegion = UserFunctions::controlRegion;
                a->overlaySignalName = signalName;
                a->overlaySignalFactor = signalFactor;
                plots[leptonCat][string(name)] = a;
@@ -2416,7 +2586,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
             a->axisTitles.push_back("Number of Events");
             a->range = make_pair(0,1);
             a->normToData = norm_data;
-            a->stacked = true; a->leptonCat = leptonCat;
+            a->stacked = true;
+            a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+            a->controlRegion = UserFunctions::controlRegion;
             a->overlaySignalName = signalName;
             a->overlaySignalFactor = signalFactor;
             plots[leptonCat][string(name)] = a;
@@ -2432,7 +2604,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events");
       a->range = make_pair(0,0.05);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2444,7 +2618,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events");
       a->range = make_pair(0.95,1.0);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2456,7 +2632,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events");
       a->range = make_pair(0.8,1.0);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2469,7 +2647,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->range = make_pair(0,1.3);
       a->logxy = make_pair(false,false);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2481,7 +2661,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events / 10 GeV");
       a->range = make_pair(0.,5000.);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2494,7 +2676,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events / .01 GeV");
       a->range = make_pair(0.9,1.03);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2506,7 +2690,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events / 0.1 Radians");
       a->range = make_pair(-0.5,3.5);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2518,7 +2704,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events");
       a->range = make_pair(-3.5,3.5);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2530,7 +2718,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events");
       a->range = make_pair(0.,7.);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2542,7 +2732,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events ");
       a->range = make_pair(-pi,pi);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2554,7 +2746,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events ");
       a->range = make_pair(-pi,pi);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2566,7 +2760,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events ");
       a->range = make_pair(-pi,pi);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2578,7 +2774,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Jets");
       a->range = make_pair(-TMath::Pi(),TMath::Pi());
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2591,7 +2789,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events ");
          a->range = make_pair(-pi,pi);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2607,7 +2807,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events" );
       a->range = make_pair(-4,4);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2620,7 +2822,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events" );
       a->range = make_pair(20.0,150.0);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2633,7 +2837,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events" );
       a->range = make_pair(-4,4);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2645,7 +2851,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("M_{W_{l#nu}}");
       a->range = make_pair(0,200);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2657,7 +2865,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events / .2 Radians");
       a->range = make_pair(-pi,pi);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2669,7 +2879,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events / .2 Radians");
       a->range = make_pair(-pi,pi);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2681,7 +2893,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events / #eta unit");
       a->range = make_pair(-10,10);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2693,7 +2907,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events / #eta unit");
       a->range = make_pair(-10,10);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2706,7 +2922,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events" );
       a->range = make_pair(-pi,pi);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2718,7 +2936,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events / .2 Radians");
       a->range = make_pair(-pi,pi);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2730,7 +2950,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events / #eta unit");
       a->range = make_pair(-10,10);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2742,7 +2964,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Isolation Energy [GeV]");
       a->range = make_pair(0,500);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2754,7 +2978,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Isolation Energy [GeV]");
       a->range = make_pair(0,1000);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2771,7 +2997,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events");
       a->range = make_pair(-1.0,1.0);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2786,7 +3014,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events");
       a->range = make_pair(-1.0,1.0);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2798,10 +3028,12 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
                                   DEFS::getNBinsX(UserFunctions::jetBin,leptonCat,string(name)),
                                   &DEFS::getBinsX(UserFunctions::jetBin,leptonCat,string(name))[0]);
       a->axisTitles.push_back("KinMEBDT");
-      a->axisTitles.push_back("Number of Events");
+      a->axisTitles.push_back("Events");
       a->range = make_pair(-1.0,1.0);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2813,10 +3045,12 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
                                      DEFS::getNBinsX(UserFunctions::jetBin,leptonCat,string("KinMEBDT")),
                                      &DEFS::getBinsX(UserFunctions::jetBin,leptonCat,string("KinMEBDT"))[0]);
          a->axisTitles.push_back("KinMEBDT");
-         a->axisTitles.push_back("Number of Events");
+         a->axisTitles.push_back("Events");
          a->range = make_pair(-1.0,1.0);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2827,10 +3061,12 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
                                      DEFS::getNBinsX(UserFunctions::jetBin,leptonCat,string("KinMEBDT")),
                                      &DEFS::getBinsX(UserFunctions::jetBin,leptonCat,string("KinMEBDT"))[0]);
          a->axisTitles.push_back("KinMEBDT");
-         a->axisTitles.push_back("Number of Events");
+         a->axisTitles.push_back("Events");
          a->range = make_pair(-1.0,1.0);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2844,7 +3080,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(-1.0,1.0);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2858,7 +3096,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(-1.0,1.0);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2872,7 +3112,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
          a->axisTitles.push_back("Number of Events");
          a->range = make_pair(-1.0,1.0);
          a->normToData = norm_data;
-         a->stacked = true; a->leptonCat = leptonCat;
+         a->stacked = true;
+         a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+         a->controlRegion = UserFunctions::controlRegion;
          a->overlaySignalName = signalName;
          a->overlaySignalFactor = signalFactor;
          plots[leptonCat][string(name)] = a;
@@ -2889,7 +3131,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events");
       a->range = make_pair(-1.0,1.0);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2903,7 +3147,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events");
       a->range = make_pair(-1.0,1.0);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2915,7 +3161,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events");
       a->range = make_pair(-1.0,1.0);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2927,7 +3175,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events");
       a->range = make_pair(-1.0,1.0);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2939,7 +3189,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("Number of Events");
       a->range = make_pair(-1.0,1.0);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2955,7 +3207,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->axisTitles.push_back("MEBDT");
       a->axisTitles.push_back("Number of Events");
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2973,7 +3227,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->range = make_pair(0.0,7.0);
       a->logxy = make_pair(false,false);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -2987,7 +3243,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->range = make_pair(0.0,7.0);
       a->logxy = make_pair(false,false);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -3000,7 +3258,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       a->range = make_pair(0,1);
       a->logxy = make_pair(false,false);
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;
@@ -3019,7 +3279,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
   ((TProfileMDF*)a->templateHisto)->AddAxis("j2eta",10,0,2.5);
   ((TProfileMDF*)a->templateHisto)->Sumw2();
   a->normToData = norm_data;
-  a->stacked = true; a->leptonCat = leptonCat;
+  a->stacked = true;
+  a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+  a->controlRegion = UserFunctions::controlRegion;
   a->overlaySignalName = signalName;
   a->overlaySignalFactor = signalFactor;
   plots[leptonCat][string(name)] = a;
@@ -3035,7 +3297,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
   ((TProfileMDF*)a->templateHisto)->AddAxis("p_{T}^{jet_{2}} [GeV]",9,jetptbinshigh);
   ((TProfileMDF*)a->templateHisto)->Sumw2();
   a->normToData = norm_data;
-  a->stacked = true; a->leptonCat = leptonCat;
+  a->stacked = true;
+  a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+  a->controlRegion = UserFunctions::controlRegion;
   a->overlaySignalName = signalName;
   a->overlaySignalFactor = signalFactor;
   plots[leptonCat][string(name)] = a;
@@ -3050,7 +3314,9 @@ MapOfPlots getPlotsForLeptonCat(DEFS::LeptonCat leptonCat, bool norm_data){
       ((TProfileMDF*)a->templateHisto)->AddAxis("#DeltaR(#mu,jet1) [Radians]",10,DRlepjet1high);
       ((TProfileMDF*)a->templateHisto)->Sumw2();
       a->normToData = norm_data;
-      a->stacked = true; a->leptonCat = leptonCat;
+      a->stacked = true;
+      a->leptonCat = leptonCat; a->jetBin = UserFunctions::jetBin; a->tagCat = UserFunctions::tagCat;
+      a->controlRegion = UserFunctions::controlRegion;
       a->overlaySignalName = signalName;
       a->overlaySignalFactor = signalFactor;
       plots[leptonCat][string(name)] = a;

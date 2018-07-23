@@ -145,7 +145,7 @@ int main(int argc,char**argv)
 
     string         iProcessName     = cl.getValue<string>  ("iProcessName", "ZJetsToLL_M50");
     string         oProcessName     = cl.getValue<string>  ("oProcessName",      "WlnuJets");
-    string         suffix           = cl.getValue<string>  ("suffix",               "_M-50");
+    string         suffix           = cl.getValue<string>  ("suffix",                    "");
     string         oFilePath        = cl.getValue<string>  ("oFilePath",                 "");
     int            nEntriesMax      = cl.getValue<int>     ("nEntriesMax",               -1);
     vector<double> probIndex1       = cl.getVector<double> ("probIndex1",       "0.5:::0.5");
@@ -315,7 +315,9 @@ int main(int argc,char**argv)
         bool lowerPtLepton = moveLeptonToMET(ntuple, make_pair(probIndex1[0],probIndex1[1]), leptonSelectionCounter, METResMethod, 
                                              sumETMult, METResolution, METPhiResolution, resetMETMass,
                                              genOnly, debug);
-        setGenLeptonToNeutrino(ntuple, lowerPtLepton, debug);
+        if(ntuple->genParticleCollection.size()>0) {
+            setGenLeptonToNeutrino(ntuple, lowerPtLepton, debug);
+        }
 
         //
         // Zero out the MET z component (really coming from the lepton)

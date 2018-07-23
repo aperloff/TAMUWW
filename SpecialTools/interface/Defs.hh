@@ -59,6 +59,8 @@ namespace DEFS{
 	             QCD_Pt20to30_EMEnriched, QCD_Pt30to80_EMEnriched, QCD_Pt80to170_EMEnriched, 
 	             QCD_Pt170to250_EMEnriched, QCD_Pt250to350_EMEnriched, QCD_Pt350_EMEnriched,
                SingleEl_Data , SingleMu_Data,
+               SingleEl_ZJetsToLL , SingleMu_ZJetsToLL,
+               SingleEl_WlnuJets , SingleMu_WlnuJets,
                WZ_JESUp, WZ_JESDown, WW_JESUp, WW_JESDown,
                STopS_T_JESUp , STopS_Tbar_JESUp , STopT_T_JESUp , STopT_Tbar_JESUp , STopTW_T_JESUp , STopTW_Tbar_JESUp ,
                STopS_T_JESDown , STopS_Tbar_JESDown , STopT_T_JESDown , STopT_Tbar_JESDown , STopTW_T_JESDown , STopTW_Tbar_JESDown ,
@@ -120,6 +122,9 @@ namespace DEFS{
   // A routine that returns a string given the type
   std::string getJetBinString(JetBin type);
 
+  // A routine that returns a label given the type
+  std::string getJetBinLabel(JetBin type);
+
   // A routine that returns a JetBin given
   JetBin getJetBin(std::string str);
 
@@ -128,7 +133,7 @@ namespace DEFS{
 
   //With Signal cuts
     enum NBinsX {nbinsx_default=100, nbinsx_jets2_electron_KinBDT=45, nbinsx_jets2_electron_MEBDT=27, nbinsx_jets2_electron_KinMEBDT=37,
-               nbinsx_jets2_muon_KinBDT=47, nbinsx_jets2_muon_MEBDT=30, nbinsx_jets2_muon_KinMEBDT=37,
+               nbinsx_jets2_muon_KinBDT=47, nbinsx_jets2_muon_MEBDT=23, nbinsx_jets2_muon_KinMEBDT=37,//nbinsx_jets2_muon_MEBDT=30
                nbinsx_jets3_electron_KinBDT=34, nbinsx_jets3_electron_MEBDT=25, nbinsx_jets3_electron_KinMEBDT=29,
                nbinsx_jets3_muon_KinBDT=34, nbinsx_jets3_muon_MEBDT=25, nbinsx_jets3_muon_KinMEBDT=29,
                nbinsx_jets4_electron_KinBDT=25, nbinsx_jets4_electron_MEBDT=20, nbinsx_jets4_electron_KinMEBDT=20,
@@ -191,6 +196,9 @@ namespace DEFS{
   // A routine that returns a string given the type
   std::string getTagCatString(TagCat type);
 
+  // A routine that returns a label given the type
+  std::string getTagCatLabel(TagCat type);
+
   // A routine that returns a jetBin given a string
   TagCat getTagCat(std::string str);
 
@@ -214,8 +222,8 @@ namespace DEFS{
   //            ALL ABOUT THE CONTROL REGIONS
   // ---------------------------------------------------------------
 
-   enum ControlRegion {all, signal, control1, control2, control3, control4, control5, control6, control7, control8, control9, UVaCuts, event, Diboson, MVAEleID, AntiMVAEleID, FlatMVAEleID, BDTBump, BDTAntiBump, HailMary, HailMaryLoose, None};
-  static const unsigned int nControlRegion = 22;
+   enum ControlRegion {all, signal, control1, control2, control3, control4, control5, control6, control7, control8, control9, UVaCuts, event, Diboson, MVAEleID, AntiMVAEleID, FlatMVAEleID, BDTBump, BDTAntiBump, HailMary, HailMaryLoose, LowKinBDT, HighKinBDT, Andrea, None};
+  static const unsigned int nControlRegion = 23;
 
   //A routine that returns a string given the type
   std::string getControlRegionString(ControlRegion type);

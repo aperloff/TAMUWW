@@ -54,6 +54,7 @@ TLegend* Style::tdrLeg(double x1, double y1, double x2, double y2) {
   TLegend *leg = new TLegend(x1, y1, x2, y2, "", "brNDC");
   leg->SetFillStyle(kNone);
   leg->SetBorderSize(0);
+  leg->SetTextFont(42);
   leg->SetTextSize(0.045);
   leg->Draw();
   return leg;
@@ -63,6 +64,7 @@ TPaveText* Style::tdrText(double x1, double y1, double x2, double y2, int alignm
   TPaveText *text = new TPaveText(x1, y1, x2, y2, "brNDC");
   text->SetFillStyle(kNone);
   text->SetBorderSize(0);
+  text->SetTextFont(42);
   text->SetTextSize(0.045);
   text->SetTextAlign(alignment);
   text->Draw();
@@ -186,6 +188,9 @@ void Style::setTDRStyle() {
   // tdrStyle->SetTitleY(0.985); // Set the position of the title box
   // tdrStyle->SetTitleStyle(Style_t style = 1001);
   // tdrStyle->SetTitleBorderSize(2);
+
+// For the legend labels:
+  tdrStyle->SetLegendFont(42);
 
 // For the axis titles:
 
@@ -328,7 +333,7 @@ void Style::CMS_lumi( TPad* pad, int iPeriod, int iPosX )
 
   latex.SetTextFont(42);
   latex.SetTextAlign(31); 
-  latex.SetTextSize(lumiTextSize*t);    
+  latex.SetTextSize(lumiTextSize*t);
   latex.DrawLatex(1-r,1-t+lumiTextOffset*t,lumiText);
 
   if( outOfFrame )
@@ -555,7 +560,7 @@ TCanvas* Style::tdrDiCanvas(const char* canvName, TH1D *hup, TH1D *hdw,
   assert(hup);
   
   // Scale text sizes and margins to match normal size
-  hup->GetYaxis()->SetTitleOffset(1.15 * Hup / H_ref); //original value was 1.25
+  hup->GetYaxis()->SetTitleOffset(1.20 * Hup / H_ref); //original value was 1.25
   hup->GetXaxis()->SetTitleOffset(1.0);
   hup->SetTitleSize(hup->GetTitleSize("Y") * H_ref / Hup, "Y");
   hup->SetLabelSize(hup->GetLabelSize("Y") * H_ref / Hup, "Y");
@@ -586,7 +591,7 @@ TCanvas* Style::tdrDiCanvas(const char* canvName, TH1D *hup, TH1D *hdw,
   hdw->SetLabelSize(hdw->GetLabelSize("Y") * H_ref / Hdw, "Y");
   hdw->SetTitleSize(hdw->GetTitleSize("Y") * H_ref / Hdw, "Y");
   hdw->GetXaxis()->SetTitleOffset(1.0);
-  hdw->GetYaxis()->SetTitleOffset(1.15 * Hdw / H_ref); //original value was 1.25
+  hdw->GetYaxis()->SetTitleOffset(1.20 * Hdw / H_ref); //original value was 1.25
 
   // Set tick lengths to match original (these are fractions of axis length)
   hdw->SetTickLength(hdw->GetTickLength("Y") * H_ref / Hup, "Y"); //?? ok if 1/3
@@ -663,8 +668,8 @@ void Style::reset_globals() {
   cmsTextFont   = 61;  // default is helvetic-bold
 
   writeExtraText = true;//false;
-  extraText   = "Simulation";
-  extraText2   = "Preliminary"; // For Simulation Preliminary on two lines
+  extraText   = "Preliminary";//"Simulation";
+  extraText2   = "";//"Preliminary"; // For Simulation Preliminary on two lines
   extraTextFont = 52;  // default is helvetica-italics
 
   // text sizes and text offsets with respect to the top frame

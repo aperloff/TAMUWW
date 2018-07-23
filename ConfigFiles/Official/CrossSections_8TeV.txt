@@ -60,6 +60,10 @@ DYJets_JESDown             	 |  3387.60   +/- 0.00
 DYJetsToLL_M10To50			 |  5900.10   +/- 0.00
 DYJetsToLL_M50				 |  3531.90   +/- 0.00
 ZpJ     					 |  3387.60   +/- 0.00
+SingleEl_ZJetsToLL   		 |  1.000  	  +/- 0.00 
+SingleMu_ZJetsToLL   		 |  1.000  	  +/- 0.00
+SingleEl_WlnuJets			 |  1.000  	  +/- 0.00 
+SingleMu_WlnuJets			 |  1.000  	  +/- 0.00
 QCD       					 |  103334.00 +/- 0.00 
 QCD_Pt20_MuEnriched       	 |  103334.00 +/- 0.00
 QCD_MuEnriched            	 |  103334.00 +/- 0.00

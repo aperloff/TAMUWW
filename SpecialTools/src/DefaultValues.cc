@@ -165,7 +165,8 @@ PhysicsProcess * DefaultValues::getSingleProcess(DEFS::PhysicsProcessType proces
    xsec[DEFS::both]     = getCrossSectionAndError(prName).first;
    map<DEFS::LeptonCat,double> lumi;
    if (process==DEFS::PhysicsProcess::SingleEl_Data || process==DEFS::PhysicsProcess::SingleMu_Data ||
-       process==DEFS::PhysicsProcess::QCD_ElFULL || process==DEFS::PhysicsProcess::QCD_MuFULL){
+       process==DEFS::PhysicsProcess::QCD_ElFULL || process==DEFS::PhysicsProcess::QCD_MuFULL ||
+       process==DEFS::PhysicsProcess::SingleEl_WlnuJets || process==DEFS::PhysicsProcess::SingleMu_WlnuJets){
       lumi[DEFS::electron] = 1.0;
       lumi[DEFS::muon]     = 1.0;
       lumi[DEFS::both]     = 1.0;
@@ -354,6 +355,10 @@ vector < PhysicsProcess * > DefaultValues::getProcessesHiggs(DEFS::JetBin jetBin
   procs.push_back(DEFS::PhysicsProcess::ZJets);
   //procs.push_back(DEFS::PhysicsProcess::ZJetsToLL_M50);
   //procs.push_back(DEFS::PhysicsProcess::ZJetsToLL_M10To50);
+  //if(lepton==DEFS::electron || lepton==DEFS::both)
+  //  procs.push_back(DEFS::PhysicsProcess::SingleEl_WlnuJets);
+  //if(lepton==DEFS::muon || lepton==DEFS::both)
+  //  procs.push_back(DEFS::PhysicsProcess::SingleMu_WlnuJets);
   procs.push_back(DEFS::PhysicsProcess::WJets);
   //procs.push_back(DEFS::PhysicsProcess::WH_ZH_TTH_HToZZ_M125);
   procs.push_back(DEFS::PhysicsProcess::WH_HToZZ_M125);
@@ -768,6 +773,56 @@ pair<double,double> DefaultValues::getMaxEventProbAndError(string meType, Table*
 
   return getMaxEventProbAndError(DEFS::PhysicsProcessType::UNKNOWN,meType,inputTable);
 }//getMaxEventProbAndError
+
+// ----------------------------------------------------------------------------
+pair<double,double> DefaultValues::getMedianPurity(DEFS::JetBin jetBin, DEFS::LeptonCat leptonCat,
+                                                   string BDTType, Table* inputTable) {
+  Table* table;
+  if(!inputTable) {
+    table = new Table();
+    table->parseFromFile(getConfigPath()+"MedianPurity.txt","TableCellMixed");
+  }
+  else {
+    table = inputTable;
+  }
+  vector<double> BDT;
+  vector<double> error;
+  vector<TableRow> tableRows;
+
+  tableRows = table->getRows();
+  for(unsigned int irow=0; irow<tableRows.size(); irow++) {
+    if(string(tableRows[irow].GetName()).compare(DEFS::getJetBinString(jetBin))!=0) continue;
+    assert(tableRows[irow]["LeptonCat"]);
+    assert(tableRows[irow]["BDTType"]);
+    if(string(tableRows[irow].GetName()).compare(DEFS::getJetBinString(jetBin))==0 &&
+       ((TableCellText*)tableRows[irow]["LeptonCat"])->text.compare(DEFS::getLeptonCatString(leptonCat))==0 &&
+       ((TableCellText*)tableRows[irow]["BDTType"])->text.compare(BDTType)==0) {
+      assert(tableRows[irow]["Median"]);
+      Value val = ((TableCellVal*)tableRows[irow]["Median"])->val;
+      BDT.push_back(val.value);
+      error.push_back(val.error);
+    }
+  }
+
+  string thisBin = "(JetBin,LeptonCat,BDTType)=("+DEFS::getJetBinString(jetBin)+","+DEFS::getLeptonCatString(leptonCat)+","+BDTType+")";
+
+  if(BDT.size()==0 || error.size()==0) {
+    cout << "WARNING::getMedianPurity::No " << thisBin << " matches found. " 
+         << "Returning -1 for the median purity cut." << endl;
+    return make_pair(-1.0,-1.0);
+  }
+
+  if(BDT.size()>1 || error.size()>1) {
+    cout << "WARNING::getMedianPurity::Multiple combinations of " << thisBin << " categories found. "
+         << "Returning the last match found in the configuration file." << endl;
+  }
+
+  if(!inputTable) {
+    delete table;
+  }
+
+  return make_pair(BDT.back(),error.back());
+}//getMedianPurity
 
 // ----------------------------------------------------------------------------
 void DefaultValues::getMVAVar(TString filename, vector<TString>& MVAV, vector<TString>& MVAS)

@@ -75,6 +75,12 @@ ZJetsToLL_M50                |   WlnuJets_M-50_lowerSubLeadingJet_HighPtLeptonKe
 #ZJetsToLL_M10To50            |   WlnuJetsTest/WlnuJets_M-10To50_lowerSubLeadingJet_HighPtLeptonKept050.root          |   microWlnuJets_M-10To50_lowerSubLeadingJet_HighPtLeptonKept050mu061el_BaseCuts.root
 #ZJetsToLL_M50                |   WlnuJetsTest/WlnuJets_M-50_lowerSubLeadingJet_HighPtLeptonKept050.root              |   microWlnuJets_M-50_lowerSubLeadingJet_HighPtLeptonKept050mu061el_BaseCuts.root
 
+#These are the data samples that came out of the Zll->Wlnu studies (Before conversion)
+SingleEl_ZJetsToLL           |   SingleEl_ZJetsToLL.root                            |   microSingleEl_ZJetsToLL_BaseCuts.root
+SingleMu_ZJetsToLL           |   SingleMu_ZJetsToLL.root                            |   microSingleMu_ZJetsToLL_BaseCuts.root
+#These are the data samples that came out of the Zll->Wlnu studies (50(61)% of the time the higher pT lepton was kept for muons (electrons))
+SingleEl_WlnuJets            |   SingleEl_WlnuJets.root                             |   microSingleEl_WlnuJets_BaseCuts.root
+SingleMu_WlnuJets            |   SingleMu_WlnuJets.root                             |   microSingleMu_WlnuJets_BaseCuts.root
 DYJets                       |   ZJets.root                                         |   microZJets_BaseCuts.root
 ZpJ                          |   ZJets.root                                         |   microZJets_BaseCuts.root
 Ztautau                      |                                                      |

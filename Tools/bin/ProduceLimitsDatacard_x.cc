@@ -123,7 +123,10 @@ int main(int argc,char**argv) {
   DEFS::TagCat    tagcat            = DEFS::getTagCat(tagcatS);
   string          anaTypeS          = cl.getValue<string>  ("anaType",    "HiggsAnalysis");
   DEFS::Ana::Type anaType           = DEFS::Ana::getAnaType(anaTypeS);
+  string          cutRegionS        = cl.getValue<string>  ("curRegion",         "signal");
+  DEFS::ControlRegion cutRegion     = DEFS::getControlRegion(cutRegionS);
   vector<TString> overrideProcesses = cl.getVector<TString>("overrideProcesses",       "");
+  bool            doStatErrors      = cl.getValue<bool>    ("doStatErrors",         false);
   bool            batch             = cl.getValue<bool>    ("batch",                 true);
   bool            debug             = cl.getValue<bool>    ("debug",                false);
   bool            verbose           = cl.getValue<bool>    ("verbose",              false);
@@ -132,7 +135,13 @@ int main(int argc,char**argv) {
   cl.print();
 
   //TString histogramFile = histogramFileBase+"_"+lepCat+"_withSumMC_SysNames.root";
-  TString histogramFile = histogramFileBase+"_"+lepCat+"_"+jetBinS+"_SysNames"+suffix+".root";
+  TString histogramFile;
+  if(doStatErrors) {
+    histogramFile = histogramFileBase+"_"+lepCat+"_"+jetBinS+suffix+"_SysNames_StatShapes.root";
+  }
+  else {
+    histogramFile = histogramFileBase+"_"+lepCat+"_"+jetBinS+suffix+"_SysNames.root";
+  }
   TFile* in_file = TFile::Open(basepath+histogramFile,"READ"); // Input the root file filled with histograms
 
   // Get the input processes
@@ -212,7 +221,7 @@ int main(int argc,char**argv) {
   vecCombined.insert(it,vecBak.begin(),vecBak.end());
 
   // Creating the datacard
-  ofstream outFile(Form("%s/DataCard_%s_%s_%s.txt",outpath.Data(),lepCat.Data(),channelName.Data(),variable.Data()));
+  ofstream outFile(Form("%s/DataCard_%s_%s.txt",outpath.Data(),channelName.Data(),variable.Data()));
   outFile << "#Simple datacard for ggH M125 Low mass H->WW->lnujj experiment" << endl
           << "#can list imax,jmax, kmax as specific values or * to make it auto calculate" << endl
           << "#expected limit command (with systematics) \"combine -M Asymptotic --significance *DATACARDNAME* -t -1 --expectSignal=1 -S 1 -m 125 --run expected\"" << endl
@@ -421,9 +430,42 @@ int main(int argc,char**argv) {
   systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("ZH_HToZZ_M125"), make_pair("0.975","1.025"), verbose); //ZH_HToWZZ_M125
   //systematics.push_back(systematic("CMS_QCDscale_pdf_wjets",false, vecCombined)); //Do not include when using QCD Eta Weight Uncertainties
   //systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("WJets")) = "1.033";
+  systematics.push_back(systematic("#CMS_hww_lnujj_ttbar_norm",false,false,vecCombined));
+  if(jetBin==DEFS::jets2 || jetBin==DEFS::jets3) {
+    if(leptonCat==DEFS::electron) {
+      systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("1.03","1.03"), verbose);
+    }
+    else {
+      systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("1.03","1.03"), verbose);
+    }
+  }
+  else {
+    if(leptonCat==DEFS::electron) {
+      systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("1.1","1.1"), verbose);
+    }
+    else {
+      systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("1.1","1.1"), verbose);
+    }
+  }
+  systematics.push_back(systematic("#CMS_hww_lnujj_QCD_norm",false,false,vecCombined));
+  if(leptonCat==DEFS::electron) {
+    systematics.back().updateValue(QCD_Enum, make_pair("1.0526866727","1.0526866727"), verbose); //1+(0.0131115/0.248858)
+    //systematics.back().updateValue(QCD_Enum, make_pair("1.1","1.1"), verbose);
+  }
+  else {
+    systematics.back().updateValue(QCD_Enum, make_pair("1.0460414117","1.0460414117"), verbose); //1+(0.00669525/0.145418)
+    //systematics.back().updateValue(QCD_Enum, make_pair("1.1","1.1"), verbose);
+  }
+  systematics.push_back(systematic("CMS_hww_lnujj_wjets_norm",false,false,vecCombined));
+  if(leptonCat==DEFS::electron) {
+    systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("WJets"), make_pair("1.0048746496","1.0048746496"), verbose); //1+(0.00509474/1.04515)
+  }
+  else {
+    systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("WJets"), make_pair("1.0045643037","1.0045643037"), verbose); //1+(0.00442517/0.969517)
+  }
   systematics.push_back(systematic("CMS_QCDscale_pdf_ttbar",false,false,vecCombined));
-  systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("1.057","1.057"), verbose); //TTbar https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO#Top_quark_pair_cross_sections_at
-  systematics.push_back(systematic("CMS_QCDscale_pdf_zjets",false,false,vecCombined));
+  systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("1.0574","1.0574"), verbose); //TTbar https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO#Top_quark_pair_cross_sections_at
+  systematics.push_back(systematic("#CMS_QCDscale_pdf_zjets",false,false,vecCombined));
   systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("ZJets"), make_pair("1.034","1.034"), verbose); //ZJets
   systematics.push_back(systematic("CMS_QCDscale_pdf_singlet",false,false,vecCombined));
   systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("STopS_T"), make_pair("1.05","1.05"), verbose);
@@ -437,9 +479,10 @@ int main(int argc,char**argv) {
   systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("WZ"), make_pair("1.03","1.03"), verbose); //WW
   //systematics.push_back(systematic("CMS_hww_lnujj_qcdNorm",false,vecCombined)); //Do not include when using QCD Eta Weight Uncertainties
   //systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("WJets"), make_pair("1.02","1.02"), verbose);
-  systematics.push_back(systematic("CMS_hww_lnujj_PUWeight",false,make_symmetric,vecCombined)); 
-  //systematics.push_back(systematic(TString("CMS_hww_lnujj_PUWeight")+TString(separate_shapes_and_rates ? "" : "_shape"),
-  //                                 !separate_shapes_and_rates,separate_shapes_and_rates ? make_symmetric : true,vecCombined)); //Vary min bias xsec up and down by 7% (nominal 69400 up 74258 down 64542)
+
+  systematics.push_back(systematic(Form("CMS_hww_lnujj_PUWeight")+TString(separate_shapes_and_rates ? "" : "_shape"),
+                                   !separate_shapes_and_rates,separate_shapes_and_rates ? make_symmetric : true,vecCombined)); //Vary min bias xsec up and down by 7% (nominal 69400 up 74258 down 64542)
+  //systematics.push_back(systematic("CMS_hww_lnujj_PUWeight",false,make_symmetric,vecCombined)); 
   if(jetBin==DEFS::jets2) {
     if(leptonCat==DEFS::electron) {
       systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("WH_HToZZ_M125"), make_pair("0.984","1.019"), verbose);
@@ -584,9 +627,10 @@ int main(int argc,char**argv) {
       systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("WJets"), make_pair("0.995","1.017"), verbose);
     }
   }
-  systematics.push_back(systematic("CMS_hww_lnujj_CSVWeight",false,make_symmetric,vecCombined));
-  //systematics.push_back(systematic(TString("CMS_hww_lnujj_CSVWeight")+TString(separate_shapes_and_rates ? "" : "_shape"),
-  //                                 !separate_shapes_and_rates,separate_shapes_and_rates ? make_symmetric : true,vecCombined));
+
+  systematics.push_back(systematic(Form("CMS_hww_lnujj_CSVWeight")+TString(separate_shapes_and_rates ? "" : "_shape"),
+                                   !separate_shapes_and_rates,separate_shapes_and_rates ? make_symmetric : true,vecCombined));
+  //systematics.push_back(systematic("CMS_hww_lnujj_CSVWeight",false,make_symmetric,vecCombined));
   if(jetBin==DEFS::jets2) {
     if(leptonCat==DEFS::electron) {
       systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("WH_HToZZ_M125"), make_pair("0.959","1.011"), verbose);
@@ -733,28 +777,83 @@ int main(int argc,char**argv) {
   }
   systematics.push_back(systematic(TString("CMS_hww_lnujj_topPtWeight")+TString(separate_shapes_and_rates ? "" : "_shape"),
                                    !separate_shapes_and_rates,separate_shapes_and_rates ? make_symmetric : true,vecCombined)); //up as TopPtWeight^2 and down as no topPTWeight
-  if(jetBin==DEFS::jets2) {
-    if(leptonCat==DEFS::electron) {
-      systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("0.998","0.994"), verbose);
+  //systematics.push_back(systematic(TString("CMS_hww_lnujj_topPtWeight"),false,make_symmetric,vecCombined));
+  if(cutRegion==DEFS::HighKinBDT) {
+    if(jetBin==DEFS::jets2) {
+      if(leptonCat==DEFS::electron) {
+        systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("0.970","1.039"), verbose);
+      }
+      else if(leptonCat==DEFS::muon) {
+        systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("0.964","1.044"), verbose);
+      }
     }
-    else if(leptonCat==DEFS::muon) {
-      systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("0.998","0.993"), verbose);
+    else if(jetBin==DEFS::jets3) {
+      if(leptonCat==DEFS::electron) {
+        systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("0.990","1.023"), verbose);
+      }
+      else if(leptonCat==DEFS::muon) {
+        systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("0.979","1.031"), verbose);
+      }
+    }
+    else if(jetBin==DEFS::jets4) {
+      if(leptonCat==DEFS::electron) {
+        systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("1.029","0.984"), verbose);
+      }
+      else if(leptonCat==DEFS::muon) {
+        systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("1.016","0.996"), verbose);
+      }
     }
   }
-  else if(jetBin==DEFS::jets3) {
-    if(leptonCat==DEFS::electron) {
-      systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("0.984","1.007"), verbose);
+  if(cutRegion==DEFS::LowKinBDT) {
+    if(jetBin==DEFS::jets2) {
+      if(leptonCat==DEFS::electron) {
+        systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("1.012","0.997"), verbose);
+      }
+      else if(leptonCat==DEFS::muon) {
+        systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("1.011","0.997"), verbose);
+      }
     }
-    else if(leptonCat==DEFS::muon) {
-      systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("0.988","1.004"), verbose);
+    else if(jetBin==DEFS::jets3) {
+      if(leptonCat==DEFS::electron) {
+        systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("1.016","0.993"), verbose);
+      }
+      else if(leptonCat==DEFS::muon) {
+        systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("1.012","0.997"), verbose);
+      }
+    }
+    else if(jetBin==DEFS::jets4) {
+      if(leptonCat==DEFS::electron) {
+        systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("1.036","0.975"), verbose);
+      }
+      else if(leptonCat==DEFS::muon) {
+        systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("1.030","0.981"), verbose);
+      }
     }
   }
-  else if(jetBin==DEFS::jets4) {
-    if(leptonCat==DEFS::electron) {
-      systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("0.962","1.028"), verbose);
+  else if(cutRegion==DEFS::signal) {
+    if(jetBin==DEFS::jets2) {
+      if(leptonCat==DEFS::electron) {
+        systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("0.998","0.994"), verbose);
+      }
+      else if(leptonCat==DEFS::muon) {
+        systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("0.998","0.993"), verbose);
+      }
     }
-    else if(leptonCat==DEFS::muon) {
-      systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("0.970","1.021"), verbose);
+    else if(jetBin==DEFS::jets3) {
+      if(leptonCat==DEFS::electron) {
+        systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("0.984","1.007"), verbose);
+      }
+      else if(leptonCat==DEFS::muon) {
+        systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("0.988","1.004"), verbose);
+      }
+    }
+    else if(jetBin==DEFS::jets4) {
+      if(leptonCat==DEFS::electron) {
+        systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("0.962","1.028"), verbose);
+      }
+      else if(leptonCat==DEFS::muon) {
+        systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("0.970","1.021"), verbose);
+      }
     }
   }
   systematics.push_back(systematic(TString("CMS_scale_j")+TString(separate_shapes_and_rates ? "" : "_shape"),
@@ -903,6 +1002,7 @@ int main(int argc,char**argv) {
       systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("WJets"), make_pair("0.985","0.850"), verbose);
     }
   }
+  /*
   systematics.push_back(systematic(TString("CMS_hww_lnujj_QCDEtaWeight")+TString(separate_shapes_and_rates ? "" : "_shape"),
                                    !separate_shapes_and_rates,separate_shapes_and_rates ? make_symmetric : true,vecCombined));
   //ratio of scale factors from fit
@@ -914,6 +1014,7 @@ int main(int argc,char**argv) {
     systematics.back().updateValue(QCD_Enum, make_pair("1.0990661404","1.0500213179"), verbose);
     systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("WJets"), make_pair("0.9999783397","1.0000103144"), verbose);
   }
+  */
   //ratio of histograms after fit
   /*
   if(jetBin==DEFS::jets2) {
@@ -953,6 +1054,11 @@ int main(int argc,char**argv) {
   systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("WJets"), make_pair("1","1"), verbose);
   systematics.push_back(systematic("CMS_hww_lnujj_scale_shape",true,true,vecCombined));
   systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("WJets"), make_pair("1","1"), verbose);
+  if(jetBin==DEFS::jets2)
+      systematics.push_back(systematic("#CMS_hww_lnujj_CosThetaLWeight_shape",true,true,vecCombined));
+  else
+    systematics.push_back(systematic("CMS_hww_lnujj_CosThetaLWeight_shape",true,true,vecCombined));
+  systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("WJets"), make_pair("1","1"), verbose);
   if(separate_shapes_and_rates) {
      systematics.push_back(systematic("CMS_hww_lnujj_topPtWeight_shape",true,true,vecCombined));
      systematics.back().updateValue(DEFS::PhysicsProcess::getProcessType("TTbar"), make_pair("1","1"), verbose); 
@@ -968,15 +1074,16 @@ int main(int argc,char**argv) {
      systematics.back().updateValue(QCD_Enum, make_pair("-","-"), verbose); //QCD does not have a CSV uncertainty
   }
   //statistical errors
-  for(unsigned int iproc=0; iproc<vecCombined.size(); iproc++) {
-    TString var_proc_lep = variable+"_"+vecCombined[iproc]+"_"+lepCat;
-    TH1D* proc = (TH1D*) in_file->Get(var_proc_lep);
-    int nbins = proc->GetNbinsX();
-    for(int ibin=1; ibin<=nbins; ibin++) {
-      TString sysName = "CMS_hww_lnujj_statError_"+channelName+"_"+var_proc_lep+"_bin_"+Form("%i",ibin);
-      if(!in_file->Get(var_proc_lep+"_"+sysName+"Up") || !in_file->Get(var_proc_lep+"_"+sysName+"Up")) continue;
-      //if(vecCombined[iproc].CompareTo("WJets")!=0) continue;
-      systematics.push_back(systematic(sysName,true,true,vecCombined,DEFS::PhysicsProcess::getProcessType(string(vecCombined[iproc])), make_pair("1","1")));
+  if(doStatErrors) {
+    for(unsigned int iproc=0; iproc<vecCombined.size(); iproc++) {
+      TString var_proc_lep = variable+"_"+vecCombined[iproc]+"_"+lepCat;
+      TH1D* proc = (TH1D*) in_file->Get(var_proc_lep);
+      int nbins = proc->GetNbinsX();
+      for(int ibin=1; ibin<=nbins; ibin++) {
+        TString sysName = "CMS_hww_lnujj_statError_"+channelName+"_"+var_proc_lep+"_bin_"+Form("%i",ibin);
+        if(!in_file->Get(var_proc_lep+"_"+sysName+"Up") || !in_file->Get(var_proc_lep+"_"+sysName+"Down")) continue;
+        systematics.push_back(systematic(sysName,true,true,vecCombined,DEFS::PhysicsProcess::getProcessType(string(vecCombined[iproc])), make_pair("1","1")));
+      }
     }
   }
 
@@ -988,18 +1095,21 @@ int main(int argc,char**argv) {
 
   cout << "Printing the systematics ... ";
   for (unsigned int iSys=0; iSys!=systematics.size(); iSys++) {
+    if(systematics[iSys].name.Contains("CMS_hww_lnujj_topPtWeight") && (jetBin==DEFS::jets2 || jetBin==DEFS::jets3)) continue;
     outFile << left << setw(sysWidth+1) << systematics[iSys].name;
     if(systematics[iSys].shape==false) outFile << left << setw(7) << "lnN";
     else                               outFile << left << setw(7) << "shape";
 
     for (unsigned int iproc = 0 ; iproc < (systematics[iSys].values.size()); iproc++){
       DEFS::PhysicsProcess::Type indexType = DEFS::PhysicsProcess::getProcessType(string(vecCombined[iproc]));
-       if(systematics[iSys].shape==true && systematics[iSys].getValueString(indexType)!="-")
-          outFile << left << setw(13) << "1";
-       else if(systematics[iSys].name.Contains("QCDEtaWeight") && systematics[iSys].getValueString(indexType)!="-")
-          outFile << left << setw(27) << systematics[iSys].getValueString(indexType);
-       else
-          outFile << left << setw(13) << systematics[iSys].getValueString(indexType);
+      if(systematics[iSys].shape==true && leptonCat==DEFS::muon && indexType==DEFS::PhysicsProcess::getProcessType("WJets") && (systematics[iSys].name.Contains("CSVWeight") || systematics[iSys].name.Contains("PUWeight")) && systematics[iSys].getValueString(indexType)!="-")
+         outFile << left << setw(13) << "0.7";
+      else if(systematics[iSys].shape==true && systematics[iSys].getValueString(indexType)!="-")
+         outFile << left << setw(13) << "1";
+      else if(systematics[iSys].name.Contains("QCDEtaWeight") && systematics[iSys].getValueString(indexType)!="-")
+         outFile << left << setw(27) << systematics[iSys].getValueString(indexType);
+      else
+         outFile << left << setw(13) << systematics[iSys].getValueString(indexType);
     } //for luminosity loop
 
     outFile << endl << flush;

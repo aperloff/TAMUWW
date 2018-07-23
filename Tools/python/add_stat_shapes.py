@@ -22,7 +22,7 @@ ROOT.gROOT.SetBatch()
 
 log = logging.getLogger('stat_shapes')
 
-def walk_and_copy(inputdir, outputdir, pattern, mergers, threshold, prefix, suffix, normalize):
+def walk_and_copy(inputdir, outputdir, pattern, mergers, minimum, scale, threshold, prefix, suffix, normalize):
     ''' Recursive function which copies from inputdir to outputdir '''
     keys = []
     for key in inputdir.GetListOfKeys():
@@ -74,7 +74,7 @@ def walk_and_copy(inputdir, outputdir, pattern, mergers, threshold, prefix, suff
                         to_merge = inputdir.Get(merger)
                         error_clone.Add(to_merge)
 
-                for ibin in range(1, th1.GetNbinsX()+1):
+                for ibin in range(minimum, th1.GetNbinsX()+1):
                     error = error_clone.GetBinError(ibin)
                     val = th1.GetBinContent(ibin)
                     # Check if we are above threshold
@@ -93,13 +93,15 @@ def walk_and_copy(inputdir, outputdir, pattern, mergers, threshold, prefix, suff
                     if above_threshold:
                         err_up = th1.Clone(
                             th1.GetName() + "_%s_%s_%s_bin_%iUp" % (prefix, suffix, histo, ibin))
+                        err_up.SetTitle("%s_shapeUp" % (prefix))
                         err_down = th1.Clone(
                             th1.GetName() + "_%s_%s_%s_bin_%iDown" % (prefix, suffix, histo, ibin))
+                        err_down.SetTitle("%s_shapeDown" % (prefix))
                         # Print to stdout, so we can capture the uncertainties
                         print "%s_%s_%s_bin_%i" % (prefix, suffix, histo, ibin)
-                        err_up.SetBinContent(ibin, val + error)
+                        err_up.SetBinContent(ibin, val + (error*scale))
                         ## if not val > error bin the down entry to a small value >0 to prevent problems in combine 
-                        err_down.SetBinContent(ibin, val - error if val > error else 0.01)
+                        err_down.SetBinContent(ibin, val - (error*scale) if val > (error*scale) else 0.01)
                         if normalize:
                             err_up.Scale(th1.Integral()/err_up.Integral())
                             err_down.Scale(th1.Integral()/err_down.Integral())
@@ -116,16 +118,16 @@ def walk_and_copy(inputdir, outputdir, pattern, mergers, threshold, prefix, suff
             # Recurse
             walk_and_copy(
                 inputdir.Get(subdir), output_subdir,
-                pattern, mergers, threshold, prefix, suffix, normalize)
+                pattern, mergers, minimum, scale, threshold, prefix, suffix, normalize)
 
-def main(inputfilename, outputfilename, matcher, mergers, threshold, prefix, suffix, normalize):
+def main(inputfilename, outputfilename, matcher, mergers, minimum, scale, threshold, prefix, suffix, normalize):
     input = ROOT.TFile(inputfilename, 'READ')
     if not input:
         raise IOError("Can't open input file: %s" % inputfilename)
     output = ROOT.TFile(outputfilename, 'RECREATE')
     if not output:
         raise IOError("Can't open output file: %s" % outputfilename)
-    walk_and_copy(input, output, matcher, mergers, threshold, prefix, suffix, normalize)
+    walk_and_copy(input, output, matcher, mergers, minimum, scale, threshold, prefix, suffix, normalize)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -143,6 +145,10 @@ if __name__ == "__main__":
                         help='Merge in errors from different shapes. '
                         'Should be only the histogram name, which are '
                         'taken from the same directory as the filtered histo.')
+    parser.add_argument('--minimum-bin', default=1, dest='minimum', type=int,
+                        help='The minimum bin index to consider')
+    parser.add_argument('--scale', default=1.0, type=float,
+                        help="Scale the uncertainty by some multiplicative factor.")
     parser.add_argument('--threshold', type=float, default=0.05,
                         help='Minimum error for systematic creation,'
                         'default %(default)0.2f')
@@ -166,7 +172,7 @@ if __name__ == "__main__":
 
     log.info("Building shape systematics. input: %s output: %s",
              args.input, args.output)
-    main(args.input, args.output, args.filter, args.merge,
-         args.threshold, args.prefix, args.suffix, args.normalize)
+    main(args.input, args.output, args.filter, args.merge, args.minimum,
+         args.scale, args.threshold, args.prefix, args.suffix, args.normalize)
     log.info("Moving temprorary output to final destination")
     shutil.move(args.output, args.output.replace('.tmp.root', '.root'))

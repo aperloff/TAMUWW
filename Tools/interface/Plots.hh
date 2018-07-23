@@ -4,6 +4,8 @@
 // ROOT libraries
 #include "TStyle.h"
 #include "TROOT.h"
+#include "TFile.h"
+#include "TKey.h"
 #include "TChain.h"
 #include "TPad.h"
 #include "TFrame.h"
@@ -25,6 +27,7 @@
 // Our libraries
 #include "TAMUWW/SpecialTools/interface/PhysicsProcess.hh"
 #include "TAMUWW/SpecialTools/interface/Defs.hh"
+#include "TAMUWW/SpecialTools/interface/DefaultValues.hh"
 #include "TAMUWW/Tools/interface/Style.hh"
 #include "JetMETAnalysis/JetUtilities/interface/TProfileMDF.h"
 
@@ -63,6 +66,7 @@ public :
 
    // Loads the histograms from a preexisting file
   void loadHistogramsFromFile(TDirectoryFile* dir, std::vector<PhysicsProcess*> procs, DEFS::LeptonCat lepCat, bool procNameOnly = false, TDirectoryFile* data_dir = 0);
+  void loadHistogramsFromCombinedFile(TDirectoryFile* dir, DEFS::LeptonCat lepCat);
 
    // Sets the scaled variable
   void setScaled(bool s) {scaled = s;}
@@ -116,15 +120,18 @@ public:
    //std::vector<TH1*> doGroupingOLD(std::vector<PhysicsProcess*> procs);
 
    //Make a graph to plot the error bands from the statistical errors in a histogram
-   TGraphAsymmErrors* makeSystematicErrors(TH1* nominal);
+   TGraphAsymmErrors* makeSystematicErrors(TH1* nominal, double totalNormalizationError = 0);
    // Add the systematic errors to the statistical errors
-   void addSystematicErrors(TGraphAsymmErrors* g, TH1* nominal, TH1* sysUp, TH1* sysDown);
+   void addSystematicErrors(TGraphAsymmErrors* g, TH1* nominal, TH1* sysUp, TH1* sysDown, string type = "");
 
    // Function to get chi2 and KS
-   void drawKSandChi2Tests(TH1* totalData, TH1* all, pair<double, double> range, bool doTDR = false);
+   void drawKSandChi2Tests(TH1* totalData, TH1* all, pair<double, double> range, bool doTDR = false, Style* st = 0);
 
    // Function to get luminosity
    void drawLumi(float intLum);
+
+   // Function to draw the bin information
+   void drawBinInfo();
 
    std::vector<std::string> axisTitles;
    std::pair<double,double> range;
@@ -132,6 +139,15 @@ public:
    
    // The lepton that this plot is for
    DEFS::LeptonCat leptonCat;
+
+   // The jet bin that this plot is for
+   DEFS::JetBin jetBin;
+
+   // The tag cat bin that this plot is for
+   DEFS::TagCat tagCat;
+
+   // The cut flow used to make the plot
+   DEFS::ControlRegion controlRegion;
 
 private:
    // Take care of the formatting

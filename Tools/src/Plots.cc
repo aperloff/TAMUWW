@@ -316,6 +316,50 @@ void Plot::loadHistogramsFromFile(TDirectoryFile* dir, std::vector<PhysicsProces
   cout << "\tPlot::loadHistogramsFromFile " << loaded << " histograms loaded for " << histos.size() << " processes" << endl; 
 }
 
+void Plot::loadHistogramsFromCombinedFile(TDirectoryFile* dir, DEFS::LeptonCat lepCat)
+{
+  int loaded = 0;
+  bool found_data = false;
+
+  cout << "Plot::loadHistogramsFromCombinedFile Loading histograms ... ";
+  TIter nextHist(dir->GetListOfKeys());
+  TKey* histKey(0);
+  while ((histKey=(TKey*)nextHist())) {
+    if (strcmp(histKey->GetClassName(),"TH1D")!=0) continue;
+    TH1* tmp = (TH1*)histKey->ReadObj();
+    if(tmp!=nullptr && TString(histKey->GetName()).BeginsWith(templateHisto->GetTitle())) {
+      string name(tmp->GetName());
+      if(TString(tmp->GetName()).Contains("data",TString::kIgnoreCase)) {
+        found_data=true;
+        histos.push_back((TH1D*)templateHisto->Clone(tmp->GetName()));
+        histos.back()->Reset();
+        int pos = name.find("Single");
+        string processName = name.substr(pos,name.find("_"+DEFS::getLeptonCatString(lepCat))-pos);
+        histos.back()->SetTitle(DEFS::PhysicsProcess::getTypeTitle(DEFS::PhysicsProcess::getProcessType(processName)).c_str());
+        for(int ibin=1; ibin<=templateHisto->GetXaxis()->GetNbins(); ibin++) {
+          histos.back()->SetBinContent(ibin,tmp->GetBinContent(ibin));
+          histos.back()->SetBinError(ibin,tmp->GetBinError(ibin));
+        }
+      }
+      else {
+        histos.push_back(tmp);
+      }
+      loaded++;
+    }
+    if(histos.size()==1 && (histos.back()->GetXaxis()->GetXmin()!=templateHisto->GetXaxis()->GetXmin() ||
+       histos.back()->GetXaxis()->GetXmax()!=templateHisto->GetXaxis()->GetXmax())) {
+      TString title = templateHisto->GetTitle();
+      templateHisto = (TH1D*)histos.back()->Clone(templateHisto->GetName());
+      templateHisto->SetTitle(title);
+      templateHisto->Reset();
+    }
+  }
+  cout << "DONE" << endl;
+  if(!found_data)
+    cout << "\tWARNING::Plot::loadHistogramsFromCombinedFile did not find the data histogram in the file provided" << endl;
+  cout << "\tPlot::loadHistogramsFromCombinedFile " << loaded << " histograms loaded" << endl; 
+}
+
 void Plot::printList() {
   cout << "LIST OF HISTOGRAMS FOR PLOT " << templateHisto->GetName() << ":" << endl;
   for(unsigned int i=0; i<histos.size(); i++) {
@@ -498,7 +542,7 @@ TCanvas* FormattedPlot::getCanvas(vector<PhysicsProcess*> procs)
       errorBand->SetMarkerColor(kGray+2);
       errorBand->SetLineColor(kGray+2);
       errorBand->SetFillColor(kGray+2);
-      errorBand->SetFillStyle(3005);
+      errorBand->SetFillStyle(3154);
       errorBand->Draw("2 SAME");
       //tMC->SetFillColor(kGray+2);
       //tMC->SetFillStyle(3005);
@@ -590,6 +634,9 @@ TCanvas* FormattedPlot::getCanvasTDR(vector<PhysicsProcess*> procs) {
   // Create the total Data and MC histos and Stacks
   TString tempName = templateHisto->GetName();
   TH1     * tMC = (TH1*) templateHisto->Clone(tempName+"_TotalMC");   tMC->Sumw2();
+  TH1     * tWJets = (TH1*) templateHisto->Clone(tempName+"_TotalWJets");   tWJets->Sumw2();
+  TH1     * tTTbar = (TH1*) templateHisto->Clone(tempName+"_TotalTTbar");   tTTbar->Sumw2();
+  TH1     * tQCDandWJets = (TH1*) templateHisto->Clone(tempName+"_TotalQCDandWJets");   tQCDandWJets->Sumw2();
   TH1     * tDa = (TH1*) templateHisto->Clone(tempName+"_TotalData"); tDa->Sumw2();
   TH1     * sys_JESUp = (TH1*) templateHisto->Clone(tempName+"_Systematic_JESUp"); sys_JESUp->Sumw2();
   TH1     * sys_JESDown = (TH1*) templateHisto->Clone(tempName+"_Systematic_JESDown"); sys_JESDown->Sumw2();
@@ -597,25 +644,30 @@ TCanvas* FormattedPlot::getCanvasTDR(vector<PhysicsProcess*> procs) {
   TH1     * sys_matchingdown = (TH1*) templateHisto->Clone(tempName+"_Systematic_matchingdown"); sys_matchingdown->Sumw2();
   TH1     * sys_scaleup = (TH1*) templateHisto->Clone(tempName+"_Systematic_scaleup"); sys_scaleup->Sumw2();
   TH1     * sys_scaledown = (TH1*) templateHisto->Clone(tempName+"_Systematic_scaledown"); sys_scaledown->Sumw2();
+  TH1     * sys_csvup = (TH1*) templateHisto->Clone(tempName+"_Systematic_CSVWeightUp"); sys_csvup->Sumw2();
+  TH1     * sys_csvdown = (TH1*) templateHisto->Clone(tempName+"_Systematic_CSVWeightDown"); sys_csvdown->Sumw2();
+  TH1     * sys_puup = (TH1*) templateHisto->Clone(tempName+"_Systematic_PUWeightUp"); sys_puup->Sumw2();
+  TH1     * sys_pudown = (TH1*) templateHisto->Clone(tempName+"_Systematic_PUWeightDown"); sys_pudown->Sumw2();
+  TH1     * sys_topptup = (TH1*) templateHisto->Clone(tempName+"_Systematic_topPtWeightUp"); sys_topptup->Sumw2();
+  TH1     * sys_topptdown = (TH1*) templateHisto->Clone(tempName+"_Systematic_topPtWeightDown"); sys_topptdown->Sumw2();
+  TH1     * sys_qcdetaup = (TH1*) templateHisto->Clone(tempName+"_Systematic_QCDEtaWeightUp"); sys_qcdetaup->Sumw2();
+  TH1     * sys_qcdetadown = (TH1*) templateHisto->Clone(tempName+"_Systematic_QCDEtaWeightDown"); sys_qcdetadown->Sumw2();
+  TH1     * sys_statup = (TH1*) templateHisto->Clone(tempName+"_Systematic_StatUp"); sys_statup->Sumw2();
+  TH1     * sys_statdown = (TH1*) templateHisto->Clone(tempName+"_Systematic_StatDown"); sys_statdown->Sumw2();
   TH1     * signal = 0;
   THStack * sMC = new THStack(tempName+"_stackMC",tempName+"_stackMC");
   THStack * sDa = new THStack(tempName+"_stackData",tempName+"_stackData");
 
   // Make the legend
-  TLegend * l = st->tdrLeg(0.37,0.64,0.55,0.89);
+  TLegend * l = st->tdrLeg(0.44,0.64,0.62,0.89);
   l->SetName(tempName+"_legend");
-  TLegend * lsig = st->tdrLeg(0.65,0.64,0.85,0.89);
+  TLegend * lsig = st->tdrLeg(0.66,0.64,0.86,0.89);
   lsig->SetName(tempName+"_signal_legend");
 
   // Create the totalHistos and Stacks for the MC and Data processes
   for (unsigned int h = 0 ; h < groupedHistos.size() ; h++) {
     TString hname = groupedHistos[h]->GetTitle();
     hname.ToUpper();
-
-    //if (hname.Contains("W+JETS")) {
-    //  cout << "I GOT HERE!!!!!" << endl;
-    //  groupedHistos[h]->Scale(0.912);
-    //}
 
     if (hname.Contains("DATA")) {
       sDa->Add(groupedHistos[h],"hist");
@@ -624,37 +676,70 @@ TCanvas* FormattedPlot::getCanvasTDR(vector<PhysicsProcess*> procs) {
 
       areDataHists = true;
     }
-    else if (hname.Contains("SYSTEMATIC")) {
-      if(hname.Contains("JES")) {
+    else if (hname.Contains("SYSTEMATIC") || hname.Contains("CMS_")) {
+      if(hname.Contains("JES") || hname.Contains("SCALE_J_SHAPE")) {
         if(hname.Contains("UP"))
           sys_JESUp->Add(groupedHistos[h]);
         else if(hname.Contains("DOWN"))
           sys_JESDown->Add(groupedHistos[h]);
       }
+      else if(hname.Contains("CSVWEIGHT_SHAPE")) {
+        if(hname.Contains("UP"))
+          sys_csvup->Add(groupedHistos[h]);
+        else if(hname.Contains("DOWN"))
+          sys_csvdown->Add(groupedHistos[h]); 
+      }
+      else if(hname.Contains("PUWEIGHT_SHAPE")) {
+        if(hname.Contains("UP"))
+          sys_puup->Add(groupedHistos[h]);
+        else if(hname.Contains("DOWN"))
+          sys_pudown->Add(groupedHistos[h]); 
+      }
+      else if(hname.Contains("MATCHING")) {
+        if(hname.Contains("UP"))
+          sys_matchingup->Add(groupedHistos[h]);
+        else if(hname.Contains("DOWN"))
+          sys_matchingdown->Add(groupedHistos[h]);
+      }
+      else if(hname.Contains("SCALE")) {
+        if(hname.Contains("UP"))
+          sys_scaleup->Add(groupedHistos[h]);
+        else if(hname.Contains("DOWN"))
+          sys_scaledown->Add(groupedHistos[h]);
+      }
+      else if(hname.Contains("TOPPTWEIGHT_SHAPE")) {
+        if(hname.Contains("UP"))
+          sys_topptup->Add(groupedHistos[h]);
+        else if(hname.Contains("DOWN"))
+          sys_topptdown->Add(groupedHistos[h]);
+      }
+      else if(hname.Contains("QCDETAWEIGHT_SHAPE")) {
+        if(hname.Contains("UP"))
+          sys_qcdetaup->Add(groupedHistos[h]);
+        else if(hname.Contains("DOWN"))
+          sys_qcdetadown->Add(groupedHistos[h]);
+      }
+      else if (hname.Contains("STATERROR")) {
+        if(hname.Contains("UP"))
+          sys_statup->Add(groupedHistos[h]);
+        else if(hname.Contains("DOWN"))
+          sys_statdown->Add(groupedHistos[h]); 
+      }
+
     }
     else {
       sMC->Add(groupedHistos[h],"hist");
       tMC->Add(groupedHistos[h]);
 
-      if(hname.CompareTo("WJets")!=0 && !hname.Contains("JES")) {
-        if(hname.Contains("MATCHING")) {
-          if(hname.Contains("UP"))
-            sys_matchingup->Add(groupedHistos[h]);
-          else if(hname.Contains("DOWN"))
-            sys_matchingdown->Add(groupedHistos[h]);
-        }
-        else if(hname.Contains("SCALE")) {
-          if(hname.Contains("UP"))
-            sys_scaleup->Add(groupedHistos[h]);
-          else if(hname.Contains("DOWN"))
-            sys_scaledown->Add(groupedHistos[h]);
-        }
-        else {
-          sys_matchingup->Add(groupedHistos[h]);
-          sys_matchingdown->Add(groupedHistos[h]);
-          sys_scaleup->Add(groupedHistos[h]);
-          sys_scaledown->Add(groupedHistos[h]);
-        }
+      if(hname.Contains("W+JETS")) {
+        tWJets->Add(groupedHistos[h]);
+        tQCDandWJets->Add(groupedHistos[h]);
+      }
+      else if(hname.CompareTo("QCD")==0) {
+        tQCDandWJets->Add(groupedHistos[h]);
+      }
+      else if(hname.Contains("T#BAR{T}")) {
+        tTTbar->Add(groupedHistos[h]);
       }
 
       if(hname.Contains("H(125)"))
@@ -670,7 +755,11 @@ TCanvas* FormattedPlot::getCanvasTDR(vector<PhysicsProcess*> procs) {
 
       if(titleContainedInTH1Vector("DATA",groupedHistos)) {
         overlaySignalFactor =  titleContainedInTH1Vector("DATA",groupedHistos)->Integral()/groupedHistos[h]->Integral();
-        overlaySignalFactor = max(100.0,(double)RoundToNearest(int(overlaySignalFactor),100));
+        //cout << "titleContainedInTH1Vector(\"DATA\",groupedHistos)->Integral() = " << titleContainedInTH1Vector("DATA",groupedHistos)->Integral() << endl;
+        //cout << "groupedHistos[h]->Integral() = " << groupedHistos[h]->Integral() << endl;
+        //cout << "original overlaySignalFactor = " << overlaySignalFactor << endl;
+        //cout << "(double)RoundToNearest(int(overlaySignalFactor),100) = " << (double)RoundToNearest(int(overlaySignalFactor),100) << endl; 
+        overlaySignalFactor = max(3100.0,(double)RoundToNearest(int(overlaySignalFactor),100));
       }
 
       ostringstream signalNameStream;
@@ -690,19 +779,48 @@ TCanvas* FormattedPlot::getCanvasTDR(vector<PhysicsProcess*> procs) {
       
   }// for grouped histos
 
+  //Make the error bands
+  TGraphAsymmErrors* errorBand;
+  if(tMC != 0) {
+    //Setup the normalization errors
+    double lumi_8TeV = 0.026;
+    double CMS_eff_l = 0.02;
+    double CMS_scale_met = 0.002;
+    //double CMS_QCDscale_pdf_ttbar = 0.057;
+    //double CMS_QCDscale_pdf_zjets = 0.034;
+    //double CMS_QCDscale_pdf_singlet = 0.05;
+    //double CMS_QCDscale_pdf_diboson = 0.03;
+    double totalNorm = sqrt(pow(lumi_8TeV,2)+pow(CMS_eff_l,2)+pow(CMS_scale_met,2));
+
+    //Loop through each of the bins in the tMC histogram and reset the errors to be stats+systematics
+    errorBand = makeSystematicErrors(tMC,totalNorm);
+    addSystematicErrors(errorBand, tMC, sys_JESUp, sys_JESDown, "JES");
+    addSystematicErrors(errorBand, tWJets, sys_matchingup, sys_matchingdown, "Matching");
+    addSystematicErrors(errorBand, tWJets, sys_scaleup, sys_scaledown, "Scale");
+    addSystematicErrors(errorBand, tMC, sys_csvup, sys_csvdown, "CSV");
+    addSystematicErrors(errorBand, tMC, sys_puup, sys_pudown, "PU");
+    addSystematicErrors(errorBand, tTTbar, sys_topptup, sys_topptdown, "TopPt");
+    addSystematicErrors(errorBand, tQCDandWJets, sys_qcdetaup, sys_qcdetadown, "QCDEta");
+    addSystematicErrors(errorBand, tMC, sys_statup, sys_statdown, "stat");
+  }
+
   // Create and Draw the Canvas
   TH1D* frame_up = new TH1D();
   frame_up->GetXaxis()->SetLimits(range.first, range.second);
   frame_up->GetXaxis()->SetMoreLogLabels();
   frame_up->GetXaxis()->SetNoExponent();
   vector<double> maximums;
-  maximums.push_back(tMC->GetBinContent(tMC->GetMaximumBin()));
-  maximums.push_back(tDa->GetBinContent(tDa->GetMaximumBin()));
-  maximums.push_back(signal->GetBinContent(signal->GetMaximumBin()));
-  //vector<double> toAvoid;
-  //toAvoid.push_back(l->GetY1());
-  //toAvoid.push_back(lsig->GetY1());
-  //*std::min_element(toAvoid.begin(),toAvoid.end());
+  if(tMC) maximums.push_back(tMC->GetBinContent(tMC->GetMaximumBin()));
+  if(tDa) maximums.push_back(tDa->GetBinContent(tDa->GetMaximumBin()));
+  if(signal) maximums.push_back(signal->GetBinContent(signal->GetMaximumBin()));
+  if(errorBand) {
+    double maxError = 0;
+    for(int ipoint=0; ipoint<errorBand->GetN(); ipoint++) {
+      if((errorBand->GetY()[ipoint]+errorBand->GetErrorYhigh(ipoint))>maxError)
+        maxError = errorBand->GetY()[ipoint]+errorBand->GetErrorYhigh(ipoint);
+    }
+    maximums.push_back(maxError);
+  }
   double multiplier = 1.45;//1.25;
   frame_up->GetYaxis()->SetRangeUser(0.0001,*std::max_element(maximums.begin(),maximums.end())*multiplier);
   frame_up->GetXaxis()->SetTitle(axisTitles[0].c_str());
@@ -711,9 +829,9 @@ TCanvas* FormattedPlot::getCanvasTDR(vector<PhysicsProcess*> procs) {
   frame_down->GetXaxis()->SetLimits(range.first, range.second);
   frame_down->GetXaxis()->SetMoreLogLabels();
   frame_down->GetXaxis()->SetNoExponent();
-  frame_down->GetYaxis()->SetRangeUser(-0.5,0.5); //(-0.5,0.5) <-- (-1.0,1.0)
+  frame_down->GetYaxis()->SetRangeUser(0.0,2.0); //(-0.5,0.5) <-- (-1.0,1.0)
   frame_down->GetXaxis()->SetTitle(axisTitles[0].c_str());
-  frame_down->GetYaxis()->SetTitle("#frac{Data - MC}{MC}");
+  frame_down->GetYaxis()->SetTitle("Data/MC");
   if (signal != 0) {
     signal->GetXaxis()->SetRangeUser(range.first, range.second);
   }
@@ -743,19 +861,23 @@ TCanvas* FormattedPlot::getCanvasTDR(vector<PhysicsProcess*> procs) {
     st->tdrDraw(sDa,gOption+"ep");
 
   //Draw the MC error bars
-  if(tMC != 0) {
-    //Loop through each of the beins in the tMC histogram and reset the errors to be stats+systematics
-    TGraphAsymmErrors* errorBand = makeSystematicErrors(tMC);
-    addSystematicErrors(errorBand, tMC,sys_JESUp,sys_JESDown);
-    //addSystematicErrors(errorBand, tMC,sys_matchingup,sys_matchingdown);
-    //addSystematicErrors(errorBand, tMC,sys_scaleup,sys_scaledown);   
-     st->tdrDraw(errorBand,"2",kNone,kGray+2,kNone,kGray+2,3005,kGray+2);
+  if(errorBand!=nullptr) {
+    cout << "Drawing systematic error band..." << flush;
+    gStyle->SetHatchesSpacing(0.03);   
+    st->tdrDraw(errorBand,"2",kNone,kGray+2,kNone,kGray+2,3004,kGray+2);
     //st->tdrDraw(tMC,"E2",kNone,kGray+2,kNone,kGray+2,3005,kGray+2);
+    cout << "DONE" << endl;
+  }
+  else {
+    cout << "Can't draw the systematic error band because the object \"errorBand\" is null." << endl;
   }
 
   // Add the Legend
   l->Draw("same");
   lsig->Draw("same");
+
+  // Draw some more label information
+  drawBinInfo();
 
   // canRatio: this is the pad with the Data/MC on it
   TVirtualPad * canRatio = can->GetPad(2);
@@ -767,24 +889,35 @@ TCanvas* FormattedPlot::getCanvasTDR(vector<PhysicsProcess*> procs) {
   st->tdrGrid(true);
   
   //Draw a line at 0
-  TLine* line = new TLine(range.first,0,range.second,0);
+  TLine* line = new TLine(range.first,1,range.second,1);
   line->SetLineColor(kBlack);
   line->SetLineWidth(2);
   line->SetLineStyle(2);
   line->Draw("same");
 
   // Add the KS and Chi2 info in the active canvas
-  if (areMCHists && areDataHists)
-    drawKSandChi2Tests(tDa, tMC, range, true);
+  //if (areMCHists && areDataHists) {
+  //  drawKSandChi2Tests(tDa, tMC, range, true);
+  //}
 
   // Create the Ratio plot
   TH1* hRatio = (TH1*) tDa->Clone(tempName+"_Ratio");
-  hRatio->SetTitle("#frac{Data - MC}{MC}");
-  hRatio->Add(tMC,-1);
+  hRatio->SetTitle("Data/MC");
+  //hRatio->Add(tMC,-1);
   hRatio->Divide(tMC);
-
   // Format the ratio plot and Draw it
   st->tdrDraw(hRatio,"");
+
+  TH1* BkgOverBkg = (TH1*) hRatio->Clone("bkgOverbkg");
+  BkgOverBkg->Divide(tMC, tMC);
+  TGraphAsymmErrors* pullUncBandTot = new TGraphAsymmErrors((TH1*)BkgOverBkg->Clone("pulluncTot"));
+  for(int ibin=1; ibin<=tDa->GetNbinsX(); ibin++) {
+    if (tMC->GetBinContent(ibin)!=0) {
+      pullUncBandTot->SetPointEYhigh(ibin-1,errorBand->GetErrorYhigh(ibin-1)/tMC->GetBinContent(ibin));
+      pullUncBandTot->SetPointEYlow(ibin-1,errorBand->GetErrorYlow(ibin-1)/tMC->GetBinContent(ibin));   
+    }
+  }
+  st->tdrDraw(pullUncBandTot,"2",kNone,kGray+2,kNone,kGray+2,3004,kGray+2);
 
   delete st;
 
@@ -855,6 +988,25 @@ vector<TH1*> FormattedPlot::doGrouping(vector<PhysicsProcess*> procs){
 // ------------------------------------------------------------
 void FormattedPlot::formatColors(vector<PhysicsProcess*> procs)
 {
+   for(unsigned int i = 0; i < histos.size(); i++) {
+      int proc_index = 0;
+      for(unsigned int p = 0; p < procs.size(); p++) {
+        if(TString(histos[i]->GetName()).Contains(procs[p]->name,TString::kIgnoreCase))
+          proc_index = p;
+      }
+
+      histos[i]->SetLineColor(kBlack);
+      histos[i]->SetMarkerColor(((PlotterPhysicsProcess*)procs[proc_index])->color);
+      histos[i]->SetFillColor(((PlotterPhysicsProcess*)procs[proc_index])->color);
+      if(procs[proc_index]->name.Contains("data",TString::kIgnoreCase)) {
+         histos[i]->SetMarkerStyle(20);
+         histos[i]->SetMarkerSize(0.7);
+      }
+      else {
+         histos[i]->SetFillStyle(1001); 
+      }
+   }
+   /*
    for(unsigned int i = 0; i < procs.size(); i++)
    {
       //histos[i]->SetLineColor(((PlotterPhysicsProcess*)procs[i])->color);
@@ -875,13 +1027,14 @@ void FormattedPlot::formatColors(vector<PhysicsProcess*> procs)
          histos[i]->SetMarkerSize(0.7);
       }
    }
+   */
 }
 
 // ------------------------------------------------------------
 void FormattedPlot::formatRatio(TH1* hRatio)
 {
-   hRatio->SetMinimum(-0.50); //formerly -0.99
-   hRatio->SetMaximum(0.50); //formerly -0.99
+   hRatio->SetMinimum(0.0); //formerly -0.99
+   hRatio->SetMaximum(2.0); //formerly -0.99
    hRatio->SetLineWidth(2);
 
    hRatio->GetXaxis()->SetLabelFont(42);
@@ -891,7 +1044,7 @@ void FormattedPlot::formatRatio(TH1* hRatio)
    hRatio->GetXaxis()->SetTitleFont(42);
    hRatio->GetXaxis()->SetRangeUser(range.first,range.second);
 
-   hRatio->GetYaxis()->SetTitle("#frac{Data - MC}{MC}");
+   hRatio->GetYaxis()->SetTitle("#frac{Data}{MC}");
    hRatio->GetYaxis()->SetTitleOffset(0.55);
    hRatio->GetYaxis()->SetNdivisions(105);
    hRatio->GetYaxis()->SetLabelFont(42);
@@ -933,7 +1086,7 @@ void FormattedPlot::formatStack(THStack * stack, double maxi)
 }
 
 //________________________________________________________________________________
-void FormattedPlot::drawKSandChi2Tests(TH1* totalData, TH1* all, pair<double, double> range, bool doTDR){
+void FormattedPlot::drawKSandChi2Tests(TH1* totalData, TH1* all, pair<double, double> range, bool doTDR, Style* st){
 
     // Skip all this if either histo has no integral
     if (totalData->Integral() == 0){
@@ -970,16 +1123,38 @@ void FormattedPlot::drawKSandChi2Tests(TH1* totalData, TH1* all, pair<double, do
 */
    TLatex Tl;
    if(doTDR) {
-      Tl.SetNDC();
-      Tl.SetTextSize(0.045);
-      Tl.DrawLatex(0.4, 0.80, Form("KSTest   = %5.4g", totalData->KolmogorovTest(all)));
-      Tl.DrawLatex(0.4, 0.70, Form("Chi2/NDF = %5.4g", chi2NDF));
+      if(st) {
+        TPaveText* text = st->tdrText(0.8,0.45,0.9,0.25);
+        text->AddText(Form("KSTest   = %5.4g", totalData->KolmogorovTest(all)));
+        text->AddText(Form("Chi2/NDF = %5.4g", chi2NDF));
+        text->Draw("same");
+      }
+      else {
+        Tl.SetNDC();
+        Tl.SetTextFont(42);
+        Tl.SetTextSize(0.10546875);
+        Tl.DrawLatex(0.60, 0.49, Form("KS       = %5.3g", totalData->KolmogorovTest(all)));
+        Tl.DrawLatex(0.60, 0.39, Form("#chi^{2}/NDF = %5.3g", chi2NDF));
+      }
    }
    else{
      Tl.DrawLatex(x, y*1.00, Form("KSTest   = %5.4g", totalData->KolmogorovTest(all)));
      Tl.DrawLatex(x, y*0.92, Form("Chi2Prob = %5.4g", all->Chi2TestX(totalData,chi2,NDF,igood,"WW")));
      Tl.DrawLatex(x, y*0.84, Form("Chi2/NDF = %5.4g", chi2/NDF));
    }
+}
+
+//______________________________________________________________________________
+void FormattedPlot::drawBinInfo() {
+  TLatex latex; 
+  latex.SetNDC();    
+  latex.SetTextFont(42);                                     
+  latex.SetTextSize(0.045);                                
+  latex.DrawLatex(0.19, 0.72, Form("%s, %s",DEFS::getJetBinLabel(jetBin).c_str(),DEFS::getTagCatLabel(tagCat).c_str()));
+  if(controlRegion == DEFS::HighKinBDT || controlRegion == DEFS::LowKinBDT) {
+    latex.DrawLatex(0.19, 0.65, Form("BDT%s%.2f",(controlRegion==DEFS::HighKinBDT) ? ">" : "<",
+                                     DefaultValues::getMedianPurity(jetBin,leptonCat,"KinBDT").first));
+  }
 }
 
 //______________________________________________________________________________
@@ -1004,12 +1179,12 @@ void FormattedPlot::drawLumi(float intLum)
 }
 
 //______________________________________________________________________________
-TGraphAsymmErrors* FormattedPlot::makeSystematicErrors(TH1* nominal) {
+TGraphAsymmErrors* FormattedPlot::makeSystematicErrors(TH1* nominal, double totalNormalizationError) {
   TGraphAsymmErrors* ret = new TGraphAsymmErrors();
   for(int ibin=1; ibin<=nominal->GetNbinsX(); ibin++) {
     int ipoint = ibin-1;
-    double errorYLow = nominal->GetBinError(ibin);
-    double errorYHigh = nominal->GetBinError(ibin);
+    double errorYLow = sqrt(pow(nominal->GetBinError(ibin),2)+(pow(totalNormalizationError,2)*pow(nominal->GetBinContent(ibin),2)));
+    double errorYHigh = sqrt(pow(nominal->GetBinError(ibin),2)+(pow(totalNormalizationError,2)*pow(nominal->GetBinContent(ibin),2)));
     ret->SetPoint(ipoint,nominal->GetBinCenter(ibin),nominal->GetBinContent(ibin));
     ret->SetPointError(ipoint,nominal->GetBinWidth(ibin)/2.0,nominal->GetBinWidth(ibin)/2.0,errorYLow,errorYHigh);
   }
@@ -1017,7 +1192,7 @@ TGraphAsymmErrors* FormattedPlot::makeSystematicErrors(TH1* nominal) {
 }
 
 //______________________________________________________________________________
-void FormattedPlot::addSystematicErrors(TGraphAsymmErrors* g, TH1* nominal, TH1* sysUp, TH1* sysDown)
+void FormattedPlot::addSystematicErrors(TGraphAsymmErrors* g, TH1* nominal, TH1* sysUp, TH1* sysDown, string type)
 {
   if(g->GetN()!=nominal->GetNbinsX()) {
     cout << "ERROR::Plots::addSystematicErrors The number of points in the error graph (" << g->GetN()
@@ -1031,17 +1206,25 @@ void FormattedPlot::addSystematicErrors(TGraphAsymmErrors* g, TH1* nominal, TH1*
     double errorYLow = 0;
     double errorYHigh = 0;
     if(sysUp->GetEntries()>0 && sysDown->GetEntries()>0) {
-      errorYHigh = g->GetErrorYhigh(ipoint)+TMath::Abs(sysDown->GetBinContent(ibin)-nominal->GetBinContent(ibin));
-      errorYLow = g->GetErrorYlow(ipoint)+TMath::Abs(sysUp->GetBinContent(ibin)-nominal->GetBinContent(ibin));
+      double errorPlus = sysUp->GetBinContent(ibin)-nominal->GetBinContent(ibin);
+      double errorMinus = nominal->GetBinContent(ibin)-sysDown->GetBinContent(ibin);
+      if(errorPlus > 0)  errorYHigh += pow(errorPlus,2);
+      else               errorYLow += pow(errorPlus,2);
+      if(errorMinus > 0) errorYLow += pow(errorMinus,2);
+      else               errorYHigh += pow(errorMinus,2);
+      errorYHigh = sqrt(pow(g->GetErrorYhigh(ipoint),2)+errorYHigh);
+      errorYLow = sqrt(pow(g->GetErrorYlow(ipoint),2)+errorYLow);
+      //errorYHigh = sqrt(pow(g->GetErrorYhigh(ipoint),2)+pow(TMath::Abs(sysDown->GetBinContent(ibin)-nominal->GetBinContent(ibin)),2));
+      //errorYLow = sqrt(pow(g->GetErrorYlow(ipoint),2)+pow(TMath::Abs(sysUp->GetBinContent(ibin)-nominal->GetBinContent(ibin)),2));
+      g->SetPointError(ipoint,nominal->GetBinWidth(ibin)/2.0,nominal->GetBinWidth(ibin)/2.0,errorYLow,errorYHigh);
     }
     else {
        printWarning = true;
     }
-    g->SetPointError(ipoint,nominal->GetBinWidth(ibin)/2.0,nominal->GetBinWidth(ibin)/2.0,errorYLow,errorYHigh);
   }
 
   if(printWarning) {
-     cout << "WARNING::Plots::addSystematicErrors Can't add systematic errors to band." << endl;
+     cout << "WARNING::Plots::addSystematicErrors Can't add systematic errors to band (" << type << ")." << endl;
   }
 }
 
@@ -1057,15 +1240,14 @@ int FormattedPlot::RoundToNearest(int iNumberToRound, int iToNearest) {
     iNearest = (iNumberToRound - iRest) + iToNearest;
     return iNearest;
   }
-  else if (iRest > (iToNearest/2)) {
+  else if (iRest >= (iToNearest/2)) {
     iNearest = (iNumberToRound - iRest) + iToNearest;
     return iNearest;
   }
   else if (iRest < (iToNearest/2)) {
-    iNearest =(iNumberToRound - iRest);
+    iNearest = (iNumberToRound - iRest);
     return iNearest;
   }
   
-  return 0;
+  return -1;
 }
-

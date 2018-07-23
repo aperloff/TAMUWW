@@ -133,6 +133,9 @@ public:
    //Takes the highest value.
    static pair<double,double> getMaxEventProbAndError(string meType, Table* inputTable = 0);
 
+   // Returns the median BDT value for a given jet bin and lepton category
+   static pair<double,double> getMedianPurity(DEFS::JetBin jetBin, DEFS::LeptonCat leptonCat, string BDTType, Table* inputTable = 0);
+
    // Sets two vectors with the variables and spectators for a given MVA training
    static void getMVAVar(TString filename, vector<TString>& MVAV, vector<TString>& MVAS);
 

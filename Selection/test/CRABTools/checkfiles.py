@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 import os, sys, getopt, argparse, fnmatch, errno, re, subprocess, shlex
 from string import translate,maketrans,punctuation 
+from itertools import groupby
+from operator import itemgetter
 
 class Error(EnvironmentError):
     pass
@@ -105,22 +107,30 @@ def print_dictionary(dict_to_print, header):
     print_header(header)
     print str(dict_to_print) + "\n"
 
-def checkfiles(src, pattern, file_types, total_number_of_jobs, symlinks=False, ignore=None):
+def checkfiles(src, pattern, file_types, total_number_of_jobs, symlinks=False, ignore=None,
+               output_file=None):
 
     print "\nChecking files in " + str(src) + " with the pattern(s) " + '[%s]' % ', '.join(map(str, pattern)) + " and the file type(s) " + '[%s]' % ', '.join(map(str, file_types)) + ", but ignoring the files with the pattern(s) " + '[%s]' % ', '.join(map(str, ignore)) + "\n"
     
+    print "WARNING::checkfiles Will not check for missing files because the total number of files given is less than or equal to zero.\n"
+
     ignore = ignore_patterns(ignore)
 
     FILES = get_list_of_files(pattern, file_types, src)
     FILES_FOUND = {}
     FILES_WITH_DUPLICATES = []
     FILES_MISSING = []
+    FILES_WITH_WARNING = []
+    FILE_NUMBER_NOT_FOUND = False
     
     if ignore is not None:
         ignored_names = ignore(src, FILES)
     else:
         ignored_names = set()
         
+    if output_file is not None:
+        fout = open(output_file, 'w')
+
     errors = []
     for FILE in FILES:
         if FILE in ignored_names:
@@ -130,12 +140,20 @@ def checkfiles(src, pattern, file_types, total_number_of_jobs, symlinks=False, i
             if not symlinks and os.path.islink(srcname):
                 continue;
             else:
-                if get_file_number(FILE) in FILES_FOUND:
-                    FILES_FOUND[get_file_number(FILE)].append(FILE)
-                    FILES_WITH_DUPLICATES.append(get_file_number(FILE))
-                else:
-                    FILES_FOUND[get_file_number(FILE)] = [FILE]
-                
+                try:
+                    if get_file_number(FILE) in FILES_FOUND:
+                        FILES_FOUND[get_file_number(FILE)].append(FILE)
+                        FILES_WITH_DUPLICATES.append(get_file_number(FILE))
+                    else:
+                        FILES_FOUND[get_file_number(FILE)] = [FILE]
+                except ValueError:
+                    if not FILE_NUMBER_NOT_FOUND:
+                        print("Could not find the job number for at least one CRAB job and thus will not be able to check for duplicates in the files:")
+                        FILE_NUMBER_NOT_FOUND = True
+                    FILES_WITH_WARNING.append(1+len(FILES_FOUND))
+                    FILES_FOUND[1+len(FILES_FOUND)] = [FILE]
+            if output_file is not None:
+                fout.write(FILE+"\n")    
         # catch the Error from checkfiles so that we can continue with other files
         except Error, err:
             errors.extend(err.args[0])
@@ -144,22 +162,33 @@ def checkfiles(src, pattern, file_types, total_number_of_jobs, symlinks=False, i
     if errors:
         raise Error, errors
 
-    for i in range(1,total_number_of_jobs+1):
-        if i not in FILES_FOUND:
-            FILES_MISSING.append(i)
-        else:
-            continue;    
+    ranges = []
+    for k, g in groupby(enumerate(FILES_WITH_WARNING), lambda ix : ix[0] - ix[1]):
+        group = map(itemgetter(1), g)
+        ranges.append((group[0], group[-1]))
+    print ranges,"\n"
+
+    if total_number_of_jobs > 0:
+        for i in range(1,total_number_of_jobs+1):
+            if i not in FILES_FOUND:
+                FILES_MISSING.append(i)
+            else:
+                continue;
 
     print_dictionary(FILES_FOUND,"FILES FOUND ("+str(len(FILES_FOUND))+")")
     print_list(FILES_WITH_DUPLICATES,"FILES WITH DUPLICATES ("+str(len(FILES_WITH_DUPLICATES))+")")
     print_list(FILES_MISSING,"MISSING FILES ("+str(len(FILES_MISSING))+")")
     
+    if output_file is not None:
+        fout.close()
+
     return len(FILES_WITH_DUPLICATES)+len(FILES_MISSING)
 
-def main(input_path, pattern, file_types, symlinks, ignore, total_number_of_jobs):
+def main(input_path, pattern, file_types, symlinks, ignore, total_number_of_jobs, output_file):
     run_checks(input_path=input_path)
     return checkfiles(src=input_path, pattern=pattern, file_types=file_types,
-                      total_number_of_jobs=total_number_of_jobs, symlinks=False, ignore=ignore)
+                      total_number_of_jobs=total_number_of_jobs, symlinks=False, ignore=ignore,
+                      output_file=output_file)
 
 if __name__ == '__main__':
     #program name available through the %(prog)s command
@@ -176,13 +205,14 @@ if __name__ == '__main__':
                         action="store_true")
     parser.add_argument("-i","--ignore", help="Patterns of files/folders to ignore",
                         nargs='+', type=str, default=())
+    parser.add_argument("-o","--output", help="Prints the list of files to the specified output file")
     parser.add_argument("-p", "--pattern", help="Shared portion of the name of the files",
                         nargs='*', default=["*"])
     parser.add_argument("-t", "--file_types", help="Specify the type (extension) of the files to check. By default this program only checks the .root output of a CRAB job.",
                         nargs='+', default=[".root"])
     group.add_argument("-v", "--verbose", help="Increase output verbosity of lcg-cp (-v) or srm (-debug) commands",
                         action="store_true")
-    parser.add_argument('--version', action='version', version='%(prog)s 1.0')
+    parser.add_argument('--version', action='version', version='%(prog)s 1.2')
     args = parser.parse_args()
 
     if(args.debug):
@@ -191,4 +221,5 @@ if __name__ == '__main__':
          print "Argument ", args
 
     main(input_path=args.input_path, pattern=args.pattern, file_types=args.file_types,
-         symlinks=False, ignore=tuple(args.ignore), total_number_of_jobs=args.total_number_of_jobs)
+         symlinks=False, ignore=tuple(args.ignore), total_number_of_jobs=args.total_number_of_jobs,
+         output_file=args.output)

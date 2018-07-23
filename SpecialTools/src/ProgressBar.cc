@@ -27,6 +27,19 @@ void ProgressBar::loadbar2(unsigned int x, unsigned int n, unsigned int w) {
 }//loadbar2
 
 //-----------------------------------------------------------------------------
+void ProgressBar::loadbar3(string prefix, unsigned int x, unsigned int n, unsigned int w) {
+   if ( (x != n) && (x % (n/100) != 0) ) return;
+ 
+   float ratio  =  x/(float)n;
+   int   c      =  ratio * w;
+ 
+   cout << prefix << " [";
+   for (int x=0; x<c; x++) cout << "=";
+   for (unsigned int x=c; x<w; x++) cout << " ";
+   cout << "] " << setw(3) << (int)(ratio*100) << "% (" << x << "/" << n << ")\r" << flush;
+}//loadbar3
+
+//-----------------------------------------------------------------------------
 // Process has done i out of n rounds,
 // and we want a bar of width w and resolution r.
 void ProgressBar::loadBar(int x, int n, int r, int w) {

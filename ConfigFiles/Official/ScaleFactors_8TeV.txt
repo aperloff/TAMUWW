@@ -78,6 +78,10 @@ DYJets_JESDown               |  both        |   1.0070493454 +/- 1.000      |   
 DYJetsToLL_M10To50           |  both        |   1.5468132424 +/- 1.000      |
 DYJetsToLL_M50               |  both        |   1.000    +/- 1.000          |
 ZpJ                          |  both        |   1.000    +/- 1.000          |
+SingleEl_ZJetsToLL           |  electron    |   1.000    +/- 1.000          | 
+SingleMu_ZJetsToLL           |  muon        |   1.000    +/- 1.000          | 
+SingleEl_WlnuJets            |  electron    |   1.000    +/- 1.000          | 
+SingleMu_WlnuJets            |  muon        |   1.000    +/- 1.000          |
 QCD                          |  both        |   1.000    +/- 1.000          |
 QCD_Pt20_MuEnriched          |  both        |   1.000    +/- 1.000          |
 QCD_MuEnriched               |  muon        |   1.000    +/- 1.000          |
@@ -112,9 +116,9 @@ QCD_Pt350_EMEnriched         |  both        |   1.000    +/- 0.00           |
 WW                           |  both        |   1.000    +/- 1.000          |
 WW_JESUp                     |  both        |   0.9975124378 +/- 1.000      |   Scaled down for failed jobs (401 out of 402)
 WW_JESDown                   |  both        |   0.9975124378 +/- 1.000      |   Scaled down for failed jobs (401 out of 402)
-WZ                           |  both        |   1.000    +/- 1.000          |
-WZ_JESUp                     |  both        |   1.000    +/- 1.000          |
-WZ_JESDown                   |  both        |   1.000    +/- 1.000          |
+WZ                           |  both        |   1.881160077  +/- 1.000      |   Scaled up by the ratio of ZZ/WZ in order to account for the missing ZZ sample
+WZ_JESUp                     |  both        |   1.881160077  +/- 1.000      |   Scaled up by the ratio of ZZ/WZ in order to account for the missing ZZ sample
+WZ_JESDown                   |  both        |   1.881160077  +/- 1.000      |   Scaled up by the ratio of ZZ/WZ in order to account for the missing ZZ sample
 ZZ                           |  both        |   1.000    +/- 1.000          |
 WH100                        |  both        |   1.000    +/- 1.000          |
 WH105                        |  both        |   1.000    +/- 1.000          |

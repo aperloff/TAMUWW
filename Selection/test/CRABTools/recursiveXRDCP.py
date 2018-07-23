@@ -12,3 +12,6 @@ for root,dirnames,filenames in os.walk("/uscms_data/d2/aperloff/Summer12ME8TeV/M
 		command = "xrdcp "+ifile+" root://cmseos.fnal.gov/"+output_folder+filename
 		print command
 		#os.system(command)
+
+
+#moves local files to EOS
